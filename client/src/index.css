@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(30, 8%, 96%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(0, 20%, 85%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(30, 8%, 96%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(30, 8%, 96%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+  
+  /* Hushed Haven custom colors */
+  --blush-50: hsl(18, 75%, 98%);
+  --blush-100: hsl(15, 67%, 94%);
+  --blush-200: hsl(15, 50%, 88%);
+  --blush-300: hsl(15, 45%, 75%);
+  --blush-400: hsl(15, 40%, 65%);
+  --cream-50: hsl(30, 67%, 99%);
+  --cream-100: hsl(25, 60%, 97%);
+  --cream-200: hsl(30, 45%, 92%);
+  --warm-gray-600: hsl(20, 8%, 35%);
+  --warm-gray-700: hsl(20, 10%, 25%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(0, 20%, 85%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased;
+    background: linear-gradient(135deg, var(--cream-50), var(--blush-50));
+    color: var(--warm-gray-700);
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .text-blush-300 {
+    color: var(--blush-300);
+  }
+  
+  .text-blush-400 {
+    color: var(--blush-400);
+  }
+  
+  .text-warm-gray-600 {
+    color: var(--warm-gray-600);
+  }
+  
+  .text-warm-gray-700 {
+    color: var(--warm-gray-700);
+  }
+  
+  .bg-blush-50 {
+    background-color: var(--blush-50);
+  }
+  
+  .bg-blush-100 {
+    background-color: var(--blush-100);
+  }
+  
+  .bg-blush-200 {
+    background-color: var(--blush-200);
+  }
+  
+  .bg-blush-300 {
+    background-color: var(--blush-300);
+  }
+  
+  .bg-blush-400 {
+    background-color: var(--blush-400);
+  }
+  
+  .bg-cream-50 {
+    background-color: var(--cream-50);
+  }
+  
+  .bg-cream-100 {
+    background-color: var(--cream-100);
+  }
+  
+  .bg-cream-200 {
+    background-color: var(--cream-200);
+  }
+  
+  .border-blush-100 {
+    border-color: var(--blush-100);
+  }
+  
+  .border-blush-200 {
+    border-color: var(--blush-200);
+  }
+  
+  .border-blush-300 {
+    border-color: var(--blush-300);
+  }
+  
+  .border-blush-400 {
+    border-color: var(--blush-400);
+  }
+  
+  .hover\:bg-blush-400:hover {
+    background-color: var(--blush-400);
+  }
+  
+  .hover\:bg-blush-50:hover {
+    background-color: var(--blush-50);
+  }
+  
+  .hover\:border-blush-300:hover {
+    border-color: var(--blush-300);
+  }
+  
+  .hover\:text-blush-500:hover {
+    color: hsl(15, 35%, 55%);
+  }
+  
+  .focus\:border-blush-300:focus {
+    border-color: var(--blush-300);
+  }
+}
