@@ -1,5 +1,6 @@
-import { type Message, type InsertMessage, type Admin, type InsertAdmin } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { type Message, type InsertMessage, type Admin, type InsertAdmin, messages, admins } from "@shared/schema";
+import { db } from "./db";
+import { eq, sql, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Message operations
@@ -12,60 +13,44 @@ export interface IStorage {
   createAdmin(admin: InsertAdmin): Promise<Admin>;
 }
 
-export class MemStorage implements IStorage {
-  private messages: Map<string, Message>;
-  private admins: Map<string, Admin>;
-
-  constructor() {
-    this.messages = new Map();
-    this.admins = new Map();
-    
-    // Create default admin user
-    const defaultAdmin: Admin = {
-      id: randomUUID(),
-      username: "admin",
-      password: "hushed2024", // In production, this should be hashed
-    };
-    this.admins.set(defaultAdmin.id, defaultAdmin);
-  }
-
+export class DatabaseStorage implements IStorage {
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
-    const id = randomUUID();
-    const message: Message = {
-      id,
-      emotion: insertMessage.emotion,
-      type: insertMessage.type,
-      content: insertMessage.content || null,
-      audioFilename: insertMessage.audioFilename || null,
-      duration: insertMessage.duration || null,
-      createdAt: new Date(),
-    };
-    this.messages.set(id, message);
+    const [message] = await db
+      .insert(messages)
+      .values(insertMessage)
+      .returning();
     return message;
   }
 
   async getAllMessages(): Promise<Message[]> {
-    return Array.from(this.messages.values()).sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-    );
+    return await db
+      .select()
+      .from(messages)
+      .orderBy(desc(messages.createdAt));
   }
 
   async deleteMessage(id: string): Promise<boolean> {
-    return this.messages.delete(id);
+    const result = await db
+      .delete(messages)
+      .where(eq(messages.id, id));
+    return (result.rowCount || 0) > 0;
   }
 
   async getAdminByUsername(username: string): Promise<Admin | undefined> {
-    return Array.from(this.admins.values()).find(
-      (admin) => admin.username === username
-    );
+    const [admin] = await db
+      .select()
+      .from(admins)
+      .where(eq(admins.username, username));
+    return admin || undefined;
   }
 
   async createAdmin(insertAdmin: InsertAdmin): Promise<Admin> {
-    const id = randomUUID();
-    const admin: Admin = { ...insertAdmin, id };
-    this.admins.set(id, admin);
+    const [admin] = await db
+      .insert(admins)
+      .values(insertAdmin)
+      .returning();
     return admin;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
