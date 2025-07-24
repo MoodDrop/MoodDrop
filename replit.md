@@ -2,7 +2,7 @@
 
 ## Overview
 
-Hushed Haven is a full-stack web application that provides a safe, anonymous space for users to express their emotions through text or voice messages. The platform features a clean mobile-first design with admin functionality for content moderation.
+Hushed Haven is a full-stack web application that provides a safe, anonymous space for users to express their emotions through text or voice messages. The platform features a clean mobile-first design with admin functionality for content moderation. The application now uses persistent PostgreSQL database storage for production reliability.
 
 ## User Preferences
 
@@ -26,8 +26,9 @@ Preferred communication style: Simple, everyday language.
 - **API Design**: RESTful endpoints with JSON responses
 
 ### Data Storage
-- **Database**: PostgreSQL with Drizzle ORM
+- **Database**: PostgreSQL with Drizzle ORM (Neon serverless)
 - **Schema**: Two main entities - messages and admins
+- **Storage Class**: DatabaseStorage with persistent data storage
 - **File Storage**: Local filesystem for audio files in uploads/audio directory
 - **Migration**: Drizzle Kit for database schema management
 
