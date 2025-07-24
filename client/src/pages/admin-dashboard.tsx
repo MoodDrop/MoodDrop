@@ -1,24 +1,47 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
-import { Play, Trash2, Inbox } from "lucide-react";
+import { Inbox, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { Message } from "@shared/schema";
+import AdminStats from "@/components/admin-stats";
+import AdminFilters from "@/components/admin-filters";
+import AdminBulkActions from "@/components/admin-bulk-actions";
+import AdminMessageCard from "@/components/admin-message-card";
 
 export default function AdminDashboard() {
   const { toast } = useToast();
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [filters, setFilters] = useState({
+    status: "",
+    emotion: "",
+    search: "",
+  });
 
   const { data: messages, isLoading } = useQuery<Message[]>({
-    queryKey: ['/api/admin/messages'],
+    queryKey: ['/api/admin/messages', filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.status) params.append('status', filters.status);
+      if (filters.emotion) params.append('emotion', filters.emotion);
+      if (filters.search) params.append('search', filters.search);
+      
+      const response = await fetch(`/api/admin/messages?${params.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch messages');
+      return response.json();
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (messageId: string) => {
       await apiRequest("DELETE", `/api/admin/messages/${messageId}`);
     },
-    onSuccess: () => {
+    onSuccess: (_, messageId) => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/messages'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      setSelectedIds(prev => prev.filter(id => id !== messageId));
       toast({
         title: "Message deleted",
         description: "The message has been successfully removed.",
@@ -33,35 +56,26 @@ export default function AdminDashboard() {
     },
   });
 
-  const playAudio = (filename: string) => {
-    const audio = new Audio(`/api/audio/${filename}`);
-    audio.play().catch(() => {
-      toast({
-        title: "Playback failed",
-        description: "Unable to play the audio file.",
-        variant: "destructive",
-      });
-    });
+  const handleSelectionChange = (messageId: string, selected: boolean) => {
+    setSelectedIds(prev => 
+      selected 
+        ? [...prev, messageId]
+        : prev.filter(id => id !== messageId)
+    );
   };
 
-  const formatTimeAgo = (date: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - new Date(date).getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    
-    if (hours < 1) return "Less than an hour ago";
-    if (hours === 1) return "1 hour ago";
-    return `${hours} hours ago`;
+  const handleSelectAll = () => {
+    if (messages && selectedIds.length < messages.length) {
+      setSelectedIds(messages.map(m => m.id));
+    } else {
+      setSelectedIds([]);
+    }
   };
 
-  const getEmotionEmoji = (emotion: string) => {
-    const emojis: Record<string, string> = {
-      angry: "😤",
-      sad: "😢",
-      anxious: "😰",
-      other: "🤔",
-    };
-    return emojis[emotion] || "🤔";
+  const handleDelete = (messageId: string) => {
+    if (window.confirm('Are you sure you want to permanently delete this message?')) {
+      deleteMutation.mutate(messageId);
+    }
   };
 
   if (isLoading) {
@@ -74,73 +88,81 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div>
+    <div className="pb-24">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-warm-gray-700">Message Dashboard</h2>
-          <p className="text-warm-gray-600 text-sm">Review anonymous submissions</p>
+          <h2 className="text-xl font-semibold text-warm-gray-700">Professional Moderation Dashboard</h2>
+          <p className="text-warm-gray-600 text-sm">Advanced tools for content review and management</p>
         </div>
         <Link href="/">
-          <button className="text-blush-400 hover:text-blush-500 text-sm" data-testid="button-admin-logout">
+          <button className="flex items-center gap-2 text-blush-400 hover:text-blush-500 text-sm" data-testid="button-admin-logout">
+            <LogOut size={16} />
             Logout
           </button>
         </Link>
       </div>
 
-      <div id="messages-list">
+      {/* Statistics */}
+      <AdminStats />
+
+      {/* Filters */}
+      <AdminFilters filters={filters} onFiltersChange={setFilters} />
+
+      {/* Selection Controls */}
+      {messages && messages.length > 0 && (
+        <div className="flex items-center justify-between mb-4 p-3 bg-blush-50 rounded-lg">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleSelectAll}
+              className="text-sm text-blush-600 hover:text-blush-700 font-medium"
+              data-testid="button-select-all"
+            >
+              {selectedIds.length === messages.length ? 'Deselect All' : 'Select All'}
+            </button>
+            {selectedIds.length > 0 && (
+              <span className="text-sm text-warm-gray-600">
+                {selectedIds.length} of {messages.length} selected
+              </span>
+            )}
+          </div>
+          <div className="text-sm text-warm-gray-600">
+            Total: {messages.length} messages
+          </div>
+        </div>
+      )}
+
+      {/* Messages List */}
+      <div className="space-y-4" id="messages-list">
         {messages && messages.length > 0 ? (
           messages.map((message) => (
-            <div 
-              key={message.id} 
-              className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-blush-100"
-              data-testid={`message-${message.id}`}
-            >
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex items-center space-x-2">
-                  <span className="px-2 py-1 bg-blush-100 text-blush-600 rounded-full text-xs font-medium">
-                    {getEmotionEmoji(message.emotion)} {message.emotion.charAt(0).toUpperCase() + message.emotion.slice(1)}
-                  </span>
-                  <span className="text-xs text-warm-gray-500">
-                    {formatTimeAgo(message.createdAt)}
-                  </span>
-                </div>
-                <div className="flex space-x-1">
-                  {message.type === 'voice' && message.audioFilename && (
-                    <button
-                      onClick={() => playAudio(message.audioFilename!)}
-                      className="w-8 h-8 bg-blush-100 rounded-full flex items-center justify-center hover:bg-blush-200 transition-colors"
-                      data-testid={`button-play-${message.id}`}
-                    >
-                      <Play className="text-blush-600" size={12} />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => deleteMutation.mutate(message.id)}
-                    disabled={deleteMutation.isPending}
-                    className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"
-                    data-testid={`button-delete-${message.id}`}
-                  >
-                    <Trash2 className="text-red-600" size={12} />
-                  </button>
-                </div>
-              </div>
-              <div className="text-warm-gray-700 text-sm">
-                {message.type === 'voice' ? (
-                  <span>Voice message{message.duration && ` • ${message.duration}`}</span>
-                ) : (
-                  <p className="whitespace-pre-wrap">{message.content}</p>
-                )}
-              </div>
-            </div>
+            <AdminMessageCard
+              key={message.id}
+              message={message}
+              isSelected={selectedIds.includes(message.id)}
+              onSelectionChange={handleSelectionChange}
+              onDelete={handleDelete}
+            />
           ))
         ) : (
-          <div className="text-center py-8 text-warm-gray-500" data-testid="no-messages">
-            <Inbox className="text-3xl mb-3 mx-auto" size={48} />
-            <p>No messages yet</p>
-            <p className="text-sm mt-1">Messages will appear here when users share their thoughts</p>
+          <div className="text-center py-12 text-warm-gray-500" data-testid="no-messages">
+            <Inbox className="text-4xl mb-4 mx-auto" size={64} />
+            <h3 className="text-lg font-medium mb-2">No messages found</h3>
+            <p className="text-sm">
+              {filters.status || filters.emotion || filters.search 
+                ? "Try adjusting your filters to see more messages"
+                : "Messages will appear here when users share their thoughts"
+              }
+            </p>
           </div>
         )}
       </div>
+
+      {/* Bulk Actions */}
+      <AdminBulkActions 
+        selectedIds={selectedIds}
+        onClearSelection={() => setSelectedIds([])}
+      />
     </div>
   );
 }

@@ -10,6 +10,10 @@ export const messages = pgTable("messages", {
   content: text("content"), // text content for text messages
   audioFilename: text("audio_filename"), // filename for voice messages
   duration: text("duration"), // recording duration for voice messages
+  status: text("status").notNull().default("active"), // 'active', 'flagged', 'hidden'
+  flagReason: text("flag_reason"), // reason for flagging
+  reviewedBy: text("reviewed_by"), // admin who reviewed
+  reviewedAt: timestamp("reviewed_at"), // when reviewed
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -21,7 +25,14 @@ export const insertMessageSchema = createInsertSchema(messages).pick({
   duration: true,
 });
 
+export const updateMessageSchema = createInsertSchema(messages).pick({
+  status: true,
+  flagReason: true,
+  reviewedBy: true,
+});
+
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type UpdateMessage = z.infer<typeof updateMessageSchema>;
 export type Message = typeof messages.$inferSelect;
 
 // Admin user schema for simple authentication

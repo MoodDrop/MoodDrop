@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertMessageSchema } from "@shared/schema";
+import { insertMessageSchema, updateMessageSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -86,13 +86,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all messages (admin only)
+  // Get all messages with filters (admin only)
   app.get("/api/admin/messages", async (req, res) => {
     try {
-      const messages = await storage.getAllMessages();
+      const { status, emotion, search } = req.query;
+      const filters = {
+        status: status as string,
+        emotion: emotion as string,
+        search: search as string,
+      };
+      const messages = await storage.getAllMessages(filters);
       res.json(messages);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Get message statistics (admin only)
+  app.get("/api/admin/stats", async (req, res) => {
+    try {
+      const stats = await storage.getMessageStats();
+      res.json(stats);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Update message status (admin only)
+  app.patch("/api/admin/messages/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = updateMessageSchema.parse(req.body);
+      const message = await storage.updateMessage(id, validatedData);
+      
+      if (!message) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+      
+      res.json({ success: true, message });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Bulk delete messages (admin only)
+  app.delete("/api/admin/messages/bulk", async (req, res) => {
+    try {
+      const { ids } = req.body;
+      if (!Array.isArray(ids)) {
+        return res.status(400).json({ message: "IDs must be an array" });
+      }
+      
+      const deletedCount = await storage.bulkDeleteMessages(ids);
+      res.json({ success: true, deletedCount });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Bulk update messages (admin only)
+  app.patch("/api/admin/messages/bulk", async (req, res) => {
+    try {
+      const { ids, updates } = req.body;
+      if (!Array.isArray(ids)) {
+        return res.status(400).json({ message: "IDs must be an array" });
+      }
+      
+      const validatedUpdates = updateMessageSchema.parse(updates);
+      const updatedCount = await storage.bulkUpdateMessages(ids, validatedUpdates);
+      res.json({ success: true, updatedCount });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
     }
   });
 

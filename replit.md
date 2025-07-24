@@ -27,8 +27,8 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage
 - **Database**: PostgreSQL with Drizzle ORM (Neon serverless)
-- **Schema**: Two main entities - messages and admins
-- **Storage Class**: DatabaseStorage with persistent data storage
+- **Schema**: Enhanced messages table with moderation fields (status, flagReason, reviewedBy, reviewedAt)
+- **Storage Class**: DatabaseStorage with advanced filtering and bulk operations
 - **File Storage**: Local filesystem for audio files in uploads/audio directory
 - **Migration**: Drizzle Kit for database schema management
 
@@ -40,10 +40,14 @@ Preferred communication style: Simple, everyday language.
 - **Voice Processing**: WebM audio format with duration tracking
 - **Anonymous Storage**: No user identification or session tracking
 
-### Admin System
+### Professional Admin Moderation System
 - **Authentication**: Simple username/password system (default: admin/hushed2024)
-- **Dashboard**: View all messages with emotion filters and timestamps
-- **Moderation**: Delete inappropriate content
+- **Advanced Dashboard**: Comprehensive admin interface with professional moderation tools
+- **Analytics & Statistics**: Real-time stats showing message counts by emotion and status
+- **Content Filtering**: Advanced filters by status (active/flagged/hidden), emotion, and text search
+- **Bulk Operations**: Select multiple messages for bulk actions (delete, flag, hide, activate)
+- **Message Status Management**: Flag messages with reasons, hide inappropriate content, or restore
+- **Review Tracking**: Track which admin reviewed messages and when, with flag reasons
 - **Audio Playback**: Direct audio file serving for voice message review
 
 ### UI/UX Design
