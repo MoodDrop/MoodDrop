@@ -75,6 +75,8 @@ export default function AdminFilters({ filters, onFiltersChange }: AdminFiltersP
             <SelectItem value="angry">😤 Angry</SelectItem>
             <SelectItem value="sad">😢 Sad</SelectItem>
             <SelectItem value="anxious">😰 Anxious</SelectItem>
+            <SelectItem value="happy">😊 Happy</SelectItem>
+            <SelectItem value="excited">🤩 Excited</SelectItem>
             <SelectItem value="other">🤔 Other</SelectItem>
           </SelectContent>
         </Select>

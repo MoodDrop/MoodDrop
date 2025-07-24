@@ -7,6 +7,8 @@ const emotions = [
   { key: "angry", emoji: "😤", label: "Angry" },
   { key: "sad", emoji: "😢", label: "Sad" },
   { key: "anxious", emoji: "😰", label: "Anxious" },
+  { key: "happy", emoji: "😊", label: "Happy" },
+  { key: "excited", emoji: "🤩", label: "Excited" },
   { key: "other", emoji: "🤔", label: "Other" },
 ];
 

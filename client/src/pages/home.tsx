@@ -11,8 +11,8 @@ export default function Home() {
       
       <h2 className="text-2xl font-semibold text-warm-gray-700 mb-4">Welcome to Your Safe Space</h2>
       <p className="text-warm-gray-600 leading-relaxed mb-8 px-4">
-        Sometimes we all need to let it out. Share your thoughts, feelings, or frustrations anonymously. 
-        Your voice matters, and this is your judgment-free zone.
+        Share your emotions freely and anonymously. Whether you're feeling joy, excitement, sadness, anger, or anything in between - 
+        your voice matters, and this is your judgment-free zone for all feelings.
       </p>
       
       <Link href="/vent">
@@ -20,8 +20,8 @@ export default function Home() {
           className="bg-blush-300 hover:bg-blush-400 text-white font-medium px-8 py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg"
           data-testid="button-start-venting"
         >
-          <span className="mr-2">🎤</span>
-          Start Venting
+          <span className="mr-2">💭</span>
+          Share Your Feelings
         </button>
       </Link>
 

@@ -85,6 +85,8 @@ export default function AdminMessageCard({
       angry: "😤",
       sad: "😢",
       anxious: "😰",
+      happy: "😊",
+      excited: "🤩",
       other: "🤔",
     };
     return emojis[emotion] || "🤔";

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Hushed Haven is a full-stack web application that provides a safe, anonymous space for users to express their emotions through text or voice messages. The platform features a clean mobile-first design with admin functionality for content moderation. The application now uses persistent PostgreSQL database storage for production reliability.
+Hushed Haven is a full-stack web application that provides a safe, anonymous space for users to express their emotions through text or voice messages. Whether experiencing joy, excitement, sadness, anger, anxiety, or any other feeling, users can share freely in this judgment-free zone. The platform features a clean mobile-first design with comprehensive admin moderation tools and persistent PostgreSQL database storage for production reliability.
 
 ## User Preferences
 
@@ -35,7 +35,7 @@ Preferred communication style: Simple, everyday language.
 ## Key Components
 
 ### Message System
-- **Emotion Tagging**: Users categorize messages as angry, sad, anxious, or other
+- **Emotion Tagging**: Users categorize messages as angry, sad, anxious, happy, excited, or other
 - **Dual Input Methods**: Text messages (500 char limit) or voice recordings
 - **Voice Processing**: WebM audio format with duration tracking
 - **Anonymous Storage**: No user identification or session tracking
