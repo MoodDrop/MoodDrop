@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Venting from "@/pages/venting";
 import ThankYou from "@/pages/thank-you";
+import Comfort from "@/pages/comfort";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import Header from "@/components/header";
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/vent" component={Venting} />
       <Route path="/thank-you" component={ThankYou} />
+      <Route path="/comfort" component={Comfort} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route component={NotFound} />

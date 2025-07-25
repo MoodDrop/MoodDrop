@@ -1,14 +1,43 @@
-import { Heart } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Heart, Home } from "lucide-react";
 
 export default function Header() {
+  const [location] = useLocation();
+  
   return (
-    <header className="bg-white border-b border-blush-100 px-6 py-4 sticky top-0 z-10">
-      <div className="text-center">
-        <div className="flex items-center justify-center space-x-2 mb-1">
-          <Heart className="text-blush-300 text-2xl" size={24} />
-          <h1 className="text-2xl font-bold text-warm-gray-700">Hushed Haven</h1>
-        </div>
-        <p className="text-sm text-warm-gray-600 font-light">Your safe space to express</p>
+    <header className="bg-gradient-to-r from-blush-100 to-cream-100 px-6 py-4 border-b border-blush-200">
+      <div className="flex items-center justify-between">
+        <Link href="/">
+          <div className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <div className="w-8 h-8 bg-blush-300 rounded-full flex items-center justify-center">
+              <Heart className="text-white" size={16} />
+            </div>
+            <span className="text-lg font-semibold text-warm-gray-700">Hushed Haven</span>
+          </div>
+        </Link>
+        
+        {location !== "/" && location !== "/comfort" && (
+          <nav className="flex items-center gap-3">
+            <Link href="/">
+              <button 
+                className="flex items-center gap-1 px-3 py-2 text-sm text-warm-gray-600 hover:text-blush-400 hover:bg-blush-50 rounded-lg transition-colors"
+                data-testid="nav-home"
+              >
+                <Home size={14} />
+                Home
+              </button>
+            </Link>
+            <Link href="/comfort">
+              <button 
+                className="flex items-center gap-1 px-3 py-2 text-sm text-warm-gray-600 hover:text-blush-400 hover:bg-blush-50 rounded-lg transition-colors"
+                data-testid="nav-comfort"
+              >
+                <Heart size={14} />
+                Comfort
+              </button>
+            </Link>
+          </nav>
+        )}
       </div>
     </header>
   );

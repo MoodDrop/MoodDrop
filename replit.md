@@ -55,6 +55,14 @@ Preferred communication style: Simple, everyday language.
 - **Accessibility**: Proper semantic HTML and ARIA labels
 - **Toast Notifications**: User feedback for actions and errors
 - **Progressive Enhancement**: Works without JavaScript for basic functionality
+- **Comfort Corner**: Integrated inspirational quotes, coping strategies, and crisis resources
+
+### Wellbeing Features
+- **Inspirational Quotes**: Rotating collection of uplifting quotes with manual refresh option
+- **Coping Strategies**: 6 practical techniques including deep breathing, grounding, and mindfulness
+- **Crisis Resources**: Emergency support contacts including suicide prevention and crisis text lines
+- **Daily Wellbeing Tips**: Guidance on morning routines, hydration, sleep, and social connection
+- **Professional Help Information**: Resources for finding qualified mental health professionals
 
 ## Data Flow
 
@@ -95,6 +103,8 @@ Preferred communication style: Simple, everyday language.
 ### File Structure
 ```
 ├── client/          # React frontend application
+│   ├── src/pages/   # Application pages (home, venting, comfort, admin)
+│   └── src/components/ # Reusable components (comfort-corner, emotion-tags, etc.)
 ├── server/          # Express backend application  
 ├── shared/          # Shared TypeScript types and schemas
 ├── uploads/         # Audio file storage (created at runtime)

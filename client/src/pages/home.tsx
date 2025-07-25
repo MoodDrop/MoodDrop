@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { Bird } from "lucide-react";
+import ComfortCorner from "@/components/comfort-corner";
 
 export default function Home() {
   return (
@@ -15,23 +16,30 @@ export default function Home() {
         your voice matters, and this is your judgment-free zone for all feelings.
       </p>
       
-      <Link href="/vent">
-        <button 
-          className="bg-blush-300 hover:bg-blush-400 text-white font-medium px-8 py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg"
-          data-testid="button-start-venting"
-        >
-          <span className="mr-2">💭</span>
-          Share Your Feelings
-        </button>
-      </Link>
+      <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+        <Link href="/vent">
+          <button 
+            className="bg-blush-300 hover:bg-blush-400 text-white font-medium px-8 py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg"
+            data-testid="button-start-venting"
+          >
+            <span className="mr-2">💭</span>
+            Share Your Feelings
+          </button>
+        </Link>
+        <Link href="/comfort">
+          <button 
+            className="bg-cream-200 hover:bg-cream-300 text-warm-gray-700 font-medium px-8 py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg"
+            data-testid="button-comfort-corner"
+          >
+            <span className="mr-2">🤗</span>
+            Need Comfort?
+          </button>
+        </Link>
+      </div>
 
-      {/* Quick stats or encouraging message */}
-      <div className="bg-blush-50 rounded-2xl p-6 mb-6 mt-8">
-        <div className="text-center">
-          <p className="text-warm-gray-600 text-sm mb-2">You're not alone</p>
-          <p className="text-2xl font-bold text-blush-400">✨</p>
-          <p className="text-warm-gray-600 text-sm">This is your safe space</p>
-        </div>
+      {/* Comfort Corner */}
+      <div className="mt-8">
+        <ComfortCorner />
       </div>
     </div>
   );
