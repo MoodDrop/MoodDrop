@@ -1,5 +1,10 @@
-import { createRoot } from "react-dom/client";
-import App from "./App";
-import "./index.css";
-
-createRoot(document.getElementById("root")!).render(<App />);
+export default function App() {
+  return (
+    <div style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
+      <div style={{ textAlign: "center" }}>
+        <h1>MoodDrop</h1>
+        <p>Gentle, private space for feelings, reflections, and calm.</p>
+      </div>
+    </div>
+  );
+}
