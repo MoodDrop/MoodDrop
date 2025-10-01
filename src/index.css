@@ -1,0 +1,18 @@
+:root{
+  --peach:#fbb7a4;
+  --honey:#f6d188;
+  --clay:#c28966;
+  --ink:#2b2b2b;
+  --cream:#fffaf5;
+}
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+  color: var(--ink);
+  background: radial-gradient(1000px 600px at 30% 40%, var(--peach), transparent 60%),
+              radial-gradient(900px 600px at 70% 60%, var(--honey), transparent 60%),
+              var(--cream);
+}
+h1{font-size:2rem}
