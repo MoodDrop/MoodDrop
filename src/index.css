@@ -16,3 +16,13 @@ body{
               var(--cream);
 }
 h1{font-size:2rem}
+/* ===== Journal ===== */
+.inp{ width:100%; border:1px solid var(--ring); background:#fff; padding:10px 12px; border-radius:10px; font:inherit }
+.jr-form{ display:grid; gap:10px; margin-top:8px }
+.jr-actions{ display:flex; gap:8px; flex-wrap:wrap }
+.jr-list{ list-style:none; padding:0; margin:10px 0 0; display:grid; gap:10px }
+.jr-item{ background:#fff; border:1px solid var(--ring); border-radius:10px; padding:10px 12px; display:grid; gap:6px }
+.jr-meta{ display:flex; align-items:baseline; justify-content:space-between; gap:10px }
+.jr-body{ white-space:pre-wrap; margin:0 }
+.link{ background:none; border:0; color:#444; text-decoration:underline; cursor:pointer; padding:0 }
+.link.danger{ color:#b00020 }
