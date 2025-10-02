@@ -1,3 +1,5 @@
+import Journal from "./Journal";
+
 export default function App() {
   return (
     <div style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
@@ -10,3 +12,9 @@ export default function App() {
     </div>
   );
 }
+
+{/* MOOD TRACKER (already on your page) */}
+// <MoodTracker />
+
+{/* JOURNAL */}
+<Journal />
