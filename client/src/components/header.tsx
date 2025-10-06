@@ -3,7 +3,7 @@ import { Heart, Home } from "lucide-react";
 
 export default function Header() {
   const [location] = useLocation();
-  
+
   return (
     <header className="bg-gradient-to-r from-blush-100 to-cream-100 px-6 py-4 border-b border-blush-200">
       <div className="flex items-center justify-between">
@@ -12,14 +12,16 @@ export default function Header() {
             <div className="w-8 h-8 bg-blush-300 rounded-full flex items-center justify-center">
               <Heart className="text-white" size={16} />
             </div>
-            <span className="text-lg font-semibold text-warm-gray-700">Hushed Haven</span>
+            <span className="text-lg font-semibold text-warm-gray-700">
+              MoodDrop
+            </span>
           </div>
         </Link>
-        
+
         {location !== "/" && location !== "/comfort" && (
           <nav className="flex items-center gap-3">
             <Link href="/">
-              <button 
+              <button
                 className="flex items-center gap-1 px-3 py-2 text-sm text-warm-gray-600 hover:text-blush-400 hover:bg-blush-50 rounded-lg transition-colors"
                 data-testid="nav-home"
               >
@@ -28,7 +30,7 @@ export default function Header() {
               </button>
             </Link>
             <Link href="/comfort">
-              <button 
+              <button
                 className="flex items-center gap-1 px-3 py-2 text-sm text-warm-gray-600 hover:text-blush-400 hover:bg-blush-50 rounded-lg transition-colors"
                 data-testid="nav-comfort"
               >
