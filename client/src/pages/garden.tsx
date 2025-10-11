@@ -3,6 +3,7 @@ import { type Message } from "@shared/schema";
 import { getEmotionColor } from "@/lib/gardenColors";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
+import GardenIllustration from "@/components/GardenIllustration";
 
 function Droplet({ color, size = 60, delay = 0 }: { color: { primary: string; secondary: string; shadow: string }; size?: number; delay?: number }) {
   return (
@@ -133,12 +134,7 @@ export default function Garden() {
           </div>
 
           <div className="text-center py-16">
-            <div className="mb-6">
-              <svg className="w-32 h-32 mx-auto text-warm-gray-300" fill="currentColor" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" opacity="0.2" />
-                <path d="M50 20 L50 45 M35 35 L50 45 L65 35" stroke="currentColor" strokeWidth="3" fill="none" />
-              </svg>
-            </div>
+            <GardenIllustration />
             <h2 className="text-xl font-semibold text-warm-gray-700 mb-3" data-testid="text-garden-signin-title">
               Sign up to grow your garden
             </h2>
@@ -192,12 +188,7 @@ export default function Garden() {
 
         {!messages || messages.length === 0 ? (
           <div className="text-center py-16">
-            <div className="mb-6">
-              <svg className="w-32 h-32 mx-auto text-warm-gray-300" fill="currentColor" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" opacity="0.2" />
-                <path d="M50 20 L50 45 M35 35 L50 45 L65 35" stroke="currentColor" strokeWidth="3" fill="none" />
-              </svg>
-            </div>
+            <GardenIllustration />
             <h2 className="text-xl font-semibold text-warm-gray-700 mb-2" data-testid="text-garden-empty-title">
               Your garden is waiting to bloom
             </h2>
