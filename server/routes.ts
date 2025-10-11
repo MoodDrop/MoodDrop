@@ -5,6 +5,7 @@ import { insertMessageSchema, updateMessageSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 
 // Configure multer for audio file uploads
 const audioStorage = multer.diskStorage({
@@ -34,15 +35,33 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup Replit Auth
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
   
   // Submit a new message (text or voice)
-  app.post("/api/messages", upload.single('audio'), async (req, res) => {
+  app.post("/api/messages", upload.single('audio'), async (req: any, res) => {
     try {
+      // Get userId if user is authenticated (optional for anonymous messages)
+      const userId = req.isAuthenticated?.() ? req.user?.claims?.sub : null;
+      
       let messageData;
       
       if (req.file) {
         // Voice message
         messageData = {
+          userId,
           emotion: req.body.emotion,
           type: 'voice',
           audioFilename: req.file.filename,
@@ -52,6 +71,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Text message
         messageData = {
+          userId,
           emotion: req.body.emotion,
           type: 'text',
           content: req.body.content,

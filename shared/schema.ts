@@ -1,10 +1,11 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, jsonb, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const messages = pgTable("messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id"), // Optional: allows anonymous messages
   emotion: text("emotion").notNull(),
   type: text("type").notNull(), // 'voice' or 'text'
   content: text("content"), // text content for text messages
@@ -49,3 +50,28 @@ export const insertAdminSchema = createInsertSchema(admins).pick({
 
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
 export type Admin = typeof admins.$inferSelect;
+
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User storage table for Replit Auth
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type UpsertUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect;

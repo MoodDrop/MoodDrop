@@ -1,4 +1,4 @@
-import { type Message, type InsertMessage, type UpdateMessage, type Admin, type InsertAdmin, messages, admins } from "@shared/schema";
+import { type Message, type InsertMessage, type UpdateMessage, type Admin, type InsertAdmin, type User, type UpsertUser, messages, admins, users } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, desc, and, like, count } from "drizzle-orm";
 
@@ -15,6 +15,10 @@ export interface IStorage {
   // Admin operations
   getAdminByUsername(username: string): Promise<Admin | undefined>;
   createAdmin(admin: InsertAdmin): Promise<Admin>;
+  
+  // User operations (required for Replit Auth)
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -125,6 +129,26 @@ export class DatabaseStorage implements IStorage {
       .values(insertAdmin)
       .returning();
     return admin;
+  }
+
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
   }
 }
 
