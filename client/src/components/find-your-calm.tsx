@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { PlayCircle, Sparkles, Laugh, Heart, Play, Pause, Gamepad2 } from "lucide-react";
-import relaxingIllustration from "@assets/relaxing-illustration.jpg";
+import relaxingIllustration from "@assets/relaxing-illustration.png";
 
 type TabType = "videos" | "games" | "sounds";
 type VideoCategory = "all" | "funny" | "uplifting" | "storytimes";
