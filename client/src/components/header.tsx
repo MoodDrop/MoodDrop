@@ -62,6 +62,19 @@ export default function Header() {
               </button>
             </Link>
             <span className="text-warm-gray-400">•</span>
+            <Link href="/garden">
+              <button
+                className={`px-2 sm:px-3 py-1 rounded-lg transition-colors whitespace-nowrap ${
+                  location === "/garden"
+                    ? "text-blush-600 font-medium"
+                    : "text-warm-gray-600 hover:text-blush-500"
+                }`}
+                data-testid="nav-garden"
+              >
+                My Garden
+              </button>
+            </Link>
+            <span className="text-warm-gray-400">•</span>
             <Link href="/comfort">
               <button
                 className={`px-2 sm:px-3 py-1 rounded-lg transition-colors whitespace-nowrap ${
