@@ -36,6 +36,15 @@ export default function Home() {
             Need Comfort?
           </button>
         </Link>
+        <Link href="/videos">
+          <button 
+            className="bg-blush-200 hover:bg-blush-300 text-warm-gray-700 font-medium px-8 py-4 rounded-xl transition-all shadow-md hover:shadow-lg"
+            data-testid="button-videos"
+          >
+            <span className="mr-2">📺</span>
+            Watch & Smile
+          </button>
+        </Link>
       </div>
     </div>
   );

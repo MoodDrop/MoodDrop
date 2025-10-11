@@ -8,6 +8,7 @@ import Home from "@/pages/home";
 import Release from "@/pages/release";
 import ThankYou from "@/pages/thank-you";
 import Comfort from "@/pages/comfort";
+import Videos from "@/pages/videos";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import Header from "@/components/header";
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/release" component={Release} />
       <Route path="/thank-you" component={ThankYou} />
       <Route path="/comfort" component={Comfort} />
+      <Route path="/videos" component={Videos} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route component={NotFound} />
