@@ -24,7 +24,7 @@ export default function Home() {
             data-testid="button-share-feelings"
           >
             <span className="mr-2">💭</span>
-            Share Your Feelings
+            Let It Flow
           </button>
         </Link>
         <Link href="/comfort">
@@ -33,7 +33,7 @@ export default function Home() {
             data-testid="button-comfort"
           >
             <span className="mr-2">🤗</span>
-            Need Comfort?
+            Take A Moment
           </button>
         </Link>
       </div>
