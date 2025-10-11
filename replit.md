@@ -55,13 +55,18 @@ Preferred communication style: Simple, everyday language.
 - **Accessibility**: Proper semantic HTML and ARIA labels
 - **Toast Notifications**: User feedback for actions and errors
 - **Progressive Enhancement**: Works without JavaScript for basic functionality
+- **Navigation**: Clean header with "Home • Drop What You're Holding • Find Your Calm" navigation
+- **Tab System**: Smooth fade-in transitions between tab content for a calming user experience
 - **Comfort Corner**: Integrated inspirational quotes, coping strategies, and crisis resources
 
 ### Wellbeing Features (Comfort Page)
 - **Inspirational Quotes**: Rotating collection of uplifting quotes with manual refresh option
 - **Coping Strategies**: 6 practical techniques including deep breathing, grounding, and mindfulness
 - **Crisis Resources**: Emergency support contacts including suicide prevention and crisis text lines
-- **Watch & Smile Videos**: Curated uplifting videos from YouTube/TikTok with category filtering (funny, uplifting, storytimes) embedded with responsive 16:9 aspect ratio and lazy loading
+- **Find Your Calm**: Interactive tab system with three activities:
+  - **Watch & Smile**: Curated uplifting videos from YouTube/TikTok with category filtering (funny, uplifting, storytimes), responsive 16:9 aspect ratio, and lazy loading
+  - **Games**: Placeholder cards for future relaxing games (coming soon)
+  - **Soothing Sounds**: Ambient audio players (rain, ocean, forest, fireplace) with play/pause controls
 - **Daily Wellbeing Tips**: Guidance on morning routines, hydration, sleep, and social connection
 - **Professional Help Information**: Resources for finding qualified mental health professionals
 

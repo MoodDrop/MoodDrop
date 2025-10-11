@@ -1,53 +1,9 @@
-import { useState } from "react";
 import { Link } from "wouter";
-import { ArrowLeft, PlayCircle, Sparkles, Laugh, Heart } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import ComfortCorner from "@/components/comfort-corner";
-
-type VideoCategory = "all" | "funny" | "uplifting" | "storytimes";
-
-interface Video {
-  id: string;
-  title: string;
-  platform: "youtube" | "tiktok";
-  embedUrl: string;
-  category: VideoCategory[];
-  description: string;
-}
-
-const VIDEOS: Video[] = [
-  {
-    id: "1",
-    title: "Wholesome Stories That Will Make Your Day",
-    platform: "youtube",
-    embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    category: ["uplifting", "storytimes"],
-    description: "Heartwarming stories that remind us of the good in the world"
-  },
-  {
-    id: "2",
-    title: "Funny Moments Compilation",
-    platform: "youtube",
-    embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    category: ["funny"],
-    description: "Guaranteed to make you laugh out loud"
-  },
-  {
-    id: "3",
-    title: "Inspiring Life Stories",
-    platform: "youtube",
-    embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    category: ["uplifting", "storytimes"],
-    description: "Real stories of triumph and perseverance"
-  }
-];
+import FindYourCalm from "@/components/find-your-calm";
 
 export default function Comfort() {
-  const [selectedCategory, setSelectedCategory] = useState<VideoCategory>("all");
-
-  const filteredVideos = selectedCategory === "all" 
-    ? VIDEOS 
-    : VIDEOS.filter(video => video.category.includes(selectedCategory));
-
   return (
     <div className="max-w-5xl mx-auto">
       {/* Header */}
@@ -62,7 +18,7 @@ export default function Comfort() {
         </Link>
         <div>
           <h1 className="text-2xl font-semibold text-warm-gray-700">
-            Need Comfort
+            Find Your Calm
           </h1>
           <p className="text-warm-gray-600 text-sm">
             Take a moment to relax and reset. Watch something uplifting, listen to something soothing, or just breathe.
@@ -73,117 +29,8 @@ export default function Comfort() {
       {/* Comfort Corner */}
       <ComfortCorner />
 
-      {/* Video Section */}
-      <div className="mt-8 mb-6">
-        <h2 className="text-xl font-semibold text-warm-gray-700 mb-4">
-          Watch & Smile
-        </h2>
-        
-        {/* Category Filter */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-          <button
-            onClick={() => setSelectedCategory("all")}
-            className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
-              selectedCategory === "all"
-                ? "bg-blush-300 text-white"
-                : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
-            }`}
-            data-testid="filter-all"
-          >
-            <PlayCircle className="inline-block mr-1" size={16} />
-            All Videos
-          </button>
-          <button
-            onClick={() => setSelectedCategory("funny")}
-            className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
-              selectedCategory === "funny"
-                ? "bg-blush-300 text-white"
-                : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
-            }`}
-            data-testid="filter-funny"
-          >
-            <Laugh className="inline-block mr-1" size={16} />
-            Funny
-          </button>
-          <button
-            onClick={() => setSelectedCategory("uplifting")}
-            className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
-              selectedCategory === "uplifting"
-                ? "bg-blush-300 text-white"
-                : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
-            }`}
-            data-testid="filter-uplifting"
-          >
-            <Heart className="inline-block mr-1" size={16} />
-            Uplifting
-          </button>
-          <button
-            onClick={() => setSelectedCategory("storytimes")}
-            className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
-              selectedCategory === "storytimes"
-                ? "bg-blush-300 text-white"
-                : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
-            }`}
-            data-testid="filter-storytimes"
-          >
-            <Sparkles className="inline-block mr-1" size={16} />
-            Story Times
-          </button>
-        </div>
-
-        {/* Videos Grid */}
-        <div className="space-y-6">
-          {filteredVideos.length === 0 ? (
-            <div className="text-center py-12 text-warm-gray-500">
-              No videos in this category yet. Check back soon! 🎥
-            </div>
-          ) : (
-            filteredVideos.map((video) => (
-              <div
-                key={video.id}
-                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-                data-testid={`video-card-${video.id}`}
-              >
-                {/* Responsive 16:9 wrapper */}
-                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                  <iframe
-                    src={video.embedUrl}
-                    title={video.title}
-                    className="absolute top-0 left-0 w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    loading="lazy"
-                    data-testid={`video-iframe-${video.id}`}
-                  />
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      video.platform === "youtube"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-pink-100 text-pink-700"
-                    }`}>
-                      {video.platform === "youtube" ? "YouTube" : "TikTok"}
-                    </span>
-                    {video.category.map((cat) => (
-                      <span
-                        key={cat}
-                        className="px-2 py-1 rounded text-xs bg-blush-100 text-blush-700"
-                      >
-                        {cat}
-                      </span>
-                    ))}
-                  </div>
-                  <h3 className="text-lg font-semibold text-warm-gray-800 mb-2">
-                    {video.title}
-                  </h3>
-                  <p className="text-sm text-warm-gray-600">{video.description}</p>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+      {/* Find Your Calm Section */}
+      <FindYourCalm />
 
       {/* Additional Wellbeing Tips */}
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-blush-100 mb-6">
