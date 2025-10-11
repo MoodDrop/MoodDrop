@@ -12,7 +12,7 @@ interface Bubble {
 export default function BubblePop() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState(0);
-  const [bubbles, setBubbles] = useState<Bubble[]>([]);
+  const bubblesRef = useRef<Bubble[]>([]);
   const animationRef = useRef<number>();
   const bubbleIdRef = useRef(0);
 
@@ -34,7 +34,7 @@ export default function BubblePop() {
     window.addEventListener('resize', resizeCanvas);
 
     // Create initial bubbles
-    const createBubble = () => {
+    const createBubble = (): Bubble => {
       const radius = 20 + Math.random() * 30;
       return {
         id: bubbleIdRef.current++,
@@ -51,34 +51,30 @@ export default function BubblePop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Add new bubbles periodically
-      if (Math.random() < 0.03 && bubbles.length < 15) {
-        setBubbles(prev => [...prev, createBubble()]);
+      if (Math.random() < 0.03 && bubblesRef.current.length < 15) {
+        bubblesRef.current.push(createBubble());
       }
 
       // Update and draw bubbles
-      setBubbles(prevBubbles => {
-        const updatedBubbles = prevBubbles
-          .map(bubble => ({
-            ...bubble,
-            y: bubble.y + bubble.speedY
-          }))
-          .filter(bubble => bubble.y + bubble.radius > 0); // Remove bubbles that went off screen
+      bubblesRef.current = bubblesRef.current
+        .map(bubble => ({
+          ...bubble,
+          y: bubble.y + bubble.speedY
+        }))
+        .filter(bubble => bubble.y + bubble.radius > 0); // Remove bubbles that went off screen
 
-        updatedBubbles.forEach(bubble => {
-          // Draw bubble
-          ctx.beginPath();
-          ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
-          ctx.fillStyle = bubble.color;
-          ctx.fill();
-          
-          // Add shine effect
-          ctx.beginPath();
-          ctx.arc(bubble.x - bubble.radius / 3, bubble.y - bubble.radius / 3, bubble.radius / 3, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-          ctx.fill();
-        });
-
-        return updatedBubbles;
+      bubblesRef.current.forEach(bubble => {
+        // Draw bubble
+        ctx.beginPath();
+        ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+        ctx.fillStyle = bubble.color;
+        ctx.fill();
+        
+        // Add shine effect
+        ctx.beginPath();
+        ctx.arc(bubble.x - bubble.radius / 3, bubble.y - bubble.radius / 3, bubble.radius / 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.fill();
       });
 
       animationRef.current = requestAnimationFrame(animate);
@@ -94,27 +90,36 @@ export default function BubblePop() {
     };
   }, []);
 
-  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handlePointerEvent = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
 
-    setBubbles(prevBubbles => {
-      let popped = false;
-      const remaining = prevBubbles.filter(bubble => {
-        const distance = Math.sqrt((x - bubble.x) ** 2 + (y - bubble.y) ** 2);
-        if (distance <= bubble.radius && !popped) {
-          popped = true;
-          setScore(s => s + 1);
-          return false;
-        }
-        return true;
-      });
-      return remaining;
+    let popped = false;
+    bubblesRef.current = bubblesRef.current.filter(bubble => {
+      const distance = Math.sqrt((x - bubble.x) ** 2 + (y - bubble.y) ** 2);
+      if (distance <= bubble.radius && !popped) {
+        popped = true;
+        setScore(s => s + 1);
+        return false;
+      }
+      return true;
     });
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    handlePointerEvent(e.clientX, e.clientY);
+  };
+
+  const handleTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      handlePointerEvent(touch.clientX, touch.clientY);
+    }
   };
 
   return (
@@ -132,7 +137,8 @@ export default function BubblePop() {
       <canvas
         ref={canvasRef}
         onClick={handleClick}
-        className="w-full h-80 bg-gradient-to-b from-sky-100 to-indigo-100 rounded-xl cursor-pointer shadow-inner"
+        onTouchStart={handleTouch}
+        className="w-full h-80 bg-gradient-to-b from-sky-100 to-indigo-100 rounded-xl cursor-pointer shadow-inner touch-none"
         data-testid="bubble-canvas"
       />
       <p className="text-xs text-center text-warm-gray-500 mt-3">
