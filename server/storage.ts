@@ -6,6 +6,7 @@ export interface IStorage {
   // Message operations
   createMessage(message: InsertMessage): Promise<Message>;
   getAllMessages(filters?: { status?: string; emotion?: string; search?: string }): Promise<Message[]>;
+  getUserMessages(userId: string): Promise<Message[]>;
   deleteMessage(id: string): Promise<boolean>;
   updateMessage(id: string, updates: UpdateMessage): Promise<Message | undefined>;
   bulkDeleteMessages(ids: string[]): Promise<number>;
@@ -52,6 +53,17 @@ export class DatabaseStorage implements IStorage {
     }
     
     return await query.orderBy(desc(messages.createdAt));
+  }
+
+  async getUserMessages(userId: string): Promise<Message[]> {
+    return await db
+      .select()
+      .from(messages)
+      .where(and(
+        eq(messages.userId, userId),
+        eq(messages.status, 'active')
+      ))
+      .orderBy(desc(messages.createdAt));
   }
 
   async deleteMessage(id: string): Promise<boolean> {

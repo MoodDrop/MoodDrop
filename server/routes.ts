@@ -49,6 +49,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
+
+  // Get user's messages for mood garden
+  app.get('/api/garden/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const messages = await storage.getUserMessages(userId);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching garden messages:", error);
+      res.status(500).json({ message: "Failed to fetch garden messages" });
+    }
+  });
   
   // Submit a new message (text or voice)
   app.post("/api/messages", upload.single('audio'), async (req: any, res) => {
