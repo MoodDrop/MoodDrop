@@ -1,19 +1,6 @@
-import { Link } from "wouter";
-
 export default function Footer() {
   return (
     <footer className="bg-blush-50 px-6 py-8 mt-auto">
-      <div className="text-center mb-6">
-        <Link href="/admin">
-          <button
-            className="text-blush-400 hover:text-blush-500 text-sm underline"
-            data-testid="link-admin"
-          >
-            Admin Access
-          </button>
-        </Link>
-      </div>
-
       {/* Legal Disclaimer */}
       <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm">
         <h3 className="font-semibold text-warm-gray-700 mb-3 text-sm">
