@@ -14,7 +14,7 @@ export default function Home() {
         Welcome to MoodDrop
       </h2>
       <p className="text-warm-gray-600 leading-relaxed mb-8">
-        Track your journey, watch your mood grow, and find comfort when you need it most.
+        A gentle space to release your thoughts, find calm, and grow through every mood.
       </p>
 
       <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
