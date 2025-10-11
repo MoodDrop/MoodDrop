@@ -1,6 +1,9 @@
 import { useState, useRef } from "react";
-import { PlayCircle, Sparkles, Laugh, Heart, Play, Pause, Gamepad2 } from "lucide-react";
+import { PlayCircle, Sparkles, Laugh, Heart, Play, Pause, Gamepad2, Lock } from "lucide-react";
 import relaxingIllustration from "@assets/relaxing-illustration.png";
+import BubblePop from "./BubblePop";
+import ColorDrift from "./ColorDrift";
+import { useAuth } from "@/hooks/useAuth";
 
 type TabType = "videos" | "games" | "sounds";
 type VideoCategory = "all" | "funny" | "uplifting" | "storytimes";
@@ -24,27 +27,43 @@ interface Sound {
 const VIDEOS: Video[] = [
   {
     id: "1",
-    title: "Wholesome Stories That Will Make Your Day",
+    title: "Peaceful Nature Scenes - Relaxing Music",
     platform: "youtube",
-    embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    category: ["uplifting", "storytimes"],
-    description: "Heartwarming stories that remind us of the good in the world"
+    embedUrl: "https://www.youtube.com/embed/lTRiuFIWV54",
+    category: ["uplifting"],
+    description: "Beautiful nature scenery with calming background music"
   },
   {
     id: "2",
-    title: "Funny Moments Compilation",
+    title: "Baby Animals Being Adorable",
     platform: "youtube",
-    embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    category: ["funny"],
-    description: "Guaranteed to make you laugh out loud"
+    embedUrl: "https://www.youtube.com/embed/AZ2ZPmEfjvU",
+    category: ["funny", "uplifting"],
+    description: "Cute baby animals that will brighten your day"
   },
   {
     id: "3",
-    title: "Inspiring Life Stories",
+    title: "Acts of Kindness Compilation",
     platform: "youtube",
-    embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    embedUrl: "https://www.youtube.com/embed/f1eJ4GLrY0M",
     category: ["uplifting", "storytimes"],
-    description: "Real stories of triumph and perseverance"
+    description: "Heartwarming moments of people helping others"
+  },
+  {
+    id: "4",
+    title: "Funny Pets Compilation",
+    platform: "youtube",
+    embedUrl: "https://www.youtube.com/embed/hY7m5jjJ9mM",
+    category: ["funny"],
+    description: "Hilarious pet moments guaranteed to make you smile"
+  },
+  {
+    id: "5",
+    title: "Meditation & Positive Affirmations",
+    platform: "youtube",
+    embedUrl: "https://www.youtube.com/embed/vmEcsMG7oxE",
+    category: ["uplifting"],
+    description: "Guided meditation with positive affirmations for inner peace"
   }
 ];
 
@@ -79,7 +98,9 @@ export default function FindYourCalm() {
   const [activeTab, setActiveTab] = useState<TabType | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<VideoCategory>("all");
   const [playingSound, setPlayingSound] = useState<string | null>(null);
+  const [selectedGame, setSelectedGame] = useState<'bubble' | 'color' | null>('bubble');
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
+  const { isAuthenticated } = useAuth();
 
   const filteredVideos = selectedCategory === "all" 
     ? VIDEOS 
@@ -259,26 +280,53 @@ export default function FindYourCalm() {
         {/* Games Tab */}
         {activeTab === "games" && (
           <div className="animate-in fade-in duration-500" data-testid="content-games">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[1, 2, 3, 4].map((num) => (
-                <div
-                  key={num}
-                  className="bg-gradient-to-br from-cream-100 to-blush-50 rounded-xl p-8 text-center border-2 border-dashed border-blush-200"
-                  data-testid={`game-card-${num}`}
-                >
-                  <div className="text-5xl mb-4">🎮</div>
-                  <h3 className="text-lg font-semibold text-warm-gray-700 mb-2">
-                    Relaxing Game #{num}
-                  </h3>
-                  <p className="text-sm text-warm-gray-600 mb-4">
-                    A calming game experience to help you unwind
-                  </p>
-                  <div className="inline-block px-4 py-2 bg-blush-200 text-warm-gray-700 rounded-lg font-medium">
-                    Coming Soon
-                  </div>
-                </div>
-              ))}
+            {/* Game Selection */}
+            <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
+              <button
+                onClick={() => setSelectedGame('bubble')}
+                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
+                  selectedGame === 'bubble'
+                    ? "bg-blush-300 text-white"
+                    : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
+                }`}
+                data-testid="select-bubble-pop"
+              >
+                🫧 Bubble Pop
+              </button>
+              <button
+                onClick={() => setSelectedGame('color')}
+                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
+                  selectedGame === 'color'
+                    ? "bg-blush-300 text-white"
+                    : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
+                }`}
+                data-testid="select-color-drift"
+              >
+                🎨 Color Drift
+              </button>
+              <button
+                className="px-4 py-2 rounded-lg whitespace-nowrap bg-gray-100 text-gray-400 cursor-not-allowed flex items-center gap-2"
+                disabled
+                data-testid="locked-game-3"
+              >
+                <Lock size={14} />
+                Memory Match
+                {!isAuthenticated && <span className="text-xs">(Sign up)</span>}
+              </button>
+              <button
+                className="px-4 py-2 rounded-lg whitespace-nowrap bg-gray-100 text-gray-400 cursor-not-allowed flex items-center gap-2"
+                disabled
+                data-testid="locked-game-4"
+              >
+                <Lock size={14} />
+                Zen Garden
+                {!isAuthenticated && <span className="text-xs">(Sign up)</span>}
+              </button>
             </div>
+
+            {/* Active Game */}
+            {selectedGame === 'bubble' && <BubblePop />}
+            {selectedGame === 'color' && <ColorDrift />}
           </div>
         )}
 
