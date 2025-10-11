@@ -20,6 +20,7 @@ export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUserStreak(userId: string): Promise<User | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -161,6 +162,52 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  async updateUserStreak(userId: string): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (!user) return undefined;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    let newStreak = 1;
+    let newLongestStreak = user.longestStreak || 0;
+
+    if (user.lastPostDate) {
+      const lastPost = new Date(user.lastPostDate);
+      const lastPostDay = new Date(lastPost.getFullYear(), lastPost.getMonth(), lastPost.getDate());
+      const diffDays = Math.floor((today.getTime() - lastPostDay.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0) {
+        // Posted today already - maintain current streak
+        newStreak = user.currentStreak || 1;
+      } else if (diffDays === 1) {
+        // Posted yesterday - increment streak
+        newStreak = (user.currentStreak || 0) + 1;
+      } else {
+        // Gap > 1 day - reset streak
+        newStreak = 1;
+      }
+    }
+
+    // Update longest streak if current streak is higher
+    if (newStreak > newLongestStreak) {
+      newLongestStreak = newStreak;
+    }
+
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        currentStreak: newStreak,
+        longestStreak: newLongestStreak,
+        lastPostDate: now,
+        updatedAt: now,
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    return updatedUser;
   }
 }
 

@@ -95,6 +95,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertMessageSchema.parse(messageData);
       const message = await storage.createMessage(validatedData);
       
+      // Update user streak if authenticated
+      if (userId) {
+        await storage.updateUserStreak(userId);
+      }
+      
       res.json({ success: true, message });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
