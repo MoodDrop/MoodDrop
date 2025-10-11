@@ -97,6 +97,7 @@ Preferred communication style: Simple, everyday language.
 - **Message Status Management**: Flag messages with reasons, hide inappropriate content, or restore
 - **Review Tracking**: Track which admin reviewed messages and when, with flag reasons
 - **Audio Playback**: Direct audio file serving for voice message review
+- **Access**: Admin dashboard accessible only via direct URL (/admin) - no public navigation link
 
 ### UI/UX Design
 - **Mobile-First**: Responsive design optimized for mobile devices
@@ -108,14 +109,19 @@ Preferred communication style: Simple, everyday language.
 - **Comfort Corner**: Integrated inspirational quotes, coping strategies, and crisis resources
 - **Affirmation System**: Supportive messages displayed after sharing feelings, with smart keyword matching and gentle animations in MoodDrop's signature blush/cream color palette
 - **GardenIllustration Component**: Animated flower illustration for empty garden states with three blooming flowers (blush pink, cream/peach, soft rose) and sage green stems/leaves. Features 1.8s staggered grow animations and gentle leaf swaying for a welcoming, calming visual
+- **Footer Design**: Contact Us section prominently displays mooddrops2@gmail.com. Important Disclaimer and Support Resources are organized in a responsive 2-column grid layout that stacks on mobile devices
 
 ### Wellbeing Features (Comfort Page)
 - **Inspirational Quotes**: Rotating collection of uplifting quotes with manual refresh option
 - **Coping Strategies**: 6 practical techniques including deep breathing, grounding, and mindfulness
 - **Crisis Resources**: Emergency support contacts including suicide prevention and crisis text lines
 - **Find Your Calm**: Interactive tab system with three activities:
-  - **Watch & Smile**: Curated uplifting videos from YouTube/TikTok with category filtering (funny, uplifting, storytimes), responsive 16:9 aspect ratio, and lazy loading
-  - **Games**: Placeholder cards for future relaxing games (coming soon)
+  - **Watch & Smile**: 5 uplifting YouTube videos (nature, baby animals, kindness, pets, meditation) with category filtering (All, Funny, Uplifting, Storytimes), responsive 16:9 aspect ratio, and lazy loading
+  - **Games**: Interactive calming games with both desktop and mobile touch support
+    - **Bubble Pop** (Free): Canvas-based stress relief game - click/tap rising bubbles to pop them and increase score
+    - **Color Drift** (Free): Color matching game - match the target color from 3 orb choices with instant feedback
+    - **Memory Match** (Locked): Requires sign-up to unlock
+    - **Zen Garden** (Locked): Requires sign-up to unlock
   - **Soothing Sounds**: Ambient audio players (rain, ocean, forest, fireplace) with play/pause controls
 - **Daily Wellbeing Tips**: Guidance on morning routines, hydration, sleep, and social connection
 - **Professional Help Information**: Resources for finding qualified mental health professionals
