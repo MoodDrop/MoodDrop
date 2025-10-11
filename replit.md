@@ -63,6 +63,7 @@ Preferred communication style: Simple, everyday language.
 - **Crisis Resources**: Emergency support contacts including suicide prevention and crisis text lines
 - **Daily Wellbeing Tips**: Guidance on morning routines, hydration, sleep, and social connection
 - **Professional Help Information**: Resources for finding qualified mental health professionals
+- **Watch & Smile Videos**: Curated uplifting videos from YouTube/TikTok with category filtering (funny, uplifting, storytimes) to brighten mood
 
 ## Data Flow
 
@@ -103,7 +104,7 @@ Preferred communication style: Simple, everyday language.
 ### File Structure
 ```
 ├── client/          # React frontend application
-│   ├── src/pages/   # Application pages (home, venting, comfort, admin)
+│   ├── src/pages/   # Application pages (home, release, comfort, videos, admin)
 │   └── src/components/ # Reusable components (comfort-corner, emotion-tags, etc.)
 ├── server/          # Express backend application  
 ├── shared/          # Shared TypeScript types and schemas
