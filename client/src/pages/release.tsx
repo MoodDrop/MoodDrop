@@ -182,7 +182,7 @@ export default function Release() {
   const canSubmit =
     !!emotion &&
     (content.trim().length > 0 || !!audioBlob) &&
-    !submitMutation.isLoading &&
+    !submitMutation.isPending &&
     !isRecording;
 
   const onSubmit: React.FormEventHandler = async (e) => {
@@ -210,9 +210,9 @@ export default function Release() {
       {/* Header / Back */}
       <div className="mb-6 flex items-center justify-between">
         <Link href="/">
-          <a className="text-sm text-warm-gray-500 hover:text-warm-gray-700 transition">
+          <span className="text-sm text-warm-gray-500 hover:text-warm-gray-700 transition cursor-pointer">
             ← Back home
-          </a>
+          </span>
         </Link>
         <h1 className="text-lg font-semibold text-warm-gray-800">Share Your Feelings</h1>
       </div>
@@ -318,13 +318,13 @@ export default function Release() {
         <div className="flex items-center gap-3">
           <button
             type="submit"
-            disabled={!emotion || (!content.trim() && !audioBlob) || submitMutation.isLoading || isRecording}
+            disabled={!emotion || (!content.trim() && !audioBlob) || submitMutation.isPending || isRecording}
             className={`px-4 py-2 rounded-lg text-white transition
               ${(!emotion || (!content.trim() && !audioBlob) || isRecording)
                 ? "bg-warm-gray-300 cursor-not-allowed"
                 : "bg-blush-400 hover:bg-blush-500"}`}
           >
-            {submitMutation.isLoading ? "Sharing…" : "Share"}
+            {submitMutation.isPending ? "Sharing…" : "Share"}
           </button>
 
           <p className="text-xs text-warm-gray-500">

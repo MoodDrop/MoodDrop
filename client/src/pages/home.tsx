@@ -1,5 +1,4 @@
 import { Link } from "wouter";
-import ComfortCorner from "@/components/comfort-corner";
 import dropletIcon from "@assets/Droplet_1760186315979.png";
 
 export default function Home() {
@@ -18,7 +17,26 @@ export default function Home() {
         A safe, anonymous space to breathe, release, and let it all drop — one mood at a time.
       </p>
 
-      <ComfortCorner />
+      <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+        <Link href="/release">
+          <button 
+            className="bg-blush-300 hover:bg-blush-400 text-white font-medium px-8 py-4 rounded-xl transition-all shadow-md hover:shadow-lg"
+            data-testid="button-share-feelings"
+          >
+            <span className="mr-2">💭</span>
+            Share Your Feelings
+          </button>
+        </Link>
+        <Link href="/comfort">
+          <button 
+            className="bg-cream-200 hover:bg-cream-300 text-warm-gray-700 font-medium px-8 py-4 rounded-xl transition-all shadow-md hover:shadow-lg"
+            data-testid="button-comfort"
+          >
+            <span className="mr-2">🤗</span>
+            Need Comfort?
+          </button>
+        </Link>
+      </div>
     </div>
   );
 }
