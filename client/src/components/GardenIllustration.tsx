@@ -2,13 +2,13 @@ export default function GardenIllustration() {
   return (
     <div className="relative w-32 h-32 mx-auto mb-6">
       {/* Circle background with arrow */}
-      <svg className="w-32 h-32 absolute inset-0 text-warm-gray-300" fill="currentColor" viewBox="0 0 100 100">
+      <svg className="w-32 h-32 absolute inset-0 text-warm-gray-300" fill="currentColor" viewBox="0 0 100 100" aria-hidden="true" role="presentation">
         <circle cx="50" cy="50" r="45" opacity="0.2" />
         <path d="M50 20 L50 45 M35 35 L50 45 L65 35" stroke="currentColor" strokeWidth="3" fill="none" />
       </svg>
 
       {/* Animated Flowers - positioned inside the circle */}
-      <svg className="w-32 h-32 absolute inset-0" viewBox="0 0 100 100">
+      <svg className="w-32 h-32 absolute inset-0" viewBox="0 0 100 100" aria-hidden="true" role="presentation">
         {/* Left Flower - Blush Pink */}
         <g className="animate-flower-grow" style={{ transformOrigin: '30px 65px', animationDelay: '0.2s' }}>
           <path d="M30 65 Q30 55 30 50" stroke="#86EFAC" strokeWidth="2" fill="none" />
