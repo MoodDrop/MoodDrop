@@ -1,8 +1,8 @@
-# Hushed Haven - Anonymous Emotional Expression Platform
+# MoodDrop - Emotional Wellness & Growth Platform
 
 ## Overview
 
-Hushed Haven is a full-stack web application that provides a safe, anonymous space for users to express their emotions through text or voice messages. Whether experiencing joy, excitement, sadness, anger, anxiety, or any other feeling, users can share freely in this judgment-free zone. The platform features a clean mobile-first design with comprehensive admin moderation tools and persistent PostgreSQL database storage for production reliability.
+MoodDrop is a full-stack web application that provides a safe space for users to express their emotions through text or voice messages. The platform has evolved from anonymous-only to supporting user accounts while maintaining anonymous posting capability. Users share feelings, receive supportive affirmations, access comfort resources, and watch their emotional journey bloom in a visual Mood Garden. The platform features a clean mobile-first design, comprehensive admin moderation tools, engagement features (streaks, insights, favorites), and persistent PostgreSQL database storage for production reliability.
 
 ## User Preferences
 
@@ -27,19 +27,66 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage
 - **Database**: PostgreSQL with Drizzle ORM (Neon serverless)
-- **Schema**: Enhanced messages table with moderation fields (status, flagReason, reviewedBy, reviewedAt)
-- **Storage Class**: DatabaseStorage with advanced filtering and bulk operations
+- **Schema**: 
+  - Messages table: emotion, type, content, userId (optional), isFavorite, status, moderation fields
+  - Users table: email, firstName, lastName, profileImageUrl, currentStreak, longestStreak, lastPostDate
+  - Sessions table: Replit Auth session management
+  - Admins table: Admin authentication
+- **Storage Class**: DatabaseStorage with advanced filtering, bulk operations, streak tracking, and favorites
 - **File Storage**: Local filesystem for audio files in uploads/audio directory
 - **Migration**: Drizzle Kit for database schema management
 
 ## Key Components
 
+### Authentication System
+- **Replit Auth Integration**: Full OAuth support with Google, GitHub, Apple, X, and email/password login
+- **User Management**: Automatic user creation and session management
+- **Landing Page**: Beautiful onboarding experience for logged-out users
+- **Dual Mode**: Support for both authenticated users and anonymous posting
+- **Session Storage**: PostgreSQL-backed session persistence
+
 ### Message System
 - **Emotion Tagging**: Users categorize messages as angry, sad, anxious, happy, excited, or other
 - **Dual Input Methods**: Text messages (500 char limit) or voice recordings
 - **Voice Processing**: WebM audio format with duration tracking
-- **Anonymous Storage**: No user identification or session tracking
+- **User Linking**: Messages automatically linked to authenticated users (optional for anonymous)
 - **Affirmation Feedback**: After submission, users receive a supportive affirmation message tailored to their content with keyword matching (e.g., "tired" → rest encouragement). Affirmations display for 8 seconds in a beautifully styled card with fade-in animation
+- **Favorites System**: Users can bookmark meaningful messages for later reflection
+
+### Mood Garden - Visual Growth System
+- **Visual Elements**: Three types - Droplets 💧, Flowers 🌸, and Trees 🌳 that alternate for variety
+- **Color-Coded Emotions**:
+  - 💙 Blue (#60A5FA): Calm, Peaceful
+  - 💗 Pink (#F9A8D4): Happy, Excited, Hopeful
+  - 💛 Gold (#FCD34D): Proud, Accomplished
+  - 🩶 Gray (#D1D5DB): Sad, Tired, Overwhelmed
+  - 🧡 Orange (#FB923C): Anxious, Angry, Frustrated
+  - 💜 Purple (#C4B5FD): Other emotions
+- **Growth Animations**: Staggered fade-in and zoom effects as elements appear
+- **Interactive**: Hover over elements to see emotion and date
+- **Empty State**: Encouraging message when no blooms exist yet
+
+### Engagement Features
+- **Streak Tracking**: 
+  - Automatic daily streak calculation based on posting patterns
+  - Current streak with flame icon 🔥
+  - Longest streak record with trophy icon 🏆
+  - Motivational messages based on streak length
+  - Updates automatically on message submission
+- **Mood Calendar**: 
+  - Last 30 days visualization
+  - Color-coded entries by dominant emotion
+  - Hover tooltips showing entry counts
+  - GitHub-style contribution graph layout
+- **Insights Dashboard**:
+  - Emotion distribution with percentage bars
+  - Activity summary (7-day and 30-day counts)
+  - Personalized insights based on patterns
+  - Trend analysis and encouragement
+- **Favorites System**:
+  - Bookmark meaningful messages with heart icon
+  - Quick access from dashboard
+  - Toggle favorite status on any message
 
 ### Professional Admin Moderation System
 - **Authentication**: Simple username/password system (default: admin/hushed2024)
@@ -56,7 +103,7 @@ Preferred communication style: Simple, everyday language.
 - **Accessibility**: Proper semantic HTML and ARIA labels
 - **Toast Notifications**: User feedback for actions and errors
 - **Progressive Enhancement**: Works without JavaScript for basic functionality
-- **Navigation**: Clean header with "Home • Drop What You're Holding • Find Your Calm" navigation. Home page features "Let It Flow" and "Take A Moment" buttons for distinct, inviting navigation
+- **Navigation**: Clean header with "Home • Drop What You're Holding • My Garden • Find Your Calm" navigation. Logout button for authenticated users
 - **Tab System**: Smooth fade-in transitions between tab content for a calming user experience
 - **Comfort Corner**: Integrated inspirational quotes, coping strategies, and crisis resources
 - **Affirmation System**: Supportive messages displayed after sharing feelings, with smart keyword matching and gentle animations in MoodDrop's signature blush/cream color palette
@@ -111,9 +158,13 @@ Preferred communication style: Simple, everyday language.
 ### File Structure
 ```
 ├── client/          # React frontend application
-│   ├── src/pages/   # Application pages (home, release, comfort with videos, admin)
-│   └── src/components/ # Reusable components (comfort-corner, emotion-tags, etc.)
+│   ├── src/pages/   # Application pages (landing, dashboard, garden, release, comfort, admin)
+│   └── src/components/ # Reusable components (streak-display, mood-calendar, insights-dashboard, etc.)
+│   └── src/lib/     # Utilities (gardenColors, affirmations, authUtils, etc.)
 ├── server/          # Express backend application  
+│   ├── replitAuth.ts # Replit Auth integration
+│   ├── storage.ts   # Database operations with streak tracking and favorites
+│   └── routes.ts    # API endpoints
 ├── shared/          # Shared TypeScript types and schemas
 ├── uploads/         # Audio file storage (created at runtime)
 ├── dist/            # Production build output
@@ -124,6 +175,7 @@ Preferred communication style: Simple, everyday language.
 - **Input Validation**: Zod schemas for data validation
 - **File Upload Limits**: 10MB max file size for audio
 - **Content Moderation**: Admin dashboard for content review
-- **No User Tracking**: Completely anonymous message system
+- **User Privacy**: Optional authentication with Replit Auth, anonymous posting still supported
+- **Session Security**: PostgreSQL-backed session management
 
-The application emphasizes simplicity, emotional safety, and ease of use while maintaining the ability to moderate content when necessary.
+The application emphasizes simplicity, emotional safety, and ease of use while providing engaging features for users to track their emotional wellness journey and see their growth over time.
