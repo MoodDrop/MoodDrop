@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { PlayCircle, Sparkles, Laugh, Heart, Play, Pause, Gamepad2 } from "lucide-react";
-import relaxingWomanImage from "@assets/stock_images/minimalist_flat_illu_fe13d7e9.jpg";
+import relaxingWomanImage from "@assets/stock_images/woman_relaxing_chair_620dca74.jpg";
 
 type TabType = "videos" | "games" | "sounds";
 type VideoCategory = "all" | "funny" | "uplifting" | "storytimes";
@@ -343,8 +343,9 @@ export default function FindYourCalm() {
             <div className="flex justify-center mb-6">
               <img 
                 src={relaxingWomanImage} 
-                alt="Woman relaxing peacefully" 
+                alt="Woman relaxing on chair with phone in hand" 
                 className="w-72 sm:w-80 md:w-96 h-auto max-w-full rounded-3xl shadow-2xl shadow-blush-200/50"
+                data-testid="illustration-relaxing"
               />
             </div>
             <p className="text-warm-gray-600">
