@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Heart, Home } from "lucide-react";
+import dropletIcon from "@assets/Droplet_1760186315979.png";
 
 export default function Header() {
   const [location] = useLocation();
@@ -9,8 +10,8 @@ export default function Header() {
       <div className="flex items-center justify-between">
         <Link href="/">
           <div className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 bg-blush-300 rounded-full flex items-center justify-center">
-              <Heart className="text-white" size={16} />
+            <div className="w-8 h-8 flex items-center justify-center">
+              <img src={dropletIcon} alt="Droplet" className="w-8 h-8" />
             </div>
             <span className="text-lg font-semibold text-warm-gray-700">
               MoodDrop

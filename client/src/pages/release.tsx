@@ -1,374 +1,345 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
+import { useMutation } from "@tanstack/react-query";
 
-type Mode = "quick" | "guided" | "letter";
+/**
+ * Release (Share Your Feelings) page
+ * - Emoji selector
+ * - Text area
+ * - Voice note (MediaRecorder) w/ preview + delete
+ * - Submits to /api/messages as multipart/form-data:
+ *   { emotion, content, audio (optional Blob), audioDurationMs (optional) }
+ *
+ * Notes:
+ * - Recording time limit ~120s (VOICE_MAX_MS)
+ * - Shows simple alerts for success/failure; you can replace with toasts.
+ */
 
-const MAX_QUICK = 280;
+type SubmitPayload = {
+  emotion: string;
+  content: string;
+  audioBlob?: Blob | null;
+  audioDurationMs?: number;
+};
 
-const GUIDED_PROMPTS = [
-  {
-    id: "stressor",
-    title: "Name the stressor",
-    prompt:
-      "What happened? Stick to the facts first. Where were you, who was involved, and what kicked this off?",
-    followUps: [
-      "What part of this do you control vs. don’t control?",
-      "What would you tell a friend in the same situation?"
-    ],
-  },
-  {
-    id: "reframe",
-    title: "Reframe the story",
-    prompt:
-      "What meaning am I giving this? Try writing a second, kinder interpretation.",
-    followUps: [
-      "If this is temporary, what does ‘temporary’ look like?",
-      "What small step would make things 1% better?"
-    ],
-  },
-  {
-    id: "needs",
-    title: "Needs behind the feeling",
-    prompt:
-      "Underneath my feeling, what need isn’t being met (e.g., rest, respect, clarity, support)?",
-    followUps: [
-      "What’s one way I can ask for or give myself that need?",
-      "What boundary would protect that need next time?"
-    ],
-  },
+const EMOJI_CHOICES = [
+  { emoji: "😊", name: "Joy" },
+  { emoji: "🙂", name: "Calm" },
+  { emoji: "😔", name: "Sad" },
+  { emoji: "😤", name: "Frustrated" },
+  { emoji: "😡", name: "Angry" },
+  { emoji: "😰", name: "Anxious" },
+  { emoji: "🥱", name: "Tired" },
+  { emoji: "😕", name: "Confused" },
 ];
 
-export default function ReleasePage() {
-  const [mode, setMode] = useState<Mode>("quick");
+const VOICE_MAX_MS = 120_000; // 2 minutes
 
-  // --- Quick Release ---
-  const [quickText, setQuickText] = useState("");
-  const quickCount = useMemo(() => quickText.length, [quickText]);
+export default function Release() {
+  // form state
+  const [emotion, setEmotion] = useState<string>("");
+  const [content, setContent] = useState<string>("");
 
-  // --- Guided ---
-  const [guidedId, setGuidedId] = useState(GUIDED_PROMPTS[0].id);
-  const selected = useMemo(
-    () => GUIDED_PROMPTS.find((p) => p.id === guidedId)!,
-    [guidedId]
-  );
-  const [guidedNotes, setGuidedNotes] = useState("");
+  // voice note state
+  const [permissionError, setPermissionError] = useState<string>("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string>("");
+  const [audioDurationMs, setAudioDurationMs] = useState<number>(0);
+  const [elapsedMs, setElapsedMs] = useState<number>(0);
 
-  // --- Open Letter ---
-  const [toWhom, setToWhom] = useState("");
-  const [letter, setLetter] = useState("");
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const tickTimerRef = useRef<number | null>(null);
+  const hardLimitTimerRef = useRef<number | null>(null);
+  const startedAtRef = useRef<number>(0);
 
-  // draft persistence (local only)
+  // clean up object URL when blob changes
   useEffect(() => {
-    const drafts = localStorage.getItem("release:drafts");
-    if (!drafts) return;
-    try {
-      const parsed = JSON.parse(drafts);
-      setQuickText(parsed.quickText ?? "");
-      setGuidedId(parsed.guidedId ?? GUIDED_PROMPTS[0].id);
-      setGuidedNotes(parsed.guidedNotes ?? "");
-      setToWhom(parsed.toWhom ?? "");
-      setLetter(parsed.letter ?? "");
-    } catch {}
+    return () => {
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      stopAllTracks();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const saveDraft = () => {
-    localStorage.setItem(
-      "release:drafts",
-      JSON.stringify({ quickText, guidedId, guidedNotes, toWhom, letter })
-    );
+  // tick timer display
+  useEffect(() => {
+    if (!isRecording) return;
+    const tick = () => {
+      const now = Date.now();
+      const ms = now - startedAtRef.current;
+      setElapsedMs(ms);
+    };
+    tick();
+    const id = window.setInterval(tick, 250);
+    tickTimerRef.current = id as unknown as number;
+    return () => window.clearInterval(id);
+  }, [isRecording]);
+
+  const stopAllTracks = () => {
+    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+    mediaStreamRef.current = null;
   };
 
-  const clearAll = () => {
-    setQuickText("");
-    setGuidedNotes("");
-    setToWhom("");
-    setLetter("");
-    localStorage.removeItem("release:drafts");
+  const requestMic = async () => {
+    try {
+      setPermissionError("");
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      return stream;
+    } catch (e) {
+      setPermissionError(
+        "Microphone access was denied. You can still write your feelings, or allow mic access to add a voice note."
+      );
+      throw e;
+    }
   };
 
-  const submitQuick = () => {
-    if (!quickText.trim()) return;
-    stashEntry({
-      type: "quick",
-      title: "Quick Release",
-      content: quickText.trim(),
-    });
-    setQuickText("");
+  const startRecording = async () => {
+    // reset prior audio
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl("");
+    }
+    setAudioBlob(null);
+    setAudioDurationMs(0);
+
+    const stream = mediaStreamRef.current ?? (await requestMic());
+
+    const mr = new MediaRecorder(stream, { mimeType: pickMimeType() });
+    chunksRef.current = [];
+    mr.ondataavailable = (evt) => {
+      if (evt.data && evt.data.size > 0) chunksRef.current.push(evt.data);
+    };
+    mr.onstop = () => {
+      const blob = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
+      const url = URL.createObjectURL(blob);
+      setAudioBlob(blob);
+      setAudioUrl(url);
+      setIsRecording(false);
+      // derive duration from elapsed
+      setAudioDurationMs(elapsedMs);
+      // clear timers
+      if (tickTimerRef.current) window.clearInterval(tickTimerRef.current);
+      if (hardLimitTimerRef.current) window.clearTimeout(hardLimitTimerRef.current);
+      stopAllTracks();
+    };
+
+    mr.start(250); // gather data every 250ms
+    mediaRecorderRef.current = mr;
+    startedAtRef.current = Date.now();
+    setElapsedMs(0);
+    setIsRecording(true);
+
+    // hard stop at VOICE_MAX_MS
+    hardLimitTimerRef.current = window.setTimeout(() => {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+        mediaRecorderRef.current.stop();
+      }
+    }, VOICE_MAX_MS) as unknown as number;
   };
 
-  const submitGuided = () => {
-    if (!guidedNotes.trim()) return;
-    stashEntry({
-      type: "guided",
-      title: selected.title,
-      content: `${selected.prompt}\n\n${guidedNotes.trim()}`,
-    });
-    setGuidedNotes("");
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
   };
 
-  const submitLetter = () => {
-    if (!letter.trim()) return;
-    const to = toWhom.trim() || "Open Letter";
-    stashEntry({ type: "letter", title: `Letter to ${to}`, content: letter.trim() });
-    setLetter("");
-    setToWhom("");
+  const deleteVoice = () => {
+    if (audioUrl) URL.revokeObjectURL(audioUrl);
+    setAudioUrl("");
+    setAudioBlob(null);
+    setAudioDurationMs(0);
   };
 
-  // store in local history (private)
-  const stashEntry = (entry: { type: string; title: string; content: string }) => {
-    const key = "release:history";
-    const prev = JSON.parse(localStorage.getItem(key) || "[]");
-    prev.unshift({
-      ...entry,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-    });
-    localStorage.setItem(key, JSON.stringify(prev.slice(0, 100))); // keep last 100
+  const pickMimeType = () => {
+    // Use a broadly supported type
+    if (MediaRecorder.isTypeSupported("audio/webm")) return "audio/webm";
+    if (MediaRecorder.isTypeSupported("audio/ogg")) return "audio/ogg";
+    return "";
+  };
+
+  const submitMutation = useMutation({
+    mutationFn: async (data: SubmitPayload) => {
+      const form = new FormData();
+      form.append("emotion", data.emotion || "unspecified");
+      form.append("content", data.content || "");
+
+      if (data.audioBlob) {
+        // Name file with timestamp; backend can ignore or save for 24h policy
+        form.append("audio", data.audioBlob, `voicenote-${Date.now()}.webm`);
+        form.append("audioDurationMs", String(data.audioDurationMs ?? 0));
+      }
+
+      const res = await fetch("/api/messages", { method: "POST", body: form });
+      if (!res.ok) throw new Error("Failed to submit message");
+      return res.json().catch(() => ({}));
+    },
+  });
+
+  const canSubmit =
+    !!emotion &&
+    (content.trim().length > 0 || !!audioBlob) &&
+    !submitMutation.isLoading &&
+    !isRecording;
+
+  const onSubmit: React.FormEventHandler = async (e) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    try {
+      await submitMutation.mutateAsync({
+        emotion,
+        content,
+        audioBlob: audioBlob ?? undefined,
+        audioDurationMs,
+      });
+      // reset form
+      setEmotion("");
+      setContent("");
+      deleteVoice();
+      alert("Thanks for sharing. Your voice matters. 🌿");
+    } catch {
+      alert("Sorry — something went wrong. Please try again.");
+    }
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <header className="mb-6">
-        <h1 className="text-3xl font-semibold">Release Space</h1>
-        <p className="mt-2 text-sm text-gray-500">
-          Offload your thoughts privately. Nothing here is shared — everything stays on your device.
-        </p>
-        <div className="mt-3 text-sm">
-          Having a rough moment? Try some{" "}
-          <Link to="/comfort" className="text-blue-600 underline">
-            calming sounds
-          </Link>{" "}
-          before or after you write.
-        </div>
-      </header>
-
-      {/* Mode Tabs */}
-      <div className="mb-6 flex gap-2">
-        <TabButton active={mode === "quick"} onClick={() => setMode("quick")}>
-          Quick Release
-        </TabButton>
-        <TabButton active={mode === "guided"} onClick={() => setMode("guided")}>
-          Guided Prompt
-        </TabButton>
-        <TabButton active={mode === "letter"} onClick={() => setMode("letter")}>
-          Open Letter
-        </TabButton>
+    <div className="mx-auto max-w-2xl px-6 py-8">
+      {/* Header / Back */}
+      <div className="mb-6 flex items-center justify-between">
+        <Link href="/">
+          <a className="text-sm text-warm-gray-500 hover:text-warm-gray-700 transition">
+            ← Back home
+          </a>
+        </Link>
+        <h1 className="text-lg font-semibold text-warm-gray-800">Share Your Feelings</h1>
       </div>
 
-      {/* Panels */}
-      {mode === "quick" && (
-        <section className="rounded-lg border p-4">
-          <p className="mb-2 text-sm text-gray-600">
-            Type it, breathe it out, and let the page hold it for you.
-          </p>
-          <textarea
-            className="h-40 w-full resize-none rounded border p-3 outline-none focus:ring"
-            placeholder="What do you want to release?"
-            maxLength={MAX_QUICK}
-            value={quickText}
-            onChange={(e) => setQuickText(e.target.value)}
-          />
-          <div className="mt-2 flex items-center justify-between text-sm">
-            <span className={quickCount >= MAX_QUICK ? "text-red-600" : "text-gray-500"}>
-              {quickCount}/{MAX_QUICK}
-            </span>
-            <div className="flex gap-2">
-              <Button variant="ghost" onClick={saveDraft}>
-                Save draft
-              </Button>
-              <Button variant="ghost" onClick={clearAll}>
-                Clear
-              </Button>
-              <Button onClick={submitQuick} disabled={!quickText.trim()}>
-                Release
-              </Button>
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Emoji Picker */}
+      <section className="mb-8">
+        <h3 className="text-warm-gray-700 font-medium mb-2">How are you feeling?</h3>
 
-      {mode === "guided" && (
-        <section className="rounded-lg border p-4">
-          <div className="mb-3">
-            <label className="mb-1 block text-sm font-medium">Choose a prompt</label>
-            <select
-              className="w-full rounded border p-2"
-              value={guidedId}
-              onChange={(e) => setGuidedId(e.target.value)}
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 justify-items-center">
+          {EMOJI_CHOICES.map((e) => (
+            <button
+              key={e.name}
+              type="button"
+              onClick={() => setEmotion(e.emoji)}
+              className={`h-12 w-12 rounded-full border transition 
+                ${emotion === e.emoji
+                  ? "border-blush-400 ring-2 ring-blush-200"
+                  : "border-warm-gray-200 hover:border-warm-gray-300"}`}
+              aria-label={e.name}
+              title={e.name}
             >
-              {GUIDED_PROMPTS.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.title}
-                </option>
-              ))}
-            </select>
-          </div>
+              <span className="text-2xl">{e.emoji}</span>
+            </button>
+          ))}
+        </div>
 
-          <div className="mb-2 rounded bg-gray-50 p-3 text-sm">
-            <p className="font-medium">{selected.title}</p>
-            <p className="text-gray-600">{selected.prompt}</p>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-gray-600">
-              {selected.followUps.map((q, i) => (
-                <li key={i}>{q}</li>
-              ))}
-            </ul>
-          </div>
+        {emotion && (
+          <p className="mt-2 text-sm text-warm-gray-500">
+            Selected: <span className="text-base">{emotion}</span>
+          </p>
+        )}
+      </section>
 
+      {/* Input + Voice */}
+      <form onSubmit={onSubmit} className="space-y-6">
+        {/* Text area */}
+        <div>
+          <label className="block text-sm font-medium text-warm-gray-700">
+            Write it out (only you can see this)
+          </label>
           <textarea
-            className="h-48 w-full resize-none rounded border p-3 outline-none focus:ring"
-            placeholder="Write your reflection here…"
-            value={guidedNotes}
-            onChange={(e) => setGuidedNotes(e.target.value)}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={6}
+            placeholder="Let it all drop here — one mood at a time."
+            className="w-full rounded-lg border border-warm-gray-200 focus:ring-2 focus:ring-blush-300 focus:outline-none px-4 py-3 text-warm-gray-800 placeholder-warm-gray-400"
           />
+        </div>
 
-          <div className="mt-2 flex items-center justify-end gap-2">
-            <Button variant="ghost" onClick={saveDraft}>
-              Save draft
-            </Button>
-            <Button variant="ghost" onClick={clearAll}>
-              Clear
-            </Button>
-            <Button onClick={submitGuided} disabled={!guidedNotes.trim()}>
-              Release
-            </Button>
-          </div>
-        </section>
-      )}
-
-      {mode === "letter" && (
-        <section className="rounded-lg border p-4">
-          <div className="mb-3">
-            <label className="mb-1 block text-sm font-medium">Who is this for?</label>
-            <input
-              className="w-full rounded border p-2"
-              placeholder='e.g., “Past Me”, “The Situation”, or leave blank'
-              value={toWhom}
-              onChange={(e) => setToWhom(e.target.value)}
-            />
+        {/* Voice note controls */}
+        <div className="rounded-lg border border-warm-gray-200 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-warm-gray-700">Add a voice note (optional)</span>
+            <span className="text-xs text-warm-gray-500">
+              {isRecording
+                ? `Recording… ${formatMs(elapsedMs)} / ${formatMs(VOICE_MAX_MS)}`
+                : audioBlob
+                ? `Recorded: ${formatMs(audioDurationMs)}`
+                : "Up to 2 minutes"}
+            </span>
           </div>
 
-          <textarea
-            className="h-56 w-full resize-none rounded border p-3 outline-none focus:ring"
-            placeholder="Write your open letter… say everything you need to say."
-            value={letter}
-            onChange={(e) => setLetter(e.target.value)}
-          />
+          {permissionError && (
+            <p className="text-xs text-red-500 mb-2">{permissionError}</p>
+          )}
 
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-            <div className="text-sm text-gray-500">
-              Optional ritual: after releasing, you can delete it, keep it, or export it as a note.
-            </div>
-            <div className="flex gap-2">
-              <Button variant="ghost" onClick={saveDraft}>
-                Save draft
-              </Button>
-              <Button variant="ghost" onClick={clearAll}>
-                Clear
-              </Button>
-              <Button onClick={submitLetter} disabled={!letter.trim()}>
-                Release
-              </Button>
-            </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            {!isRecording && (
+              <button
+                type="button"
+                onClick={startRecording}
+                className="px-4 py-2 rounded-lg bg-blush-400 hover:bg-blush-500 text-white transition disabled:opacity-60"
+                disabled={isRecording}
+              >
+                ● Start recording
+              </button>
+            )}
+            {isRecording && (
+              <button
+                type="button"
+                onClick={stopRecording}
+                className="px-4 py-2 rounded-lg bg-cream-200 hover:bg-cream-300 text-warm-gray-800 transition"
+              >
+                ■ Stop
+              </button>
+            )}
+            {audioBlob && !isRecording && (
+              <>
+                <audio controls src={audioUrl} className="h-10" />
+                <button
+                  type="button"
+                  onClick={deleteVoice}
+                  className="px-3 py-2 rounded-lg bg-warm-gray-200 hover:bg-warm-gray-300 text-warm-gray-800 transition"
+                >
+                  Delete voice note
+                </button>
+              </>
+            )}
           </div>
-        </section>
-      )}
+        </div>
 
-      <History />
+        {/* Submit */}
+        <div className="flex items-center gap-3">
+          <button
+            type="submit"
+            disabled={!emotion || (!content.trim() && !audioBlob) || submitMutation.isLoading || isRecording}
+            className={`px-4 py-2 rounded-lg text-white transition
+              ${(!emotion || (!content.trim() && !audioBlob) || isRecording)
+                ? "bg-warm-gray-300 cursor-not-allowed"
+                : "bg-blush-400 hover:bg-blush-500"}`}
+          >
+            {submitMutation.isLoading ? "Sharing…" : "Share"}
+          </button>
+
+          <p className="text-xs text-warm-gray-500">
+            Voice notes are stored per your policy (e.g., disappear after 24h). 🌿
+          </p>
+        </div>
+      </form>
     </div>
   );
 }
 
-/* ----------------- small components ----------------- */
-
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active?: boolean;
-  onClick?: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`rounded-full px-4 py-2 text-sm transition ${
-        active
-          ? "bg-blue-600 text-white"
-          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function Button({
-  children,
-  onClick,
-  disabled,
-  variant = "solid",
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
-  variant?: "solid" | "ghost";
-}) {
-  const base =
-    "rounded px-4 py-2 text-sm transition disabled:opacity-50 disabled:cursor-not-allowed";
-  const styles =
-    variant === "ghost"
-      ? "bg-transparent text-gray-700 hover:bg-gray-100"
-      : "bg-blue-600 text-white hover:bg-blue-700";
-  return (
-    <button className={`${base} ${styles}`} onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  );
-}
-
-function History() {
-  const [items, setItems] = useState<
-    { id: string; title: string; content: string; createdAt: string }[]
-  >([]);
-
-  useEffect(() => {
-    const key = "release:history";
-    const data = JSON.parse(localStorage.getItem(key) || "[]");
-    setItems(data);
-  }, []);
-
-  const clear = () => {
-    localStorage.removeItem("release:history");
-    setItems([]);
-  };
-
-  if (!items.length) return null;
-
-  return (
-    <section className="mt-8 rounded-lg border p-4">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-lg font-medium">Recent Releases (private)</h2>
-        <button
-          className="text-sm text-red-600 underline hover:opacity-80"
-          onClick={clear}
-        >
-          Clear history
-        </button>
-      </div>
-      <ul className="space-y-3">
-        {items.map((it) => (
-          <li key={it.id} className="rounded border p-3">
-            <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
-              <span className="font-medium text-gray-700">{it.title}</span>
-              <time>{new Date(it.createdAt).toLocaleString()}</time>
-            </div>
-            <pre className="whitespace-pre-wrap text-sm text-gray-800">
-              {it.content}
-            </pre>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
+/** Helpers */
+function formatMs(ms: number) {
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const ss = s % 60;
+  return `${String(m).padStart(1, "0")}:${String(ss).padStart(2, "0")}`;
 }
