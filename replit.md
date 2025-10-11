@@ -39,6 +39,7 @@ Preferred communication style: Simple, everyday language.
 - **Dual Input Methods**: Text messages (500 char limit) or voice recordings
 - **Voice Processing**: WebM audio format with duration tracking
 - **Anonymous Storage**: No user identification or session tracking
+- **Affirmation Feedback**: After submission, users receive a supportive affirmation message tailored to their content with keyword matching (e.g., "tired" → rest encouragement). Affirmations display for 8 seconds in a beautifully styled card with fade-in animation
 
 ### Professional Admin Moderation System
 - **Authentication**: Simple username/password system (default: admin/hushed2024)
@@ -55,9 +56,10 @@ Preferred communication style: Simple, everyday language.
 - **Accessibility**: Proper semantic HTML and ARIA labels
 - **Toast Notifications**: User feedback for actions and errors
 - **Progressive Enhancement**: Works without JavaScript for basic functionality
-- **Navigation**: Clean header with "Home • Drop What You're Holding • Find Your Calm" navigation
+- **Navigation**: Clean header with "Home • Drop What You're Holding • Find Your Calm" navigation. Home page features "Let It Flow" and "Take A Moment" buttons for distinct, inviting navigation
 - **Tab System**: Smooth fade-in transitions between tab content for a calming user experience
 - **Comfort Corner**: Integrated inspirational quotes, coping strategies, and crisis resources
+- **Affirmation System**: Supportive messages displayed after sharing feelings, with smart keyword matching and gentle animations in MoodDrop's signature blush/cream color palette
 
 ### Wellbeing Features (Comfort Page)
 - **Inspirational Quotes**: Rotating collection of uplifting quotes with manual refresh option
