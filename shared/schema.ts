@@ -11,6 +11,7 @@ export const messages = pgTable("messages", {
   content: text("content"), // text content for text messages
   audioFilename: text("audio_filename"), // filename for voice messages
   duration: text("duration"), // recording duration for voice messages
+  isFavorite: integer("is_favorite").default(0), // 0 = not favorite, 1 = favorite
   status: text("status").notNull().default("active"), // 'active', 'flagged', 'hidden'
   flagReason: text("flag_reason"), // reason for flagging
   reviewedBy: text("reviewed_by"), // admin who reviewed

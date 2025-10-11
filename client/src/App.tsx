@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
-import Home from "@/pages/home";
+import Dashboard from "@/pages/dashboard";
 import Release from "@/pages/release";
 import ThankYou from "@/pages/thank-you";
 import Comfort from "@/pages/comfort";
@@ -30,7 +30,7 @@ function Router() {
         </>
       ) : (
         <>
-          <Route path="/" component={Home} />
+          <Route path="/" component={Dashboard} />
           <Route path="/release" component={Release} />
           <Route path="/thank-you" component={ThankYou} />
           <Route path="/comfort" component={Comfort} />
@@ -47,12 +47,12 @@ function Router() {
 function AppContent() {
   const { isAuthenticated } = useAuth();
   const [location] = useLocation();
-  const isGardenPage = location === '/garden';
+  const isFullWidthPage = location === '/garden' || location === '/';
   
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      <main className={isGardenPage ? '' : 'max-w-lg mx-auto px-6 py-8'}>
+      <main className={isFullWidthPage ? '' : 'max-w-lg mx-auto px-6 py-8'}>
         <Router />
       </main>
       {isAuthenticated && <Footer />}

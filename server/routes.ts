@@ -61,6 +61,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch garden messages" });
     }
   });
+
+  // Get user's favorite messages
+  app.get('/api/favorites', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const favorites = await storage.getFavoriteMessages(userId);
+      res.json(favorites);
+    } catch (error) {
+      console.error("Error fetching favorites:", error);
+      res.status(500).json({ message: "Failed to fetch favorites" });
+    }
+  });
+
+  // Toggle message favorite status
+  app.post('/api/messages/:id/favorite', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { id } = req.params;
+      const message = await storage.toggleFavorite(id, userId);
+      
+      if (!message) {
+        return res.status(404).json({ message: "Message not found or unauthorized" });
+      }
+      
+      res.json({ success: true, message });
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      res.status(500).json({ message: "Failed to toggle favorite" });
+    }
+  });
   
   // Submit a new message (text or voice)
   app.post("/api/messages", upload.single('audio'), async (req: any, res) => {

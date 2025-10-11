@@ -7,6 +7,8 @@ export interface IStorage {
   createMessage(message: InsertMessage): Promise<Message>;
   getAllMessages(filters?: { status?: string; emotion?: string; search?: string }): Promise<Message[]>;
   getUserMessages(userId: string): Promise<Message[]>;
+  getFavoriteMessages(userId: string): Promise<Message[]>;
+  toggleFavorite(messageId: string, userId: string): Promise<Message | undefined>;
   deleteMessage(id: string): Promise<boolean>;
   updateMessage(id: string, updates: UpdateMessage): Promise<Message | undefined>;
   bulkDeleteMessages(ids: string[]): Promise<number>;
@@ -65,6 +67,41 @@ export class DatabaseStorage implements IStorage {
         eq(messages.status, 'active')
       ))
       .orderBy(desc(messages.createdAt));
+  }
+
+  async getFavoriteMessages(userId: string): Promise<Message[]> {
+    return await db
+      .select()
+      .from(messages)
+      .where(and(
+        eq(messages.userId, userId),
+        eq(messages.isFavorite, 1),
+        eq(messages.status, 'active')
+      ))
+      .orderBy(desc(messages.createdAt));
+  }
+
+  async toggleFavorite(messageId: string, userId: string): Promise<Message | undefined> {
+    // First get the message to verify ownership
+    const [message] = await db
+      .select()
+      .from(messages)
+      .where(eq(messages.id, messageId));
+    
+    if (!message || message.userId !== userId) {
+      return undefined;
+    }
+
+    // Toggle favorite status
+    const newFavoriteStatus = message.isFavorite === 1 ? 0 : 1;
+    
+    const [updatedMessage] = await db
+      .update(messages)
+      .set({ isFavorite: newFavoriteStatus })
+      .where(eq(messages.id, messageId))
+      .returning();
+    
+    return updatedMessage;
   }
 
   async deleteMessage(id: string): Promise<boolean> {
