@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { PlayCircle, Sparkles, Laugh, Heart, Play, Pause, Gamepad2 } from "lucide-react";
-import relaxingWomanImage from "@assets/stock_images/woman_relaxing_chair_620dca74.jpg";
+import relaxingIllustration from "@assets/stock_images/minimalist_woman_arm_c803307b.jpg";
 
 type TabType = "videos" | "games" | "sounds";
 type VideoCategory = "all" | "funny" | "uplifting" | "storytimes";
@@ -340,11 +340,11 @@ export default function FindYourCalm() {
         {/* Initial State - No Tab Selected */}
         {!activeTab && (
           <div className="text-center py-12 animate-in fade-in duration-500">
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-4">
               <img 
-                src={relaxingWomanImage} 
-                alt="Woman relaxing on chair with phone in hand" 
-                className="w-72 sm:w-80 md:w-96 h-auto max-w-full rounded-3xl shadow-2xl shadow-blush-200/50"
+                src={relaxingIllustration} 
+                alt="Relaxing illustration" 
+                className="w-20 h-20 object-contain opacity-80"
                 data-testid="illustration-relaxing"
               />
             </div>
