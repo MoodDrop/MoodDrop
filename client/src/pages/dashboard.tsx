@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { type Message } from "@shared/schema";
 import { type User } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 import { Loader2, Heart, Sparkles } from "lucide-react";
 import StreakDisplay from "@/components/streak-display";
@@ -8,17 +9,91 @@ import MoodCalendar from "@/components/mood-calendar";
 import InsightsDashboard from "@/components/insights-dashboard";
 
 export default function Dashboard() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  
   const { data: user, isLoading: userLoading } = useQuery<User>({
     queryKey: ['/api/auth/user'],
+    enabled: isAuthenticated,
   });
 
   const { data: messages, isLoading: messagesLoading } = useQuery<Message[]>({
     queryKey: ['/api/garden/messages'],
+    enabled: isAuthenticated,
   });
 
   const { data: favorites, isLoading: favoritesLoading } = useQuery<Message[]>({
     queryKey: ['/api/favorites'],
+    enabled: isAuthenticated,
   });
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blush-50 to-cream-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-blush-400" />
+          <p className="mt-4 text-warm-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show soft prompt for unauthenticated users
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blush-50 to-cream-50 px-6 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-warm-gray-800 mb-2" data-testid="text-dashboard-title">
+              Track Your Emotional Journey
+            </h1>
+            <p className="text-warm-gray-600" data-testid="text-dashboard-subtitle">
+              See your mood patterns, streaks, and insights unfold
+            </p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-8 shadow-lg text-center">
+            <Sparkles className="w-16 h-16 mx-auto text-blush-300 mb-4" />
+            <h2 className="text-xl font-semibold text-warm-gray-700 mb-3">
+              Sign up to unlock your dashboard
+            </h2>
+            <p className="text-warm-gray-600 mb-6 max-w-md mx-auto">
+              Create an account to track your emotional patterns, build streaks, view insights, and save your favorite moments
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="p-4 bg-gradient-to-br from-blush-50 to-cream-50 rounded-xl">
+                <div className="text-3xl mb-2">🔥</div>
+                <h3 className="font-semibold text-warm-gray-800 mb-1">Streak Tracking</h3>
+                <p className="text-sm text-warm-gray-600">Build momentum with daily check-ins</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl">
+                <div className="text-3xl mb-2">📊</div>
+                <h3 className="font-semibold text-warm-gray-800 mb-1">Mood Insights</h3>
+                <p className="text-sm text-warm-gray-600">Discover patterns in your emotions</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-pink-50 to-red-50 rounded-xl">
+                <div className="text-3xl mb-2">🌸</div>
+                <h3 className="font-semibold text-warm-gray-800 mb-1">Visual Garden</h3>
+                <p className="text-sm text-warm-gray-600">Watch your feelings bloom</p>
+              </div>
+            </div>
+
+            <a
+              href="/api/login"
+              className="inline-block bg-blush-300 hover:bg-blush-400 text-white font-medium px-8 py-3 rounded-xl transition-all shadow-md hover:shadow-lg"
+              data-testid="button-dashboard-signup"
+            >
+              <span className="mr-2">✨</span>
+              Get Started Free
+            </a>
+            <p className="text-xs text-warm-gray-500 mt-4">
+              No credit card required • Takes less than a minute
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const isLoading = userLoading || messagesLoading || favoritesLoading;
 

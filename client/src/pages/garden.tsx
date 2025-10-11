@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { type Message } from "@shared/schema";
 import { getEmotionColor } from "@/lib/gardenColors";
+import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
 function Droplet({ color, size = 60, delay = 0 }: { color: { primary: string; secondary: string; shadow: string }; size?: number; delay?: number }) {
@@ -100,11 +101,68 @@ function GardenElement({ message, index }: { message: Message; index: number }) 
 }
 
 export default function Garden() {
-  const { data: messages, isLoading } = useQuery<Message[]>({
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { data: messages, isLoading: messagesLoading } = useQuery<Message[]>({
     queryKey: ['/api/garden/messages'],
+    enabled: isAuthenticated,
   });
 
-  if (isLoading) {
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-blush-400" />
+          <p className="mt-4 text-warm-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show soft prompt for unauthenticated users
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 px-6 py-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-warm-gray-800 mb-2" data-testid="text-garden-title">
+              Your Mood Garden
+            </h1>
+            <p className="text-warm-gray-600" data-testid="text-garden-subtitle">
+              Watch your emotional journey bloom into something beautiful
+            </p>
+          </div>
+
+          <div className="text-center py-16">
+            <div className="mb-6">
+              <svg className="w-32 h-32 mx-auto text-warm-gray-300" fill="currentColor" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" opacity="0.2" />
+                <path d="M50 20 L50 45 M35 35 L50 45 L65 35" stroke="currentColor" strokeWidth="3" fill="none" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-warm-gray-700 mb-3" data-testid="text-garden-signin-title">
+              Sign up to grow your garden
+            </h2>
+            <p className="text-warm-gray-600 mb-6 max-w-md mx-auto" data-testid="text-garden-signin-message">
+              Create an account to track your emotional journey and watch your feelings bloom into a beautiful visual garden
+            </p>
+            <a
+              href="/api/login"
+              className="inline-block bg-blush-300 hover:bg-blush-400 text-white font-medium px-8 py-3 rounded-xl transition-all shadow-md hover:shadow-lg"
+              data-testid="button-garden-signup"
+            >
+              <span className="mr-2">🌸</span>
+              Sign Up Free
+            </a>
+            <p className="text-xs text-warm-gray-500 mt-4">
+              No credit card required • Takes less than a minute
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (messagesLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
