@@ -15,6 +15,7 @@ import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import { TimeBasedThemeProvider } from "@/components/TimeBasedThemeProvider";
 
 function Router() {
   return (
@@ -37,13 +38,15 @@ function AppContent() {
   const isFullWidthPage = location === '/garden' || location === '/dashboard';
   
   return (
-    <div className="min-h-screen bg-white">
-      <Header />
-      <main className={isFullWidthPage ? '' : 'max-w-lg mx-auto px-6 py-8'}>
-        <Router />
-      </main>
-      <Footer />
-    </div>
+    <TimeBasedThemeProvider>
+      <div className="min-h-screen">
+        <Header />
+        <main className={isFullWidthPage ? '' : 'max-w-lg mx-auto px-6 py-8'}>
+          <Router />
+        </main>
+        <Footer />
+      </div>
+    </TimeBasedThemeProvider>
   );
 }
 
