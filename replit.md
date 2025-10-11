@@ -100,13 +100,14 @@ Preferred communication style: Simple, everyday language.
 
 ### UI/UX Design
 - **Mobile-First**: Responsive design optimized for mobile devices
-- **Accessibility**: Proper semantic HTML and ARIA labels
+- **Accessibility**: Proper semantic HTML and ARIA labels, decorative SVGs marked with aria-hidden
 - **Toast Notifications**: User feedback for actions and errors
 - **Progressive Enhancement**: Works without JavaScript for basic functionality
-- **Navigation**: Clean header with "Home • Drop What You're Holding • My Garden • Find Your Calm" navigation. Logout button for authenticated users
+- **Navigation**: Clean header with "Home • Drop What You're Holding • Mood Garden • Find Your Calm" navigation. Sign Up button in top-right corner for unauthenticated users
 - **Tab System**: Smooth fade-in transitions between tab content for a calming user experience
 - **Comfort Corner**: Integrated inspirational quotes, coping strategies, and crisis resources
 - **Affirmation System**: Supportive messages displayed after sharing feelings, with smart keyword matching and gentle animations in MoodDrop's signature blush/cream color palette
+- **GardenIllustration Component**: Animated flower illustration for empty garden states with three blooming flowers (blush pink, cream/peach, soft rose) and sage green stems/leaves. Features 1.8s staggered grow animations and gentle leaf swaying for a welcoming, calming visual
 
 ### Wellbeing Features (Comfort Page)
 - **Inspirational Quotes**: Rotating collection of uplifting quotes with manual refresh option
