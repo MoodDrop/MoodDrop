@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { useMutation } from "@tanstack/react-query";
+import { getAffirmation } from "@/lib/affirmations";
 
 /**
  * Release (Share Your Feelings) page
@@ -39,6 +40,8 @@ export default function Release() {
   // form state
   const [emotion, setEmotion] = useState<string>("");
   const [content, setContent] = useState<string>("");
+  const [affirmation, setAffirmation] = useState<string>("");
+  const [showAffirmation, setShowAffirmation] = useState(false);
 
   // voice note state
   const [permissionError, setPermissionError] = useState<string>("");
@@ -54,12 +57,17 @@ export default function Release() {
   const tickTimerRef = useRef<number | null>(null);
   const hardLimitTimerRef = useRef<number | null>(null);
   const startedAtRef = useRef<number>(0);
+  const affirmationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // clean up object URL when blob changes
   useEffect(() => {
     return () => {
       if (audioUrl) URL.revokeObjectURL(audioUrl);
       stopAllTracks();
+      // Clear affirmation timer on unmount
+      if (affirmationTimerRef.current) {
+        clearTimeout(affirmationTimerRef.current);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -189,18 +197,41 @@ export default function Release() {
     e.preventDefault();
     if (!canSubmit) return;
     try {
+      // Get affirmation before clearing content
+      const encouragingMessage = getAffirmation(content, emotion);
+      
       await submitMutation.mutateAsync({
         emotion,
         content,
         audioBlob: audioBlob ?? undefined,
         audioDurationMs,
       });
+      
       // reset form
       setEmotion("");
       setContent("");
       deleteVoice();
-      alert("Thanks for sharing. Your voice matters. 🌿");
+      
+      // Clear any existing timeout before setting a new one
+      if (affirmationTimerRef.current) {
+        clearTimeout(affirmationTimerRef.current);
+      }
+      
+      // Show affirmation
+      setAffirmation(encouragingMessage);
+      setShowAffirmation(true);
+      
+      // Hide affirmation after 8 seconds
+      affirmationTimerRef.current = setTimeout(() => {
+        setShowAffirmation(false);
+        affirmationTimerRef.current = null;
+      }, 8000);
     } catch {
+      // Clear timeout if mutation errors
+      if (affirmationTimerRef.current) {
+        clearTimeout(affirmationTimerRef.current);
+        affirmationTimerRef.current = null;
+      }
       alert("Sorry — something went wrong. Please try again.");
     }
   };
@@ -323,6 +354,7 @@ export default function Release() {
               ${(!emotion || (!content.trim() && !audioBlob) || isRecording)
                 ? "bg-warm-gray-300 cursor-not-allowed"
                 : "bg-blush-400 hover:bg-blush-500"}`}
+            data-testid="button-submit-feelings"
           >
             {submitMutation.isPending ? "Sharing…" : "Share"}
           </button>
@@ -332,6 +364,25 @@ export default function Release() {
           </p>
         </div>
       </form>
+
+      {/* Affirmation Display */}
+      {showAffirmation && (
+        <div 
+          className="mt-6 p-6 bg-gradient-to-br from-blush-50 to-cream-50 border-2 border-blush-200 rounded-2xl shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-500"
+          data-testid="affirmation-message"
+        >
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-10 h-10 bg-blush-300 rounded-full flex items-center justify-center">
+              <span className="text-xl">✨</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-warm-gray-700 leading-relaxed font-medium">
+                {affirmation}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
