@@ -102,13 +102,9 @@ export default function FindYourCalm() {
   };
 
   return (
-    <div className="mt-8 mb-6">
-      <h2 className="text-2xl font-semibold text-warm-gray-700 mb-6 text-center">
-        Find Your Calm
-      </h2>
-
+    <div className="mb-6">
       {/* Tab Buttons */}
-      <div className="flex flex-wrap justify-center gap-3 mb-8">
+      <div className="flex flex-wrap justify-center gap-3 mb-6">
         <button
           onClick={() => handleTabClick("videos")}
           className={`px-6 py-3 rounded-xl font-medium transition-all shadow-sm ${

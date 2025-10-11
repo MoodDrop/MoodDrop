@@ -26,11 +26,11 @@ export default function Comfort() {
         </div>
       </div>
 
+      {/* Find Your Calm Section - Tabs */}
+      <FindYourCalm />
+
       {/* Comfort Corner */}
       <ComfortCorner />
-
-      {/* Find Your Calm Section */}
-      <FindYourCalm />
 
       {/* Additional Wellbeing Tips */}
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-blush-100 mb-6">
