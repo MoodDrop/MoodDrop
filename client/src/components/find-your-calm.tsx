@@ -65,16 +65,16 @@ const SOUNDS: Sound[] = [
     audioUrl: "https://cdn.pixabay.com/download/audio/2022/06/07/audio_c2eb9e14c8.mp3"
   },
   {
-    id: "forest",
-    name: "Forest Birds",
-    icon: "🌲",
-    audioUrl: "https://cdn.pixabay.com/download/audio/2022/03/10/audio_4dedf2e94c.mp3"
+    id: "meditation",
+    name: "Meditation",
+    icon: "🧘",
+    audioUrl: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c610232532.mp3"
   },
   {
-    id: "fireplace",
-    name: "Crackling Fire",
-    icon: "🔥",
-    audioUrl: "https://cdn.pixabay.com/download/audio/2022/03/24/audio_1d5417725f.mp3"
+    id: "morning-birds",
+    name: "Morning Birds",
+    icon: "🐦",
+    audioUrl: "https://cdn.pixabay.com/download/audio/2022/03/10/audio_4dedf2e94c.mp3"
   }
 ];
 
