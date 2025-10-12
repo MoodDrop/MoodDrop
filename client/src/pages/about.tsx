@@ -38,7 +38,7 @@ export default function About() {
           </p>
           
           <p>
-            It started as an idea born from real moments — the days that feel heavy, the nights when your thoughts won't quiet down, and the times you just need somewhere to breathe. MoodDrop was designed to be that space — a gentle corner of the internet where you can journal freely, share your emotions without judgment, and rediscover calm at your own pace.
+            It started as an idea born from real moments — the days I felt heavy, the nights when my thoughts won't quiet down, and the times I just need somewhere to breathe. MoodDrop was designed to be that space — a gentle corner of the internet where you can release freely, share your emotions without judgment, and rediscover calm at your own pace.
           </p>
           
           <p>
