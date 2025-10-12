@@ -79,3 +79,30 @@ export const users = pgTable("users", {
 
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// Featured videos table for admin-curated content
+export const featuredVideos = pgTable("featured_videos", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  url: text("url").notNull(),
+  platform: text("platform").notNull(), // 'youtube' or 'tiktok'
+  displayOrder: integer("display_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertFeaturedVideoSchema = createInsertSchema(featuredVideos).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateFeaturedVideoSchema = createInsertSchema(featuredVideos).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).partial();
+
+export type InsertFeaturedVideo = z.infer<typeof insertFeaturedVideoSchema>;
+export type UpdateFeaturedVideo = z.infer<typeof updateFeaturedVideoSchema>;
+export type FeaturedVideo = typeof featuredVideos.$inferSelect;

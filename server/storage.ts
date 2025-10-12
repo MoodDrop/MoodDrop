@@ -1,6 +1,6 @@
-import { type Message, type InsertMessage, type UpdateMessage, type Admin, type InsertAdmin, type User, type UpsertUser, messages, admins, users } from "@shared/schema";
+import { type Message, type InsertMessage, type UpdateMessage, type Admin, type InsertAdmin, type User, type UpsertUser, type FeaturedVideo, type InsertFeaturedVideo, type UpdateFeaturedVideo, messages, admins, users, featuredVideos } from "@shared/schema";
 import { db } from "./db";
-import { eq, sql, desc, and, like, count } from "drizzle-orm";
+import { eq, sql, desc, and, like, count, asc } from "drizzle-orm";
 
 export interface IStorage {
   // Message operations
@@ -23,6 +23,12 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserStreak(userId: string): Promise<User | undefined>;
+  
+  // Featured videos operations
+  getAllFeaturedVideos(): Promise<FeaturedVideo[]>;
+  createFeaturedVideo(video: InsertFeaturedVideo): Promise<FeaturedVideo>;
+  updateFeaturedVideo(id: string, updates: UpdateFeaturedVideo): Promise<FeaturedVideo | undefined>;
+  deleteFeaturedVideo(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -245,6 +251,40 @@ export class DatabaseStorage implements IStorage {
       .returning();
 
     return updatedUser;
+  }
+
+  async getAllFeaturedVideos(): Promise<FeaturedVideo[]> {
+    return await db
+      .select()
+      .from(featuredVideos)
+      .orderBy(asc(featuredVideos.displayOrder));
+  }
+
+  async createFeaturedVideo(video: InsertFeaturedVideo): Promise<FeaturedVideo> {
+    const [newVideo] = await db
+      .insert(featuredVideos)
+      .values(video)
+      .returning();
+    return newVideo;
+  }
+
+  async updateFeaturedVideo(id: string, updates: UpdateFeaturedVideo): Promise<FeaturedVideo | undefined> {
+    const [video] = await db
+      .update(featuredVideos)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(featuredVideos.id, id))
+      .returning();
+    return video;
+  }
+
+  async deleteFeaturedVideo(id: string): Promise<boolean> {
+    const result = await db
+      .delete(featuredVideos)
+      .where(eq(featuredVideos.id, id));
+    return (result.rowCount || 0) > 0;
   }
 }
 
