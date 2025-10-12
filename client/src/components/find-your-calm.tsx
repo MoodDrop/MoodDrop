@@ -326,54 +326,16 @@ export default function FindYourCalm() {
         {/* Soothing Sounds Tab */}
         {activeTab === "sounds" && (
           <div className="animate-in fade-in duration-500" data-testid="content-sounds">
-            <p className="text-center text-warm-gray-600 mb-6">
-              Click on a sound to play calming ambient audio. Perfect for meditation, focus, or relaxation.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {SOUNDS.map((sound) => (
-                <div
-                  key={sound.id}
-                  className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all"
-                  data-testid={`sound-card-${sound.id}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="text-4xl">{sound.icon}</div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-warm-gray-700">
-                          {sound.name}
-                        </h3>
-                        <p className="text-sm text-warm-gray-500">
-                          {playingSound === sound.id ? "Now Playing..." : "Tap to play"}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => toggleSound(sound.id)}
-                      className={`p-3 rounded-full transition-all ${
-                        playingSound === sound.id
-                          ? "bg-blush-300 text-white"
-                          : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
-                      }`}
-                      data-testid={`sound-button-${sound.id}`}
-                    >
-                      {playingSound === sound.id ? (
-                        <Pause size={20} />
-                      ) : (
-                        <Play size={20} />
-                      )}
-                    </button>
-                  </div>
-                  <audio
-                    ref={(el) => {
-                      if (el) audioRefs.current[sound.id] = el;
-                    }}
-                    src={sound.audioUrl}
-                    loop
-                    onEnded={() => setPlayingSound(null)}
-                  />
-                </div>
-              ))}
+            <div className="text-center py-16">
+              <div className="bg-blush-50 border border-blush-100 rounded-2xl p-8 max-w-md mx-auto">
+                <div className="text-6xl mb-4">🎵</div>
+                <h3 className="text-2xl font-semibold text-warm-gray-700 mb-2">
+                  Coming Soon
+                </h3>
+                <p className="text-warm-gray-600">
+                  Soothing sounds are on their way to help you relax and find your calm.
+                </p>
+              </div>
             </div>
           </div>
         )}

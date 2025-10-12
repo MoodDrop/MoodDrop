@@ -127,11 +127,7 @@ Preferred communication style: Simple, everyday language.
     - **Color Drift** (Free): Color matching game - match the target color from 3 orb choices with instant feedback
     - **Memory Match** (Locked): Requires sign-up to unlock
     - **Zen Garden** (Locked): Requires sign-up to unlock
-  - **Soothing Sounds**: 4 ambient audio players with play/pause controls and looping playback
-    - 🌧️ Gentle Rain
-    - 🌊 Ocean Waves
-    - 🧘 Meditation
-    - 🐦 Morning Birds
+  - **Soothing Sounds**: Coming Soon message displayed with blush/cream aesthetic
 - **Daily Wellbeing Tips**: Guidance on morning routines, hydration, sleep, and social connection
 - **Professional Help Information**: Resources for finding qualified mental health professionals
 
