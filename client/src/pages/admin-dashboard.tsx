@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
-import { Inbox, LogOut } from "lucide-react";
+import { Inbox, LogOut, MessageSquare, Video } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { Message } from "@shared/schema";
@@ -10,9 +10,12 @@ import AdminStats from "@/components/admin-stats";
 import AdminFilters from "@/components/admin-filters";
 import AdminBulkActions from "@/components/admin-bulk-actions";
 import AdminMessageCard from "@/components/admin-message-card";
+import AdminFeaturedVideos from "@/components/admin-featured-videos";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AdminDashboard() {
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("messages");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [filters, setFilters] = useState({
     status: "",
@@ -103,11 +106,24 @@ export default function AdminDashboard() {
         </Link>
       </div>
 
-      {/* Statistics */}
-      <AdminStats />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="messages" className="flex items-center gap-2" data-testid="tab-messages">
+            <MessageSquare size={16} />
+            Messages
+          </TabsTrigger>
+          <TabsTrigger value="videos" className="flex items-center gap-2" data-testid="tab-videos">
+            <Video size={16} />
+            Featured Videos
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Filters */}
-      <AdminFilters filters={filters} onFiltersChange={setFilters} />
+        <TabsContent value="messages" className="mt-0">
+          {/* Statistics */}
+          <AdminStats />
+
+          {/* Filters */}
+          <AdminFilters filters={filters} onFiltersChange={setFilters} />
 
       {/* Selection Controls */}
       {messages && messages.length > 0 && (
@@ -158,11 +174,17 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Bulk Actions */}
-      <AdminBulkActions 
-        selectedIds={selectedIds}
-        onClearSelection={() => setSelectedIds([])}
-      />
+          {/* Bulk Actions */}
+          <AdminBulkActions 
+            selectedIds={selectedIds}
+            onClearSelection={() => setSelectedIds([])}
+          />
+        </TabsContent>
+
+        <TabsContent value="videos" className="mt-0">
+          <AdminFeaturedVideos />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
