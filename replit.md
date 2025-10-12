@@ -116,13 +116,22 @@ Preferred communication style: Simple, everyday language.
 - **Coping Strategies**: 6 practical techniques including deep breathing, grounding, and mindfulness
 - **Crisis Resources**: Emergency support contacts including suicide prevention and crisis text lines
 - **Find Your Calm**: Interactive tab system with three activities:
-  - **Watch & Smile**: 5 uplifting YouTube videos (nature, baby animals, kindness, pets, meditation) with category filtering (All, Funny, Uplifting, Storytimes), responsive 16:9 aspect ratio, and lazy loading
+  - **Watch & Smile**: 3 curated YouTube videos with creator support message encouraging users to follow creators
+    - **Story Time**: "Money Made Me Do It" by Creator YO DJ Star
+    - **Funny**: "Teachers dressed as students day" by Creator RomanasKatun
+    - **Uplifting**: "The Power of Hope" by Creator motivationalresource
+    - Category filtering (All, Funny, Uplifting, Story Times), responsive 16:9 aspect ratio with rounded corners and soft shadows
+    - Blush/cream aesthetic with sparkle icon and supportive creator message
   - **Games**: Interactive calming games with both desktop and mobile touch support
     - **Bubble Pop** (Free): Canvas-based stress relief game - click/tap rising bubbles to pop them and increase score
     - **Color Drift** (Free): Color matching game - match the target color from 3 orb choices with instant feedback
     - **Memory Match** (Locked): Requires sign-up to unlock
     - **Zen Garden** (Locked): Requires sign-up to unlock
-  - **Soothing Sounds**: Ambient audio players (rain, ocean, forest, fireplace) with play/pause controls
+  - **Soothing Sounds**: 4 ambient audio players with play/pause controls and looping playback
+    - 🌧️ Gentle Rain
+    - 🌊 Ocean Waves
+    - 🧘 Meditation
+    - 🐦 Morning Birds
 - **Daily Wellbeing Tips**: Guidance on morning routines, hydration, sleep, and social connection
 - **Professional Help Information**: Resources for finding qualified mental health professionals
 
