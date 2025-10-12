@@ -90,6 +90,17 @@ export default function Header() {
               Find Your Calm
             </button>
           </Link>
+          <span className="text-warm-gray-400">•</span>
+          <Link href="/about">
+            <button
+              className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
+                location === "/about" ? "text-blush-400 font-medium" : "text-warm-gray-600 hover:text-blush-300"
+              }`}
+              data-testid="nav-about"
+            >
+              About MoodDrop
+            </button>
+          </Link>
         </nav>
       </div>
     </header>

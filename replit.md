@@ -105,28 +105,35 @@ Preferred communication style: Simple, everyday language.
 - **Accessibility**: Proper semantic HTML and ARIA labels, decorative SVGs marked with aria-hidden
 - **Toast Notifications**: User feedback for actions and errors
 - **Progressive Enhancement**: Works without JavaScript for basic functionality
-- **Navigation**: Clean header with "Home • Drop What You're Holding • Mood Garden • Find Your Calm" navigation. Sign Up button in top-right corner for unauthenticated users
+- **Navigation**: Clean header with "Home • Drop What You're Holding • Mood Garden • Find Your Calm • About MoodDrop" navigation. Sign Up button in top-right corner for unauthenticated users
 - **Tab System**: Smooth fade-in transitions between tab content for a calming user experience
 - **Comfort Corner**: Integrated inspirational quotes, coping strategies, and crisis resources
 - **Affirmation System**: Supportive messages displayed after sharing feelings, with smart keyword matching and gentle animations in MoodDrop's signature blush/cream color palette
 - **GardenIllustration Component**: Animated flower illustration for empty garden states with three blooming flowers (blush pink, cream/peach, soft rose) and sage green stems/leaves. Features 1.8s staggered grow animations and gentle leaf swaying for a welcoming, calming visual
 - **Footer Design**: Contact Us section prominently displays mooddrops2@gmail.com. Important Disclaimer and Support Resources are organized in a responsive 2-column grid layout that stacks on mobile devices
 
+### About MoodDrop Page
+- **Dedicated Page**: Standalone About page accessible from header navigation
+- **Origin Story**: Heartfelt message explaining MoodDrop's purpose and creation
+- **Mission Statement**: Three key paragraphs covering:
+  - The intention behind creating a safe, comforting space
+  - Real moments that inspired the platform
+  - Features designed to help users process and release emotions
+- **Visual Design**: Gradient blush/cream background with 🌸 emoji and sparkles
+- **Personal Touch**: Closing message with 💕 emoji showing creator's care and dedication
+- **Navigation**: Back button to return to home page
+
 ### Wellbeing Features (Comfort Page)
 - **Inspirational Quotes**: Rotating collection of uplifting quotes with manual refresh option
 - **Coping Strategies**: 6 practical techniques including deep breathing, grounding, and mindfulness
 - **Crisis Resources**: Emergency support contacts including suicide prevention and crisis text lines
-- **Find Your Calm**: Interactive tab system with four activities:
+- **Find Your Calm**: Interactive tab system with three activities:
   - **Watch & Smile**: 3 curated YouTube videos with creator support message encouraging users to follow creators
     - **Story Time**: "Money Made Me Do It" by Creator YO DJ Star
     - **Funny**: "Teachers dressed as students day" by Creator RomanasKatun
     - **Uplifting**: "The Power of Hope" by Creator motivationalresource
     - Category filtering (All, Funny, Uplifting, Story Times), responsive 16:9 aspect ratio with rounded corners and soft shadows
     - Blush/cream aesthetic with sparkle icon and supportive creator message
-  - **About MoodDrop**: Beautiful origin story and mission statement explaining MoodDrop's purpose
-    - Gradient blush/cream design with 🌸 emoji and sparkles
-    - Heartfelt message about creating a safe space for emotional expression
-    - Personal closing note with 💕 emoji
   - **Games**: Interactive calming games with both desktop and mobile touch support
     - **Bubble Pop** (Free): Canvas-based stress relief game - click/tap rising bubbles to pop them and increase score
     - **Color Drift** (Free): Color matching game - match the target color from 3 orb choices with instant feedback

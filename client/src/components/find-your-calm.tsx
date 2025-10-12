@@ -1,11 +1,11 @@
 import { useState, useRef } from "react";
-import { PlayCircle, Sparkles, Laugh, Heart, Play, Pause, Gamepad2, Lock, Info } from "lucide-react";
+import { PlayCircle, Sparkles, Laugh, Heart, Play, Pause, Gamepad2, Lock } from "lucide-react";
 import relaxingIllustration from "@assets/relaxing-illustration.png";
 import BubblePop from "./BubblePop";
 import ColorDrift from "./ColorDrift";
 import { useAuth } from "@/hooks/useAuth";
 
-type TabType = "videos" | "games" | "sounds" | "about";
+type TabType = "videos" | "games" | "sounds";
 type VideoCategory = "all" | "funny" | "uplifting" | "storytimes";
 
 interface Video {
@@ -146,18 +146,6 @@ export default function FindYourCalm() {
         >
           <span className="inline-block mr-2">🎵</span>
           Soothing Sounds
-        </button>
-        <button
-          onClick={() => handleTabClick("about")}
-          className={`px-6 py-3 rounded-xl font-medium transition-all shadow-sm ${
-            activeTab === "about"
-              ? "bg-blush-300 text-white shadow-md"
-              : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
-          }`}
-          data-testid="tab-about"
-        >
-          <Info className="inline-block mr-2" size={18} />
-          About MoodDrop
         </button>
       </div>
 
@@ -347,41 +335,6 @@ export default function FindYourCalm() {
                 <p className="text-warm-gray-600">
                   Soothing sounds are on their way to help you relax and find your calm.
                 </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* About MoodDrop Tab */}
-        {activeTab === "about" && (
-          <div className="animate-in fade-in duration-500" data-testid="content-about">
-            <div className="bg-gradient-to-br from-blush-50 to-cream-50 border border-blush-200 rounded-2xl p-8 max-w-3xl mx-auto">
-              <div className="text-center mb-6">
-                <h2 className="text-3xl font-semibold text-warm-gray-700 mb-2 flex items-center justify-center gap-2">
-                  <span>🌸</span> About MoodDrop
-                </h2>
-              </div>
-              
-              <div className="space-y-6 text-warm-gray-700 leading-relaxed">
-                <p>
-                  MoodDrop was created with one simple intention — to give you a safe, comforting space to release what's on your mind and reconnect with your peace.
-                </p>
-                
-                <p>
-                  It started as an idea born from real moments — the days that feel heavy, the nights when your thoughts won't quiet down, and the times you just need somewhere to breathe. MoodDrop was designed to be that space — a gentle corner of the internet where you can journal freely, share your emotions without judgment, and rediscover calm at your own pace.
-                </p>
-                
-                <p>
-                  Every feature — from writing reflections to exploring affirmations and calming content — was built to help you process, release, and realign with yourself. Whether you're expressing gratitude, easing anxiety, or simply dropping off the weight of your day, MoodDrop is here for those quiet, in-between moments we all experience.
-                </p>
-                
-                <div className="text-center mt-8 pt-6 border-t border-blush-200">
-                  <p className="text-warm-gray-600 flex items-center justify-center gap-2 flex-wrap">
-                    <Sparkles className="inline-block text-blush-400" size={20} />
-                    <span className="font-medium">Hope you enjoy MoodDrop as much as I enjoyed creating this space for you.</span>
-                    <span className="text-xl">💕</span>
-                  </p>
-                </div>
               </div>
             </div>
           </div>
