@@ -2,7 +2,6 @@ import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import ComfortCorner from "@/components/comfort-corner";
 import FindYourCalm from "@/components/find-your-calm";
-import FeaturedVideos from "@/components/featured-videos";
 
 export default function Comfort() {
   return (
@@ -29,9 +28,6 @@ export default function Comfort() {
 
       {/* Find Your Calm Section - Tabs */}
       <FindYourCalm />
-
-      {/* Featured Videos Section */}
-      <FeaturedVideos />
 
       {/* Comfort Corner */}
       <ComfortCorner />
