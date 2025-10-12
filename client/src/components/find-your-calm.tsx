@@ -27,51 +27,27 @@ interface Sound {
 const VIDEOS: Video[] = [
   {
     id: "1",
-    title: "Peaceful Nature Scenes - Relaxing Music",
-    platform: "youtube",
-    embedUrl: "https://www.youtube.com/embed/lTRiuFIWV54",
-    category: ["uplifting"],
-    description: "Beautiful nature scenery with calming background music"
-  },
-  {
-    id: "2",
-    title: "Baby Animals Being Adorable",
-    platform: "youtube",
-    embedUrl: "https://www.youtube.com/embed/AZ2ZPmEfjvU",
-    category: ["funny", "uplifting"],
-    description: "Cute baby animals that will brighten your day"
-  },
-  {
-    id: "3",
-    title: "Acts of Kindness Compilation",
-    platform: "youtube",
-    embedUrl: "https://www.youtube.com/embed/f1eJ4GLrY0M",
-    category: ["uplifting", "storytimes"],
-    description: "Heartwarming moments of people helping others"
-  },
-  {
-    id: "4",
-    title: "Funny Pets Compilation",
-    platform: "youtube",
-    embedUrl: "https://www.youtube.com/embed/hY7m5jjJ9mM",
-    category: ["funny"],
-    description: "Hilarious pet moments guaranteed to make you smile"
-  },
-  {
-    id: "5",
-    title: "Meditation & Positive Affirmations",
-    platform: "youtube",
-    embedUrl: "https://www.youtube.com/embed/vmEcsMG7oxE",
-    category: ["uplifting"],
-    description: "Guided meditation with positive affirmations for inner peace"
-  },
-  {
-    id: "6",
-    title: "Today's Story Time: A Heartfelt Moment",
+    title: "\"Money Made Me Do It\"",
     platform: "youtube",
     embedUrl: "https://www.youtube.com/embed/AdO-QzGxZW0",
     category: ["storytimes"],
-    description: "A touching story that will warm your heart and remind you of life's special moments"
+    description: "Creator: YO DJ Star"
+  },
+  {
+    id: "2",
+    title: "Teachers dressed as students day",
+    platform: "youtube",
+    embedUrl: "https://www.youtube.com/embed/LpLM6rxijSc",
+    category: ["funny"],
+    description: "Creator: RomanasKatun"
+  },
+  {
+    id: "3",
+    title: "\"The Power of Hope\"",
+    platform: "youtube",
+    embedUrl: "https://www.youtube.com/embed/ZwcaFhdjRY4",
+    category: ["uplifting"],
+    description: "Creator: motivationalresource"
   }
 ];
 
@@ -178,6 +154,15 @@ export default function FindYourCalm() {
         {/* Watch & Smile Tab */}
         {activeTab === "videos" && (
           <div className="animate-in fade-in duration-500" data-testid="content-videos">
+            {/* Support Message */}
+            <div className="bg-blush-50 border border-blush-100 rounded-xl p-4 mb-6 text-center">
+              <p className="text-warm-gray-700 text-sm flex items-center justify-center gap-2 flex-wrap">
+                <span>Follow and support these amazing creators</span>
+                <Sparkles className="inline-block text-blush-400" size={16} />
+                <span>for more heartfelt, funny, and relatable storytimes that remind us we're all human.</span>
+              </p>
+            </div>
+
             {/* Category Filter */}
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
               <button
