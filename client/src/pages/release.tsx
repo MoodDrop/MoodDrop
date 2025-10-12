@@ -189,9 +189,8 @@ export default function Release() {
 
   const canSubmit =
     !!emotion &&
-    (content.trim().length > 0 || !!audioBlob) &&
-    !submitMutation.isPending &&
-    !isRecording;
+    content.trim().length > 0 &&
+    !submitMutation.isPending;
 
   const onSubmit: React.FormEventHandler = async (e) => {
     e.preventDefault();
@@ -203,14 +202,13 @@ export default function Release() {
       await submitMutation.mutateAsync({
         emotion,
         content,
-        audioBlob: audioBlob ?? undefined,
-        audioDurationMs,
+        audioBlob: undefined,
+        audioDurationMs: 0,
       });
       
       // reset form
       setEmotion("");
       setContent("");
-      deleteVoice();
       
       // Clear any existing timeout before setting a new one
       if (affirmationTimerRef.current) {
@@ -293,65 +291,24 @@ export default function Release() {
           />
         </div>
 
-        {/* Voice note controls */}
-        <div className="rounded-lg border border-warm-gray-200 p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-warm-gray-700">Add a voice note (optional)</span>
-            <span className="text-xs text-warm-gray-500">
-              {isRecording
-                ? `Recording… ${formatMs(elapsedMs)} / ${formatMs(VOICE_MAX_MS)}`
-                : audioBlob
-                ? `Recorded: ${formatMs(audioDurationMs)}`
-                : "Up to 2 minutes"}
-            </span>
-          </div>
-
-          {permissionError && (
-            <p className="text-xs text-red-500 mb-2">{permissionError}</p>
-          )}
-
-          <div className="flex items-center gap-3 flex-wrap">
-            {!isRecording && (
-              <button
-                type="button"
-                onClick={startRecording}
-                className="px-4 py-2 rounded-lg bg-blush-400 hover:bg-blush-500 text-white transition disabled:opacity-60"
-                disabled={isRecording}
-              >
-                ● Start recording
-              </button>
-            )}
-            {isRecording && (
-              <button
-                type="button"
-                onClick={stopRecording}
-                className="px-4 py-2 rounded-lg bg-cream-200 hover:bg-cream-300 text-warm-gray-800 transition"
-              >
-                ■ Stop
-              </button>
-            )}
-            {audioBlob && !isRecording && (
-              <>
-                <audio controls src={audioUrl} className="h-10" />
-                <button
-                  type="button"
-                  onClick={deleteVoice}
-                  className="px-3 py-2 rounded-lg bg-warm-gray-200 hover:bg-warm-gray-300 text-warm-gray-800 transition"
-                >
-                  Delete voice note
-                </button>
-              </>
-            )}
-          </div>
+        {/* Voice note - Coming Soon */}
+        <div className="rounded-lg border border-blush-100 bg-blush-50 p-6 text-center">
+          <div className="text-4xl mb-2">🎤</div>
+          <h3 className="text-lg font-semibold text-warm-gray-700 mb-1">
+            Voice Notes Coming Soon
+          </h3>
+          <p className="text-sm text-warm-gray-600">
+            Soon you'll be able to share your feelings with voice recordings.
+          </p>
         </div>
 
         {/* Submit */}
         <div className="flex items-center gap-3">
           <button
             type="submit"
-            disabled={!emotion || (!content.trim() && !audioBlob) || submitMutation.isPending || isRecording}
+            disabled={!emotion || !content.trim() || submitMutation.isPending}
             className={`px-4 py-2 rounded-lg text-white transition
-              ${(!emotion || (!content.trim() && !audioBlob) || isRecording)
+              ${(!emotion || !content.trim())
                 ? "bg-warm-gray-300 cursor-not-allowed"
                 : "bg-blush-400 hover:bg-blush-500"}`}
             data-testid="button-submit-feelings"
@@ -360,7 +317,7 @@ export default function Release() {
           </button>
 
           <p className="text-xs text-warm-gray-500">
-            Voice notes are stored per your policy (e.g., disappear after 24h). 🌿
+            Your feelings are safe and only visible to you. 🌿
           </p>
         </div>
       </form>
