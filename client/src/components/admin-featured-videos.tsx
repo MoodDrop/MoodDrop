@@ -140,14 +140,40 @@ export default function AdminFeaturedVideos() {
     }
   };
 
-  const handleReorder = (id: string, direction: 'up' | 'down') => {
+  const handleReorder = async (id: string, direction: 'up' | 'down') => {
     if (!videos) return;
     
-    const currentVideo = videos.find(v => v.id === id);
-    if (!currentVideo) return;
+    const currentIndex = videos.findIndex(v => v.id === id);
+    if (currentIndex === -1) return;
 
-    const newOrder = direction === 'up' ? currentVideo.displayOrder - 1 : currentVideo.displayOrder + 1;
-    updateMutation.mutate({ id, data: { displayOrder: newOrder } });
+    // Determine target index based on direction
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    
+    // Check bounds
+    if (targetIndex < 0 || targetIndex >= videos.length) return;
+
+    const currentVideo = videos[currentIndex];
+    const targetVideo = videos[targetIndex];
+
+    try {
+      // Swap display orders
+      await Promise.all([
+        updateMutation.mutateAsync({ 
+          id: currentVideo.id, 
+          data: { displayOrder: targetVideo.displayOrder } 
+        }),
+        updateMutation.mutateAsync({ 
+          id: targetVideo.id, 
+          data: { displayOrder: currentVideo.displayOrder } 
+        })
+      ]);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to reorder videos. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
