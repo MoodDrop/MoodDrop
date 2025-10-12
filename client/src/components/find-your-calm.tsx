@@ -64,6 +64,14 @@ const VIDEOS: Video[] = [
     embedUrl: "https://www.youtube.com/embed/vmEcsMG7oxE",
     category: ["uplifting"],
     description: "Guided meditation with positive affirmations for inner peace"
+  },
+  {
+    id: "6",
+    title: "Today's Story Time: A Heartfelt Moment",
+    platform: "youtube",
+    embedUrl: "https://www.youtube.com/embed/AdO-QzGxZW0",
+    category: ["storytimes"],
+    description: "A touching story that will warm your heart and remind you of life's special moments"
   }
 ];
 
