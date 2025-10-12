@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertMessageSchema, updateMessageSchema } from "@shared/schema";
+import { insertMessageSchema, updateMessageSchema, insertFeaturedVideoSchema, updateFeaturedVideoSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -150,6 +150,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, admin: { id: admin.id, username: admin.username } });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Featured Videos Routes (Admin)
+  app.get("/api/admin/featured-videos", async (req, res) => {
+    try {
+      const videos = await storage.getAllFeaturedVideos();
+      res.json(videos);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/admin/featured-videos", async (req, res) => {
+    try {
+      const validatedData = insertFeaturedVideoSchema.parse(req.body);
+      const video = await storage.createFeaturedVideo(validatedData);
+      res.json({ success: true, video });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/admin/featured-videos/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = updateFeaturedVideoSchema.parse(req.body);
+      const video = await storage.updateFeaturedVideo(id, validatedData);
+      
+      if (!video) {
+        return res.status(404).json({ message: "Video not found" });
+      }
+      
+      res.json({ success: true, video });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/admin/featured-videos/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteFeaturedVideo(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Video not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Public route to get featured videos
+  app.get("/api/featured-videos", async (req, res) => {
+    try {
+      const videos = await storage.getAllFeaturedVideos();
+      res.json(videos);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
     }
   });
 
