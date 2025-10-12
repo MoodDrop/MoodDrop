@@ -49,7 +49,10 @@ export default function About() {
             <p className="text-warm-gray-600 flex items-center justify-center gap-2 flex-wrap">
               <Sparkles className="inline-block text-blush-400" size={20} />
               <span className="font-medium">Hope you enjoy MoodDrop as much as I enjoyed creating this space for you.</span>
-              <span className="text-xl">💕</span>
+            </p>
+            <p className="text-warm-gray-600 mt-2">
+              <span>~ Charae</span>
+              <span className="text-xl ml-1">💕</span>
             </p>
           </div>
         </div>
