@@ -47,7 +47,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Message System
 - **Emotion Tagging**: Users categorize messages as angry, sad, anxious, happy, excited, or other
-- **Text Input**: Text messages with 500 character limit
+- **Text Input**: Unlimited text messages for free expression
 - **Voice Notes**: Coming Soon message displayed - feature in development
 - **User Linking**: Messages automatically linked to authenticated users (optional for anonymous)
 - **Affirmation Feedback**: After submission, users receive a supportive affirmation message tailored to their content with keyword matching (e.g., "tired" → rest encouragement). Affirmations display for 8 seconds in a beautifully styled card with fade-in animation
