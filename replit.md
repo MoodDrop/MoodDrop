@@ -52,6 +52,7 @@ Preferred communication style: Simple, everyday language.
 - **User Linking**: Messages automatically linked to authenticated users (optional for anonymous)
 - **Affirmation Feedback**: After submission, users receive a supportive affirmation message tailored to their content with keyword matching (e.g., "tired" → rest encouragement). Affirmations display for 8 seconds in a beautifully styled card with fade-in animation
 - **Favorites System**: Users can bookmark meaningful messages for later reflection
+- **Sign-Up Prompt**: Anonymous users see a gentle invitation showcasing locked features (Mood Garden, streaks, favorites) to encourage account creation without limiting their expression
 
 ### Mood Garden - Visual Growth System
 - **Visual Elements**: Three types - Droplets 💧, Flowers 🌸, and Trees 🌳 that alternate for variety
@@ -115,13 +116,17 @@ Preferred communication style: Simple, everyday language.
 - **Inspirational Quotes**: Rotating collection of uplifting quotes with manual refresh option
 - **Coping Strategies**: 6 practical techniques including deep breathing, grounding, and mindfulness
 - **Crisis Resources**: Emergency support contacts including suicide prevention and crisis text lines
-- **Find Your Calm**: Interactive tab system with three activities:
+- **Find Your Calm**: Interactive tab system with four activities:
   - **Watch & Smile**: 3 curated YouTube videos with creator support message encouraging users to follow creators
     - **Story Time**: "Money Made Me Do It" by Creator YO DJ Star
     - **Funny**: "Teachers dressed as students day" by Creator RomanasKatun
     - **Uplifting**: "The Power of Hope" by Creator motivationalresource
     - Category filtering (All, Funny, Uplifting, Story Times), responsive 16:9 aspect ratio with rounded corners and soft shadows
     - Blush/cream aesthetic with sparkle icon and supportive creator message
+  - **About MoodDrop**: Beautiful origin story and mission statement explaining MoodDrop's purpose
+    - Gradient blush/cream design with 🌸 emoji and sparkles
+    - Heartfelt message about creating a safe space for emotional expression
+    - Personal closing note with 💕 emoji
   - **Games**: Interactive calming games with both desktop and mobile touch support
     - **Bubble Pop** (Free): Canvas-based stress relief game - click/tap rising bubbles to pop them and increase score
     - **Color Drift** (Free): Color matching game - match the target color from 3 orb choices with instant feedback
