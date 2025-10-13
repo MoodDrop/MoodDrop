@@ -194,49 +194,31 @@ export default function Release() {
       }
       return res.json();
     },
-  });
-
-  const canSubmit =
-    !!emotion &&
-    content.trim().length > 0 &&
-    !submitMutation.isPending;
-
-  const onSubmit: React.FormEventHandler = async (e) => {
-    e.preventDefault();
-    if (!canSubmit) return;
-    
-    try {
-      // Get affirmation before clearing content
-      const encouragingMessage = getAffirmation(content, emotion);
-      
-      const result = await submitMutation.mutateAsync({
-        emotion,
-        content,
-        audioBlob: undefined,
-        audioDurationMs: 0,
-      });
+    onSuccess: (data, variables) => {
+      // Get affirmation based on submitted content
+      const encouragingMessage = getAffirmation(variables.content, variables.emotion);
       
       // Clear any existing timeout before setting a new one
       if (affirmationTimerRef.current) {
         clearTimeout(affirmationTimerRef.current);
       }
       
-      // Set affirmation immediately after successful submission
+      // Show affirmation with message
       setAffirmation(encouragingMessage);
       setShowAffirmation(true);
       
-      // Clear form after a brief delay to ensure affirmation renders first
-      setTimeout(() => {
-        setEmotion("");
-        setContent("");
-      }, 50);
+      // Clear form
+      setEmotion("");
+      setContent("");
       
       // Hide affirmation after 8 seconds
       affirmationTimerRef.current = setTimeout(() => {
         setShowAffirmation(false);
+        setAffirmation("");
         affirmationTimerRef.current = null;
       }, 8000);
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       // Clear timeout if mutation errors
       if (affirmationTimerRef.current) {
         clearTimeout(affirmationTimerRef.current);
@@ -248,7 +230,24 @@ export default function Release() {
         description: error?.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
-    }
+    },
+  });
+
+  const canSubmit =
+    !!emotion &&
+    content.trim().length > 0 &&
+    !submitMutation.isPending;
+
+  const onSubmit: React.FormEventHandler = (e) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    
+    submitMutation.mutate({
+      emotion,
+      content,
+      audioBlob: undefined,
+      audioDurationMs: 0,
+    });
   };
 
   return (
