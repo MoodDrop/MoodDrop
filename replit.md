@@ -110,7 +110,7 @@ Preferred communication style: Simple, everyday language.
 - **Comfort Corner**: Integrated inspirational quotes, coping strategies, and crisis resources
 - **Affirmation System**: Supportive messages displayed after sharing feelings, with smart keyword matching and gentle animations in MoodDrop's signature blush/cream color palette
 - **GardenIllustration Component**: Animated flower illustration for empty garden states with three blooming flowers (blush pink, cream/peach, soft rose) and sage green stems/leaves. Features 1.8s staggered grow animations and gentle leaf swaying for a welcoming, calming visual
-- **Footer Design**: Contact Us section prominently displays mooddrops2@gmail.com. Important Disclaimer and Support Resources are organized in a responsive 2-column grid layout that stacks on mobile devices
+- **Footer Design**: Gentle floating petal animation with soft, slow, meditative motion. Blush/pink gradient petals float upward with rotation on a blush-50 background. Simple copyright text centered
 
 ### About MoodDrop Page
 - **Dedicated Page**: Standalone About page accessible from header navigation
@@ -147,9 +147,9 @@ Preferred communication style: Simple, everyday language.
     - **Uplifting**: "The Power of Hope" by Creator motivationalresource
     - Category filtering (All, Funny, Uplifting, Story Times), responsive 16:9 aspect ratio with rounded corners and soft shadows
     - Blush/cream aesthetic with sparkle icon and supportive creator message
-  - **Games**: Interactive calming games with both desktop and mobile touch support
-    - **Bubble Pop** (Free): Canvas-based stress relief game - click/tap rising bubbles to pop them and increase score
-    - **Color Drift** (Free): Color matching game - match the target color from 3 orb choices with instant feedback
+  - **Games**: Interactive calming games with both desktop and mobile touch support, 30-second challenges with high score tracking (localStorage)
+    - **Bubble Pop** (Free): Canvas-based stress relief game with enhanced responsiveness - faster bubble spawn rate (5% per frame), faster movement speed (-1.5 to -3.5), and up to 20 bubbles on screen
+    - **Color Drift** (Free): Color and shape matching game with variety (circles, squares, triangles, stars) - match both the target color AND shape from 3 orb choices with instant visual feedback
     - **Memory Match** (Locked): Requires sign-up to unlock
     - **Zen Garden** (Locked): Requires sign-up to unlock
   - **Soothing Sounds**: Coming Soon message displayed with blush/cream aesthetic
