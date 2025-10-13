@@ -59,7 +59,7 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="bg-blush-50 px-6 py-12 mt-auto relative overflow-hidden">
+    <footer className="bg-gradient-to-br from-blush-100 to-[#E8D5C4] px-6 py-12 mt-auto relative overflow-hidden">
       {/* Floating Petals Animation */}
       <div className="absolute inset-0 pointer-events-none">
         {petals.map((petal) => (
@@ -72,21 +72,38 @@ export default function Footer() {
         ))}
       </div>
 
-      <div className="max-w-4xl mx-auto relative z-10">
+      <div className="max-w-4xl mx-auto relative z-10 text-center space-y-3 footer-content">
+        {/* MoodDrop Title */}
+        <p className="text-base font-medium text-[#8B7355]">
+          <span className="text-[#D4AF37]">💧</span> MoodDrop
+        </p>
+        
         {/* Tagline */}
-        <div className="text-center space-y-2">
-          <p className="text-sm font-semibold text-warm-gray-700">
-            💧 MoodDrop
-          </p>
-          <p className="text-sm text-warm-gray-600">
-            A quiet space to breathe, release, and reset.
-          </p>
-          <p className="text-sm text-warm-gray-600">
-            Your words are safe — always private, always anonymous.
-          </p>
-          <p className="text-xs text-warm-gray-500 pt-2">
-            © 2025 MoodDrop 🌸
-          </p>
+        <p className="text-sm text-[#8B7355] leading-relaxed">
+          A quiet space to breathe, release, and reset.
+        </p>
+        
+        {/* Privacy Statement */}
+        <p className="text-sm text-[#8B7355] leading-relaxed">
+          Your words are safe — always private, always anonymous.
+        </p>
+        
+        {/* Copyright */}
+        <p className="text-xs text-[#A08B73] pt-1">
+          © 2025 MoodDrop 🌸
+        </p>
+        
+        {/* Privacy Policy Link */}
+        <div className="pt-2">
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block text-sm text-[#8B7355] hover:text-[#F9A8D4] transition-colors duration-400 font-medium"
+            data-testid="link-privacy-policy-footer"
+          >
+            <span className="text-[#D4AF37]">💧</span> View Privacy & Safety Policy
+          </a>
         </div>
       </div>
 
@@ -110,6 +127,29 @@ export default function Footer() {
         
         .animate-float {
           animation: float linear infinite;
+        }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(6px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .footer-content {
+          animation: fadeInUp 0.8s ease-out 150ms both;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .footer-content {
+            animation: none;
+            opacity: 1;
+            transform: none;
+          }
         }
       `}</style>
     </footer>

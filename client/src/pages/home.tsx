@@ -39,9 +39,6 @@ export default function Home() {
       </div>
 
       <div className="mt-8 pt-6 border-t border-blush-200">
-        <p className="text-sm text-warm-gray-600 mb-2">
-          "Your words stay with you. Your peace stays yours."
-        </p>
         <a
           href="/privacy"
           target="_blank"
