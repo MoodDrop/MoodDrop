@@ -4,6 +4,7 @@ interface ColorOrb {
   id: number;
   color: string;
   name: string;
+  shape: 'circle' | 'square' | 'triangle' | 'star';
 }
 
 const COLORS = [
@@ -15,8 +16,61 @@ const COLORS = [
   { color: '#86EFAC', name: 'Sage Green' }
 ];
 
+const SHAPES: Array<'circle' | 'square' | 'triangle' | 'star'> = ['circle', 'square', 'triangle', 'star'];
+
+// Shape Component
+function Shape({ color, shape, size = 'w-full h-full' }: { color: string; shape: string; size?: string }) {
+  if (shape === 'circle') {
+    return (
+      <div
+        className={`${size} rounded-full`}
+        style={{ backgroundColor: color }}
+      />
+    );
+  }
+  
+  if (shape === 'square') {
+    return (
+      <div
+        className={`${size} rounded-lg`}
+        style={{ backgroundColor: color }}
+      />
+    );
+  }
+  
+  if (shape === 'triangle') {
+    return (
+      <div className={`${size} flex items-center justify-center`}>
+        <div
+          className="w-0 h-0"
+          style={{
+            borderLeft: '50px solid transparent',
+            borderRight: '50px solid transparent',
+            borderBottom: `86px solid ${color}`,
+          }}
+        />
+      </div>
+    );
+  }
+  
+  if (shape === 'star') {
+    return (
+      <div className={`${size} flex items-center justify-center`}>
+        <svg viewBox="0 0 100 100" className="w-full h-full">
+          <polygon
+            points="50,10 61,35 88,35 67,52 77,77 50,60 23,77 33,52 12,35 39,35"
+            fill={color}
+          />
+        </svg>
+      </div>
+    );
+  }
+  
+  return null;
+}
+
 export default function ColorDrift() {
-  const [targetColor, setTargetColor] = useState(COLORS[0]);
+  const [targetOrb, setTargetOrb] = useState<ColorOrb>({ id: 0, ...COLORS[0], shape: 'circle' });
   const [orbs, setOrbs] = useState<ColorOrb[]>([]);
   const [score, setScore] = useState(0);
   const [feedback, setFeedback] = useState('');
@@ -58,27 +112,44 @@ export default function ColorDrift() {
   }, [gameOver]);
 
   const generateNewRound = () => {
-    const target = COLORS[Math.floor(Math.random() * COLORS.length)];
-    setTargetColor(target);
+    // Create target with random color and shape
+    const targetColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+    const targetShape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+    const target: ColorOrb = { id: 0, ...targetColor, shape: targetShape };
+    setTargetOrb(target);
 
-    // Generate 3 random orbs including the target
-    const shuffledColors = [...COLORS].sort(() => Math.random() - 0.5).slice(0, 3);
-    if (!shuffledColors.find(c => c.color === target.color)) {
-      shuffledColors[0] = target;
+    // Generate 3 orbs including the target
+    const newOrbs: ColorOrb[] = [target];
+    
+    // Add 2 more random orbs (different from target)
+    while (newOrbs.length < 3) {
+      const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+      const randomShape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+      const newOrb: ColorOrb = { 
+        id: newOrbs.length, 
+        ...randomColor, 
+        shape: randomShape 
+      };
+      
+      // Make sure it's different from target (either color or shape must be different)
+      if (newOrb.color !== target.color || newOrb.shape !== target.shape) {
+        newOrbs.push(newOrb);
+      }
     }
     
-    setOrbs(
-      shuffledColors
-        .sort(() => Math.random() - 0.5)
-        .map((color, i) => ({ id: i, ...color }))
-    );
+    // Shuffle orbs and update IDs
+    const shuffled = newOrbs
+      .sort(() => Math.random() - 0.5)
+      .map((orb, i) => ({ ...orb, id: i }));
+    
+    setOrbs(shuffled);
     setFeedback('');
   };
 
   const handleOrbClick = (orb: ColorOrb) => {
     if (gameOver) return;
     
-    if (orb.color === targetColor.color) {
+    if (orb.color === targetOrb.color && orb.shape === targetOrb.shape) {
       setScore(s => s + 1);
       setFeedback('✨ Perfect match!');
       setTimeout(() => {
@@ -100,12 +171,16 @@ export default function ColorDrift() {
     generateNewRound();
   };
 
+  const getShapeName = (shape: string) => {
+    return shape.charAt(0).toUpperCase() + shape.slice(1);
+  };
+
   return (
     <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6" data-testid="game-color-drift">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="text-xl font-semibold text-warm-gray-800">Color Drift</h3>
-          <p className="text-sm text-warm-gray-600">Match the colors to find calm</p>
+          <p className="text-sm text-warm-gray-600">Match the color and shape to find calm</p>
         </div>
         <div className="flex gap-3">
           <div className="bg-white rounded-xl px-4 py-2 shadow-sm">
@@ -138,32 +213,31 @@ export default function ColorDrift() {
         </div>
       ) : (
         <>
-          {/* Target Color */}
+          {/* Target Shape & Color */}
           <div className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-            <p className="text-sm text-warm-gray-600 mb-3 text-center">Find this color:</p>
+            <p className="text-sm text-warm-gray-600 mb-3 text-center">Find this color and shape:</p>
             <div className="flex flex-col items-center gap-3">
-              <div
-                className="w-24 h-24 rounded-full shadow-lg transition-transform hover:scale-105"
-                style={{ backgroundColor: targetColor.color }}
-                data-testid="target-color"
-              />
-              <p className="text-lg font-semibold text-warm-gray-700">{targetColor.name}</p>
+              <div className="w-24 h-24">
+                <Shape color={targetOrb.color} shape={targetOrb.shape} />
+              </div>
+              <p className="text-lg font-semibold text-warm-gray-700">
+                {targetOrb.name} {getShapeName(targetOrb.shape)}
+              </p>
             </div>
           </div>
 
-          {/* Color Orbs */}
+          {/* Shape Orbs */}
           <div className="grid grid-cols-3 gap-4 mb-4">
             {orbs.map((orb) => (
               <button
                 key={orb.id}
                 onClick={() => handleOrbClick(orb)}
-                className="group relative"
+                className="group relative p-4 bg-white rounded-2xl shadow-md transition-all hover:shadow-xl hover:scale-105"
                 data-testid={`orb-${orb.id}`}
               >
-                <div
-                  className="w-full aspect-square rounded-2xl shadow-md transition-all group-hover:shadow-xl group-hover:scale-105"
-                  style={{ backgroundColor: orb.color }}
-                />
+                <div className="w-full aspect-square">
+                  <Shape color={orb.color} shape={orb.shape} />
+                </div>
                 <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
             ))}
@@ -183,7 +257,7 @@ export default function ColorDrift() {
       )}
 
       <p className="text-xs text-center text-warm-gray-500 mt-2">
-        💡 Tip: Match as many colors as you can in 30 seconds!
+        💡 Tip: Match both color AND shape in 30 seconds!
       </p>
     </div>
   );
