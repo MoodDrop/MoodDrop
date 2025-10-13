@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'wouter';
 
 // Floating Petal Component
 function FloatingPetal({ delay, left, size }: { delay: number; left: string; size: number }) {
@@ -95,15 +96,13 @@ export default function Footer() {
         
         {/* Privacy Policy Link */}
         <div className="pt-2">
-          <a
+          <Link 
             href="/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block text-sm text-[#8B7355] hover:text-[#F9A8D4] transition-colors duration-400 font-medium"
+            className="inline-block text-sm text-[#8B7355] hover:text-[#F9A8D4] transition-colors duration-400 font-medium cursor-pointer"
             data-testid="link-privacy-policy-footer"
           >
             <span className="text-[#D4AF37]">💧</span> View Privacy & Safety Policy
-          </a>
+          </Link>
         </div>
       </div>
 
