@@ -10,8 +10,8 @@ Preferred communication style: Simple, everyday language.
 ### Instagram Soft Launch Preparation (October 2025)
 - **Release Page Affirmation Fix**: Resolved critical bug where affirmation failed to display after message submission. Fixed by using React Query's `onSuccess` callback pattern instead of async/await for reliable state updates. Affirmation now displays supportive message immediately after successful submission with 8-second visibility duration
 - **Bubble Pop Game Sound**: Added gentle popping sound effect when bubbles are clicked. Audio element initialized with error handling for graceful fallback if sound file missing. User must download pop.mp3 to /public/sounds/ directory
-- **Soothing Sounds Removal**: Completely removed Soothing Sounds tab from Find Your Calm page, including all related components, state management, and unused audio references
-- **Production Readiness**: All fixes tested and verified via comprehensive end-to-end testing. Platform ready for Instagram soft launch deployment
+- **Soothing Sounds Tab**: Restored tab with "Coming Soon" message featuring Music2 icon, centered text, and soft blush/cream gradient background. Clean placeholder notifying users that soothing sounds (nature sounds, ambient music) will be available soon
+- **Production Readiness**: All features tested and verified via comprehensive end-to-end testing. Platform ready for Instagram soft launch deployment
 
 ## System Architecture
 ### Frontend
