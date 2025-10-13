@@ -3,6 +3,7 @@ import { PlayCircle, Sparkles, Laugh, Heart, Play, Pause, Gamepad2, Lock } from 
 import relaxingIllustration from "@assets/relaxing-illustration.png";
 import BubblePop from "./BubblePop";
 import ColorDrift from "./ColorDrift";
+import SoothingSounds from "./SoothingSounds";
 import { useAuth } from "@/hooks/useAuth";
 
 type TabType = "videos" | "games" | "sounds";
@@ -325,19 +326,7 @@ export default function FindYourCalm() {
 
         {/* Soothing Sounds Tab */}
         {activeTab === "sounds" && (
-          <div className="animate-in fade-in duration-500" data-testid="content-sounds">
-            <div className="text-center py-16">
-              <div className="bg-blush-50 border border-blush-100 rounded-2xl p-8 max-w-md mx-auto">
-                <div className="text-6xl mb-4">🎵</div>
-                <h3 className="text-2xl font-semibold text-warm-gray-700 mb-2">
-                  Coming Soon
-                </h3>
-                <p className="text-warm-gray-600">
-                  Soothing sounds are on their way to help you relax and find your calm.
-                </p>
-              </div>
-            </div>
-          </div>
+          <SoothingSounds />
         )}
 
         {/* Initial State - No Tab Selected */}
