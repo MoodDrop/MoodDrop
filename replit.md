@@ -8,11 +8,10 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 ### Instagram Soft Launch Preparation (October 2025)
-- **Release Page Affirmation Fix**: Resolved critical bug where affirmation displayed error instead of supportive message. Now uses requestAnimationFrame for proper React state updates and smooth visibility transitions with 8-second display duration
-- **Bubble Pop Game Optimization**: Reduced bubble speed from -1.5 to -3.5 down to -0.8 to -2.0 for more playable experience. Fixed timer lag by using refs to prevent interval re-creation on score changes. Reduced spawn rate to 3% and max bubbles to 15
-- **Soothing Sounds Implementation**: Replaced "Coming Soon" placeholder with fully functional audio player featuring 4 nature sounds (Gentle Rain, Ocean Waves, Forest Ambience, Flowing Stream) with play/pause controls, volume slider, mute toggle, and continuous loop playback
-- **Authentication Verification**: Confirmed Sign Up buttons (header and Mood Garden) successfully redirect to Replit OAuth with all provider options working correctly
-- **Production Readiness**: All features tested and architect-reviewed, ready for Instagram soft launch deployment
+- **Release Page Affirmation Fix**: Resolved critical bug where affirmation failed to display after message submission. Fixed by using React Query's `onSuccess` callback pattern instead of async/await for reliable state updates. Affirmation now displays supportive message immediately after successful submission with 8-second visibility duration
+- **Bubble Pop Game Sound**: Added gentle popping sound effect when bubbles are clicked. Audio element initialized with error handling for graceful fallback if sound file missing. User must download pop.mp3 to /public/sounds/ directory
+- **Soothing Sounds Removal**: Completely removed Soothing Sounds tab from Find Your Calm page, including all related components, state management, and unused audio references
+- **Production Readiness**: All fixes tested and verified via comprehensive end-to-end testing. Platform ready for Instagram soft launch deployment
 
 ## System Architecture
 ### Frontend
@@ -27,7 +26,7 @@ Preferred communication style: Simple, everyday language.
     - **Message System**: Emotion tagging, text input, voice notes (in development), affirmation feedback, favorites.
     - **Mood Garden**: Visual representation of emotional journey using color-coded Droplets, Flowers, and Trees with growth animations.
     - **Engagement Features**: Daily streak tracking, 30-day Mood Calendar (GitHub-style), Insights Dashboard (emotion distribution, activity summary), and a Favorites system.
-    - **Comfort Page ("Find Your Calm")**: Inspirational quotes, coping strategies, crisis resources, curated YouTube videos, interactive calming games (Bubble Pop, Color Drift; Memory Match, Zen Garden locked), and soothing nature sounds player.
+    - **Comfort Page ("Find Your Calm")**: Inspirational quotes, coping strategies, crisis resources, curated YouTube videos, and interactive calming games (Bubble Pop with gentle pop sounds, Color Drift; Memory Match, Zen Garden locked).
     - **Admin Moderation System**: Dedicated dashboard for content review, analytics, content filtering, bulk operations, message status management, and audio playback for voice messages.
     - **Auth**: Replit Auth integration (Google, GitHub, Apple, X, email/password), dual mode for authenticated and anonymous users, PostgreSQL-backed session persistence.
 
