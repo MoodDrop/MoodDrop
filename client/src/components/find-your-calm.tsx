@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { PlayCircle, Sparkles, Gamepad2, Lock, Laugh, Heart } from "lucide-react";
+import { PlayCircle, Sparkles, Gamepad2, Lock, Laugh, Heart, Music2 } from "lucide-react";
 import relaxingIllustration from "@assets/relaxing-illustration.png";
 import BubblePop from "./BubblePop";
 import ColorDrift from "./ColorDrift";
 import { useAuth } from "@/hooks/useAuth";
 
-type TabType = "videos" | "games";
+type TabType = "videos" | "sounds" | "games";
 type VideoCategory = "all" | "funny" | "uplifting" | "storytimes";
 
 interface Video {
@@ -73,6 +73,18 @@ export default function FindYourCalm() {
         >
           <PlayCircle className="inline-block mr-2" size={18} />
           Watch & Smile
+        </button>
+        <button
+          onClick={() => handleTabClick("sounds")}
+          className={`px-6 py-3 rounded-xl font-medium transition-all shadow-sm ${
+            activeTab === "sounds"
+              ? "bg-blush-300 text-white shadow-md"
+              : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
+          }`}
+          data-testid="tab-sounds"
+        >
+          <Music2 className="inline-block mr-2" size={18} />
+          Soothing Sounds
         </button>
         <button
           onClick={() => handleTabClick("games")}
@@ -205,6 +217,28 @@ export default function FindYourCalm() {
                   </div>
                 ))
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Soothing Sounds Tab */}
+        {activeTab === "sounds" && (
+          <div className="animate-in fade-in duration-500" data-testid="content-sounds">
+            <div className="flex items-center justify-center py-16">
+              <div className="text-center max-w-sm">
+                <div className="mb-6 flex justify-center">
+                  <div className="w-20 h-20 bg-gradient-to-br from-blush-100 to-cream-100 rounded-full flex items-center justify-center">
+                    <Music2 className="text-blush-400" size={36} />
+                  </div>
+                </div>
+                <h3 className="text-2xl font-semibold text-warm-gray-700 mb-3">
+                  Coming Soon
+                </h3>
+                <p className="text-warm-gray-600 leading-relaxed">
+                  Soothing sounds to help you find your calm will be available soon. 
+                  Stay tuned for nature sounds, ambient music, and more.
+                </p>
+              </div>
             </div>
           </div>
         )}
