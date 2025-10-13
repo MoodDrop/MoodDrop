@@ -25,7 +25,18 @@ export default function BubblePop() {
 
   const colors = ['#F9A8D4', '#FBCFE8', '#FDE68A', '#93C5FD', '#C4B5FD', '#FCA5A5'];
 
-  // Timer effect
+  // Timer effect - uses refs to avoid dependency issues
+  const scoreRef = useRef(score);
+  const highScoreRef = useRef(highScore);
+  
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
+  
+  useEffect(() => {
+    highScoreRef.current = highScore;
+  }, [highScore]);
+
   useEffect(() => {
     if (gameOver) return;
 
@@ -33,9 +44,9 @@ export default function BubblePop() {
       setTimeLeft(prev => {
         if (prev <= 1) {
           setGameOver(true);
-          if (score > highScore) {
-            setHighScore(score);
-            localStorage.setItem('bubblePop-highScore', score.toString());
+          if (scoreRef.current > highScoreRef.current) {
+            setHighScore(scoreRef.current);
+            localStorage.setItem('bubblePop-highScore', scoreRef.current.toString());
           }
           return 0;
         }
@@ -46,7 +57,7 @@ export default function BubblePop() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [gameOver, score, highScore]);
+  }, [gameOver]);
 
   useEffect(() => {
     if (gameOver) return;
@@ -74,7 +85,7 @@ export default function BubblePop() {
         y: canvas.height + radius,
         radius,
         color: colors[Math.floor(Math.random() * colors.length)],
-        speedY: -1.5 - Math.random() * 2 // Faster: -1.5 to -3.5 (was -1 to -3)
+        speedY: -0.8 - Math.random() * 1.2 // Slower and more manageable: -0.8 to -2.0
       };
     };
 
@@ -82,8 +93,8 @@ export default function BubblePop() {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Add new bubbles periodically (faster spawn rate)
-      if (Math.random() < 0.05 && bubblesRef.current.length < 20) {
+      // Add new bubbles periodically (balanced spawn rate)
+      if (Math.random() < 0.03 && bubblesRef.current.length < 15) {
         bubblesRef.current.push(createBubble());
       }
 
