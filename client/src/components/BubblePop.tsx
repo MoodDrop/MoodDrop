@@ -74,7 +74,7 @@ export default function BubblePop() {
         y: canvas.height + radius,
         radius,
         color: colors[Math.floor(Math.random() * colors.length)],
-        speedY: -1 - Math.random() * 2
+        speedY: -1.5 - Math.random() * 2 // Faster: -1.5 to -3.5 (was -1 to -3)
       };
     };
 
@@ -82,8 +82,8 @@ export default function BubblePop() {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Add new bubbles periodically
-      if (Math.random() < 0.03 && bubblesRef.current.length < 15) {
+      // Add new bubbles periodically (faster spawn rate)
+      if (Math.random() < 0.05 && bubblesRef.current.length < 20) {
         bubblesRef.current.push(createBubble());
       }
 
