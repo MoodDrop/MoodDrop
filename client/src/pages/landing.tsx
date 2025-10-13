@@ -1,4 +1,5 @@
 import dropletIcon from "@assets/Droplet_1760186315979.png";
+import { Link } from "wouter";
 
 export default function Landing() {
   return (
@@ -32,6 +33,22 @@ export default function Landing() {
         <p className="text-xs text-warm-gray-500">
           Free to use • Secure login with Google, GitHub, Apple, or email
         </p>
+      </div>
+
+      {/* Privacy Policy Link */}
+      <div className="mt-8 pt-6 border-t border-blush-200">
+        <p className="text-sm text-warm-gray-600 mb-2">
+          "Your words stay with you. Your peace stays yours."
+        </p>
+        <a
+          href="/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blush-400 hover:text-blush-500 text-sm font-medium transition-colors underline"
+          data-testid="link-privacy-policy"
+        >
+          View Privacy & Safety Policy
+        </a>
       </div>
     </div>
   );
