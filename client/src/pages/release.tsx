@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { getAffirmation } from "@/lib/affirmations";
 import { useAuth } from "@/hooks/useAuth";
 import { Sparkles } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 /**
  * Release (Share Your Feelings) page
@@ -40,6 +41,7 @@ const VOICE_MAX_MS = 120_000; // 2 minutes
 
 export default function Release() {
   const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
   
   // form state
   const [emotion, setEmotion] = useState<string>("");
@@ -186,8 +188,11 @@ export default function Release() {
       }
 
       const res = await fetch("/api/messages", { method: "POST", body: form });
-      if (!res.ok) throw new Error("Failed to submit message");
-      return res.json().catch(() => ({}));
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: "Failed to submit message" }));
+        throw new Error(errorData.message || "Failed to submit message");
+      }
+      return res.json();
     },
   });
 
@@ -199,42 +204,52 @@ export default function Release() {
   const onSubmit: React.FormEventHandler = async (e) => {
     e.preventDefault();
     if (!canSubmit) return;
+    
     try {
       // Get affirmation before clearing content
       const encouragingMessage = getAffirmation(content, emotion);
       
-      await submitMutation.mutateAsync({
+      const result = await submitMutation.mutateAsync({
         emotion,
         content,
         audioBlob: undefined,
         audioDurationMs: 0,
       });
       
-      // reset form
-      setEmotion("");
-      setContent("");
-      
       // Clear any existing timeout before setting a new one
       if (affirmationTimerRef.current) {
         clearTimeout(affirmationTimerRef.current);
       }
       
-      // Show affirmation
-      setAffirmation(encouragingMessage);
-      setShowAffirmation(true);
-      
-      // Hide affirmation after 8 seconds
-      affirmationTimerRef.current = setTimeout(() => {
-        setShowAffirmation(false);
-        affirmationTimerRef.current = null;
-      }, 8000);
-    } catch {
+      // Use requestAnimationFrame to ensure the DOM is ready for the update
+      requestAnimationFrame(() => {
+        setAffirmation(encouragingMessage);
+        setShowAffirmation(true);
+        
+        // Then reset form after affirmation is shown
+        setTimeout(() => {
+          setEmotion("");
+          setContent("");
+        }, 100);
+        
+        // Hide affirmation after 8 seconds
+        affirmationTimerRef.current = setTimeout(() => {
+          setShowAffirmation(false);
+          affirmationTimerRef.current = null;
+        }, 8000);
+      });
+    } catch (error: any) {
       // Clear timeout if mutation errors
       if (affirmationTimerRef.current) {
         clearTimeout(affirmationTimerRef.current);
         affirmationTimerRef.current = null;
       }
-      alert("Sorry — something went wrong. Please try again.");
+      
+      toast({
+        title: "Oops!",
+        description: error?.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -327,11 +342,17 @@ export default function Release() {
       </form>
 
       {/* Affirmation Display */}
-      {showAffirmation && (
-        <div 
-          className="mt-6 p-6 bg-gradient-to-br from-blush-50 to-cream-50 border-2 border-blush-200 rounded-2xl shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-500"
-          data-testid="affirmation-message"
-        >
+      <div 
+        className={`mt-6 p-6 bg-gradient-to-br from-blush-50 to-cream-50 border-2 border-blush-200 rounded-2xl shadow-lg transition-all duration-500 ${
+          showAffirmation 
+            ? 'opacity-100 translate-y-0' 
+            : 'opacity-0 translate-y-4 pointer-events-none h-0 p-0 mt-0 border-0'
+        }`}
+        data-testid="affirmation-message"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {showAffirmation && (
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 w-10 h-10 bg-blush-300 rounded-full flex items-center justify-center">
               <span className="text-xl">✨</span>
@@ -342,8 +363,8 @@ export default function Release() {
               </p>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Sign Up Prompt for Anonymous Users */}
       {!isAuthenticated && (
