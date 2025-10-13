@@ -12,6 +12,7 @@ import ThankYou from "@/pages/thank-you";
 import Comfort from "@/pages/comfort";
 import Garden from "@/pages/garden";
 import About from "@/pages/about";
+import Privacy from "@/pages/privacy";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import Header from "@/components/header";
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/comfort" component={Comfort} />
       <Route path="/garden" component={Garden} />
       <Route path="/about" component={About} />
+      <Route path="/privacy" component={Privacy} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route component={NotFound} />
