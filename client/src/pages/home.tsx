@@ -37,18 +37,6 @@ export default function Home() {
           </button>
         </Link>
       </div>
-
-      <div className="mt-8 pt-6 border-t border-blush-200">
-        <a
-          href="/privacy"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blush-400 hover:text-blush-500 text-sm font-medium transition-colors underline"
-          data-testid="link-privacy-policy"
-        >
-          View Privacy & Safety Policy
-        </a>
-      </div>
     </div>
   );
 }
