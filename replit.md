@@ -110,7 +110,9 @@ Preferred communication style: Simple, everyday language.
 - **Comfort Corner**: Integrated inspirational quotes, coping strategies, and crisis resources
 - **Affirmation System**: Supportive messages displayed after sharing feelings, with smart keyword matching and gentle animations in MoodDrop's signature blush/cream color palette
 - **GardenIllustration Component**: Animated flower illustration for empty garden states with three blooming flowers (blush pink, cream/peach, soft rose) and sage green stems/leaves. Features 1.8s staggered grow animations and gentle leaf swaying for a welcoming, calming visual
-- **Footer Design**: Gentle floating petal animation with soft, slow, meditative motion. Blush/pink gradient petals float upward with rotation on a blush-50 background. Simple copyright text centered
+- **Footer Design**: Gentle floating petal animation with soft, slow, meditative motion. Blush/pink gradient petals float upward with rotation on a blush-50 background. Conditional content based on page:
+  - **Home Page**: Privacy statement "Your words are safe — always private, always anonymous" with link to Privacy & Safety Policy
+  - **All Other Pages**: Disclaimer stating MoodDrop is not a substitute for professional help, crisis helpline numbers (988, findahelpline.com, befrienders.org, Crisis Text Line 741741), and "Back to Home" link
 
 ### About MoodDrop Page
 - **Dedicated Page**: Standalone About page accessible from header navigation
