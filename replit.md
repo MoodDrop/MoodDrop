@@ -123,6 +123,19 @@ Preferred communication style: Simple, everyday language.
 - **Personal Touch**: Closing message with 💕 emoji showing creator's care and dedication
 - **Navigation**: Back button to return to home page
 
+### Privacy & Safety Policy Page
+- **Dedicated Page**: Standalone Privacy Policy page at /privacy
+- **Landing Page Integration**: Privacy policy link displayed at bottom of homepage with tagline "Your words stay with you. Your peace stays yours."
+- **Opens in New Tab**: Link configured with target="_blank" for user convenience
+- **Content Sections**:
+  - 💧 What We Collect - Minimal data collection, private voice notes and entries
+  - 🔒 Your Privacy - Anonymous submissions, no third-party sharing, secure storage
+  - 🌿 Safe Space Promise - Community guidelines and respect
+  - 💛 Transparency - Commitment to clear communication about policy updates
+- **Visual Design**: Matches About page aesthetic with gradient blush/cream background and 🌸 emoji
+- **Closing Message**: "Your words stay with you. Your peace stays yours." with Shield icon
+- **Navigation**: Back button to return to home page
+
 ### Wellbeing Features (Comfort Page)
 - **Inspirational Quotes**: Rotating collection of uplifting quotes with manual refresh option
 - **Coping Strategies**: 6 practical techniques including deep breathing, grounding, and mindfulness
