@@ -1,12 +1,11 @@
-import { useState, useRef } from "react";
-import { PlayCircle, Sparkles, Laugh, Heart, Play, Pause, Gamepad2, Lock } from "lucide-react";
+import { useState } from "react";
+import { PlayCircle, Sparkles, Gamepad2, Lock, Laugh, Heart } from "lucide-react";
 import relaxingIllustration from "@assets/relaxing-illustration.png";
 import BubblePop from "./BubblePop";
 import ColorDrift from "./ColorDrift";
-import SoothingSounds from "./SoothingSounds";
 import { useAuth } from "@/hooks/useAuth";
 
-type TabType = "videos" | "games" | "sounds";
+type TabType = "videos" | "games";
 type VideoCategory = "all" | "funny" | "uplifting" | "storytimes";
 
 interface Video {
@@ -16,13 +15,6 @@ interface Video {
   embedUrl: string;
   category: VideoCategory[];
   description: string;
-}
-
-interface Sound {
-  id: string;
-  name: string;
-  icon: string;
-  audioUrl: string;
 }
 
 const VIDEOS: Video[] = [
@@ -52,39 +44,10 @@ const VIDEOS: Video[] = [
   }
 ];
 
-const SOUNDS: Sound[] = [
-  {
-    id: "rain",
-    name: "Gentle Rain",
-    icon: "🌧️",
-    audioUrl: "https://cdn.pixabay.com/download/audio/2022/05/13/audio_257112ce97.mp3"
-  },
-  {
-    id: "ocean",
-    name: "Ocean Waves",
-    icon: "🌊",
-    audioUrl: "https://cdn.pixabay.com/download/audio/2022/06/07/audio_c2eb9e14c8.mp3"
-  },
-  {
-    id: "meditation",
-    name: "Meditation",
-    icon: "🧘",
-    audioUrl: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c610232532.mp3"
-  },
-  {
-    id: "morning-birds",
-    name: "Morning Birds",
-    icon: "🐦",
-    audioUrl: "https://cdn.pixabay.com/download/audio/2022/03/10/audio_4dedf2e94c.mp3"
-  }
-];
-
 export default function FindYourCalm() {
   const [activeTab, setActiveTab] = useState<TabType | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<VideoCategory>("all");
-  const [playingSound, setPlayingSound] = useState<string | null>(null);
   const [selectedGame, setSelectedGame] = useState<'bubble' | 'color' | null>('bubble');
-  const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
   const { isAuthenticated } = useAuth();
 
   const filteredVideos = selectedCategory === "all" 
@@ -93,19 +56,6 @@ export default function FindYourCalm() {
 
   const handleTabClick = (tab: TabType) => {
     setActiveTab(activeTab === tab ? null : tab);
-  };
-
-  const toggleSound = (soundId: string) => {
-    if (playingSound === soundId) {
-      audioRefs.current[soundId]?.pause();
-      setPlayingSound(null);
-    } else {
-      if (playingSound) {
-        audioRefs.current[playingSound]?.pause();
-      }
-      audioRefs.current[soundId]?.play();
-      setPlayingSound(soundId);
-    }
   };
 
   return (
@@ -135,18 +85,6 @@ export default function FindYourCalm() {
         >
           <Gamepad2 className="inline-block mr-2" size={18} />
           Games
-        </button>
-        <button
-          onClick={() => handleTabClick("sounds")}
-          className={`px-6 py-3 rounded-xl font-medium transition-all shadow-sm ${
-            activeTab === "sounds"
-              ? "bg-blush-300 text-white shadow-md"
-              : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
-          }`}
-          data-testid="tab-sounds"
-        >
-          <span className="inline-block mr-2">🎵</span>
-          Soothing Sounds
         </button>
       </div>
 
@@ -322,11 +260,6 @@ export default function FindYourCalm() {
             {selectedGame === 'bubble' && <BubblePop />}
             {selectedGame === 'color' && <ColorDrift />}
           </div>
-        )}
-
-        {/* Soothing Sounds Tab */}
-        {activeTab === "sounds" && (
-          <SoothingSounds />
         )}
 
         {/* Initial State - No Tab Selected */}

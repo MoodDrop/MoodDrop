@@ -221,23 +221,21 @@ export default function Release() {
         clearTimeout(affirmationTimerRef.current);
       }
       
-      // Use requestAnimationFrame to ensure the DOM is ready for the update
-      requestAnimationFrame(() => {
-        setAffirmation(encouragingMessage);
-        setShowAffirmation(true);
-        
-        // Then reset form after affirmation is shown
-        setTimeout(() => {
-          setEmotion("");
-          setContent("");
-        }, 100);
-        
-        // Hide affirmation after 8 seconds
-        affirmationTimerRef.current = setTimeout(() => {
-          setShowAffirmation(false);
-          affirmationTimerRef.current = null;
-        }, 8000);
-      });
+      // Set affirmation immediately after successful submission
+      setAffirmation(encouragingMessage);
+      setShowAffirmation(true);
+      
+      // Clear form after a brief delay to ensure affirmation renders first
+      setTimeout(() => {
+        setEmotion("");
+        setContent("");
+      }, 50);
+      
+      // Hide affirmation after 8 seconds
+      affirmationTimerRef.current = setTimeout(() => {
+        setShowAffirmation(false);
+        affirmationTimerRef.current = null;
+      }, 8000);
     } catch (error: any) {
       // Clear timeout if mutation errors
       if (affirmationTimerRef.current) {

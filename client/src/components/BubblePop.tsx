@@ -22,8 +22,16 @@ export default function BubblePop() {
   const animationRef = useRef<number>();
   const bubbleIdRef = useRef(0);
   const timerRef = useRef<NodeJS.Timeout>();
+  const popSoundRef = useRef<HTMLAudioElement | null>(null);
 
   const colors = ['#F9A8D4', '#FBCFE8', '#FDE68A', '#93C5FD', '#C4B5FD', '#FCA5A5'];
+
+  // Initialize pop sound
+  useEffect(() => {
+    const audio = new Audio('/sounds/pop.mp3');
+    audio.volume = 0.3;
+    popSoundRef.current = audio;
+  }, []);
 
   // Timer effect - uses refs to avoid dependency issues
   const scoreRef = useRef(score);
@@ -149,6 +157,15 @@ export default function BubblePop() {
       if (distance <= bubble.radius && !popped) {
         popped = true;
         setScore(s => s + 1);
+        
+        // Play pop sound
+        if (popSoundRef.current) {
+          popSoundRef.current.currentTime = 0;
+          popSoundRef.current.play().catch(() => {
+            // Ignore errors if sound fails to play
+          });
+        }
+        
         return false;
       }
       return true;
