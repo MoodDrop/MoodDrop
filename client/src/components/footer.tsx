@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 
 // Floating Petal Component
 function FloatingPetal({ delay, left, size }: { delay: number; left: string; size: number }) {
@@ -46,7 +46,9 @@ function FloatingPetal({ delay, left, size }: { delay: number; left: string; siz
 }
 
 export default function Footer() {
+  const [location] = useLocation();
   const [petals, setPetals] = useState<Array<{ id: number; left: string; delay: number; size: number }>>([]);
+  const isHomePage = location === '/';
 
   useEffect(() => {
     // Generate random petals
@@ -84,26 +86,68 @@ export default function Footer() {
           A quiet space to breathe, release, and reset.
         </p>
         
-        {/* Privacy Statement */}
-        <p className="text-sm text-[#8B7355] leading-relaxed">
-          Your words are safe — always private, always anonymous.
-        </p>
-        
-        {/* Copyright */}
-        <p className="text-xs text-[#A08B73] pt-1">
-          © 2025 MoodDrop 🌸
-        </p>
-        
-        {/* Privacy Policy Link */}
-        <div className="pt-2">
-          <Link 
-            href="/privacy"
-            className="inline-block text-sm text-[#8B7355] hover:text-[#F9A8D4] transition-colors duration-400 font-medium cursor-pointer"
-            data-testid="link-privacy-policy-footer"
-          >
-            <span className="text-[#D4AF37]">💧</span> View Privacy & Safety Policy
-          </Link>
-        </div>
+        {/* Conditional Content Based on Page */}
+        {isHomePage ? (
+          <>
+            {/* Privacy Statement - Home Page Only */}
+            <p className="text-sm text-[#8B7355] leading-relaxed">
+              Your words are safe — always private, always anonymous.
+            </p>
+            
+            {/* Copyright */}
+            <p className="text-xs text-[#A08B73] pt-1">
+              © 2025 MoodDrop 🌸
+            </p>
+            
+            {/* Privacy Policy Link */}
+            <div className="pt-2">
+              <Link 
+                href="/privacy"
+                className="inline-block text-sm text-[#8B7355] hover:text-[#F9A8D4] transition-colors duration-400 font-medium cursor-pointer"
+                data-testid="link-privacy-policy-footer"
+              >
+                <span className="text-[#D4AF37]">💧</span> View Privacy & Safety Policy
+              </Link>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Disclaimer - All Other Pages */}
+            <div className="space-y-4 mt-4">
+              <div>
+                <h3 className="text-base font-semibold text-[#8B7355] mb-2">Disclaimer</h3>
+                <p className="text-sm text-[#8B7355] leading-relaxed">
+                  MoodDrop is designed for emotional release and calm reflection. It is not a substitute for professional mental health support. If you are in crisis, please reach out for help immediately.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-base font-semibold text-[#8B7355] mb-2">Important Numbers</h3>
+                <div className="text-sm text-[#8B7355] leading-relaxed space-y-1">
+                  <p>📞 National Suicide Prevention Lifeline (US): <strong>988</strong></p>
+                  <p>🌍 Find international helplines: <a href="https://findahelpline.com" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] hover:text-[#F9A8D4] transition-colors underline">findahelpline.com</a>, <a href="https://befrienders.org" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] hover:text-[#F9A8D4] transition-colors underline">befrienders.org</a>, or search your local emergency services.</p>
+                  <p>💬 If you need someone to talk to, text <strong>HELLO</strong> to <strong>741741</strong> (US & Canada) for the Crisis Text Line.</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Copyright */}
+            <p className="text-xs text-[#A08B73] pt-4">
+              © 2025 MoodDrop 🌸
+            </p>
+            
+            {/* Back to Home Link */}
+            <div className="pt-2">
+              <Link 
+                href="/"
+                className="inline-block text-sm text-[#8B7355] hover:text-[#F9A8D4] transition-colors duration-400 font-medium cursor-pointer"
+                data-testid="link-back-home"
+              >
+                <span className="text-[#D4AF37]">💧</span> Back to Home
+              </Link>
+            </div>
+          </>
+        )}
       </div>
 
       <style>{`
