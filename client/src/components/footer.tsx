@@ -73,10 +73,19 @@ export default function Footer() {
       </div>
 
       <div className="max-w-4xl mx-auto relative z-10">
-        {/* Copyright */}
-        <div className="text-center">
-          <p className="text-xs text-warm-gray-600">
-            © 2024 MoodDrop • Made with 💝 for emotional wellness
+        {/* Tagline */}
+        <div className="text-center space-y-2">
+          <p className="text-sm font-semibold text-warm-gray-700">
+            💧 MoodDrop
+          </p>
+          <p className="text-sm text-warm-gray-600">
+            A quiet space to breathe, release, and reset.
+          </p>
+          <p className="text-sm text-warm-gray-600">
+            Your words are safe — always private, always anonymous.
+          </p>
+          <p className="text-xs text-warm-gray-500 pt-2">
+            © 2025 MoodDrop 🌸
           </p>
         </div>
       </div>
