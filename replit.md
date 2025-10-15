@@ -7,11 +7,18 @@ MoodDrop is a full-stack web application designed as a safe space for users to e
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
-### Instagram Soft Launch Preparation (October 2025)
-- **Release Page Affirmation Fix**: Resolved critical bug where affirmation failed to display after message submission. Fixed by using React Query's `onSuccess` callback pattern instead of async/await for reliable state updates. Affirmation now displays supportive message immediately after successful submission with 8-second visibility duration
-- **Bubble Pop Game Sound**: Added gentle popping sound effect when bubbles are clicked. Audio element initialized with error handling for graceful fallback if sound file missing. User must download pop.mp3 to /public/sounds/ directory
-- **Soothing Sounds Tab**: Restored tab with "Coming Soon" message featuring Music2 icon, centered text, and soft blush/cream gradient background. Clean placeholder notifying users that soothing sounds (nature sounds, ambient music) will be available soon
-- **Production Readiness**: All features tested and verified via comprehensive end-to-end testing. Platform ready for Instagram soft launch deployment
+### Visual Mood Selector on Homepage (October 2025)
+- **Mood Selector Feature**: Added interactive mood selector on homepage with 6 color-coded mood icons (Calm, Grounded, Joyful, Tender, Overwhelmed, Frustrated). Each mood has unique color, shape icon, and meaning description displayed when selected
+- **Write & Record Options**: Users can choose to Write (text input with mood meaning displayed) or Record Voice after selecting a mood. Affirmation displays for 8 seconds after submission, then automatically returns to mood grid
+- **Memory Match Game**: Replaced Color Drift with Memory Match card game featuring 8 pairs of flower emojis. Tracks moves and matches with win celebration. Color Drift moved to locked games
+- **Mood Flow**: Homepage now features: Mood Grid → Select Mood → Write/Record → Submit → Affirmation (8s) → Auto-reset to Grid
+- **Accessibility**: Full keyboard navigation support, ARIA labels for all mood icons, calming color palette matching MoodDrop aesthetic
+
+### Previous Updates
+- **Release Page Affirmation Fix**: Resolved critical bug where affirmation failed to display after message submission. Fixed by using React Query's `onSuccess` callback pattern instead of async/await for reliable state updates
+- **Bubble Pop Game Sound**: Added gentle popping sound effect when bubbles are clicked. Audio element initialized with error handling for graceful fallback if sound file missing
+- **Soothing Sounds Tab**: Restored tab with "Coming Soon" message featuring Music2 icon, centered text, and soft blush/cream gradient background
+- **Production Readiness**: All features tested and verified via comprehensive end-to-end testing
 
 ## System Architecture
 ### Frontend
@@ -23,10 +30,11 @@ Preferred communication style: Simple, everyday language.
 - **Build Tool**: Vite
 - **UI/UX**: Mobile-first responsive design, accessibility-focused (semantic HTML, ARIA labels), toast notifications, progressive enhancement, calming tab transitions, animated Mood Garden elements, and a floating petal footer animation.
 - **Key Pages**:
+    - **Homepage Mood Selector**: Interactive visual mood selector with 6 color-coded moods (Calm, Grounded, Joyful, Tender, Overwhelmed, Frustrated). Users select mood, choose Write or Record Voice, receive affirmation, and auto-return to mood grid.
     - **Message System**: Emotion tagging, text input, voice notes (in development), affirmation feedback, favorites.
     - **Mood Garden**: Visual representation of emotional journey using color-coded Droplets, Flowers, and Trees with growth animations.
     - **Engagement Features**: Daily streak tracking, 30-day Mood Calendar (GitHub-style), Insights Dashboard (emotion distribution, activity summary), and a Favorites system.
-    - **Comfort Page ("Find Your Calm")**: Inspirational quotes, coping strategies, crisis resources, curated YouTube videos, and interactive calming games (Bubble Pop with gentle pop sounds, Color Drift; Memory Match, Zen Garden locked).
+    - **Comfort Page ("Find Your Calm")**: Inspirational quotes, coping strategies, crisis resources, curated YouTube videos, interactive calming games (Bubble Pop with gentle pop sounds, Memory Match with 8 pairs; Color Drift and Zen Garden locked), and Soothing Sounds placeholder.
     - **Admin Moderation System**: Dedicated dashboard for content review, analytics, content filtering, bulk operations, message status management, and audio playback for voice messages.
     - **Auth**: Replit Auth integration (Google, GitHub, Apple, X, email/password), dual mode for authenticated and anonymous users, PostgreSQL-backed session persistence.
 
