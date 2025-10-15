@@ -81,6 +81,8 @@ export default function MoodComposer({
         setShowAffirmation(false);
         setAffirmation("");
         affirmationTimerRef.current = null;
+        // Reset mood to return to selector after affirmation
+        onResetMood();
       }, 8000);
     },
     onError: (error: any) => {
