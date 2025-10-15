@@ -10,6 +10,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"write" | "voice">("write");
   const [selectedMood, setSelectedMood] = useState<MoodKey | null>(null);
   const [hoveredMood, setHoveredMood] = useState<MoodKey | null>(null);
+  const [draftText, setDraftText] = useState("");
 
   const handleTabClick = (tab: "write" | "voice") => {
     setActiveTab(tab);
@@ -127,6 +128,8 @@ export default function Home() {
             <WriteTab 
               selectedMood={selectedMood} 
               onResetMood={handleResetMood}
+              draftText={draftText}
+              onTextChange={setDraftText}
             />
           )}
           {activeTab === "voice" && (

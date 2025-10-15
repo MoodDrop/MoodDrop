@@ -8,10 +8,11 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 interface WriteTabProps {
   selectedMood: MoodKey | null;
   onResetMood: () => void;
+  draftText: string;
+  onTextChange: (text: string) => void;
 }
 
-export default function WriteTab({ selectedMood, onResetMood }: WriteTabProps) {
-  const [content, setContent] = useState("");
+export default function WriteTab({ selectedMood, onResetMood, draftText, onTextChange }: WriteTabProps) {
   const [showAffirmation, setShowAffirmation] = useState(false);
   const [affirmation, setAffirmation] = useState("");
   const affirmationTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -46,7 +47,7 @@ export default function WriteTab({ selectedMood, onResetMood }: WriteTabProps) {
       
       setAffirmation(encouragingMessage);
       setShowAffirmation(true);
-      setContent("");
+      onTextChange("");
       
       affirmationTimerRef.current = setTimeout(() => {
         setShowAffirmation(false);
@@ -73,10 +74,10 @@ export default function WriteTab({ selectedMood, onResetMood }: WriteTabProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (!draftText.trim()) return;
 
     const emotion = selectedMood ? moods[selectedMood].key : "Calm";
-    submitMutation.mutate({ content: content.trim(), emotion });
+    submitMutation.mutate({ content: draftText.trim(), emotion });
   };
 
   const mood = selectedMood ? moods[selectedMood] : null;
@@ -134,8 +135,8 @@ export default function WriteTab({ selectedMood, onResetMood }: WriteTabProps) {
           </label>
           <textarea
             ref={textareaRef}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
+            value={draftText}
+            onChange={(e) => onTextChange(e.target.value)}
             rows={6}
             placeholder="Let it all drop here — one mood at a time."
             className="w-full rounded-lg border border-warm-gray-200 focus:ring-2 focus:ring-blush-300 focus:outline-none px-4 py-3 text-warm-gray-800 placeholder-warm-gray-400"
@@ -145,7 +146,7 @@ export default function WriteTab({ selectedMood, onResetMood }: WriteTabProps) {
 
         <button
           type="submit"
-          disabled={!content.trim() || submitMutation.isPending}
+          disabled={!draftText.trim() || submitMutation.isPending}
           className="w-full bg-blush-300 hover:bg-blush-400 disabled:bg-warm-gray-200 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-all shadow-md hover:shadow-lg"
           data-testid="button-submit-write"
         >
