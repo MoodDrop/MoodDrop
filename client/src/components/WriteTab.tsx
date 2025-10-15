@@ -15,6 +15,7 @@ export default function WriteTab({ selectedMood, onResetMood }: WriteTabProps) {
   const [showAffirmation, setShowAffirmation] = useState(false);
   const [affirmation, setAffirmation] = useState("");
   const affirmationTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     return () => {
@@ -22,6 +23,13 @@ export default function WriteTab({ selectedMood, onResetMood }: WriteTabProps) {
         clearTimeout(affirmationTimerRef.current);
       }
     };
+  }, []);
+
+  // Auto-focus textarea when component opens
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
   }, []);
 
   const submitMutation = useMutation({
@@ -125,6 +133,7 @@ export default function WriteTab({ selectedMood, onResetMood }: WriteTabProps) {
             Write it out (only you can see this)
           </label>
           <textarea
+            ref={textareaRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={6}

@@ -87,49 +87,56 @@ export default function Home() {
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="flex flex-wrap justify-center gap-3 mb-6">
-        <button
-          onClick={() => handleTabClick("write")}
-          className={`px-6 py-3 rounded-xl font-medium transition-all shadow-sm ${
-            activeTab === "write"
-              ? "bg-blush-300 text-white shadow-md"
-              : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
-          }`}
-          data-testid="tab-let-it-flow"
-        >
-          <PenLine className="inline-block mr-2" size={18} />
-          Let It Flow
-        </button>
-        <button
-          onClick={() => handleTabClick("voice")}
-          className={`px-6 py-3 rounded-xl font-medium transition-all shadow-sm ${
-            activeTab === "voice"
-              ? "bg-blush-300 text-white shadow-md"
-              : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
-          }`}
-          data-testid="tab-take-a-moment"
-        >
-          <Mic className="inline-block mr-2" size={18} />
-          Take a Moment
-        </button>
-      </div>
+      {/* Tabs - Only show when mood is selected */}
+      {selectedMood && (
+        <div className="flex flex-wrap justify-center gap-3 mb-6">
+          <button
+            onClick={() => handleTabClick("write")}
+            className={`px-6 py-3 rounded-xl font-medium transition-all shadow-sm ${
+              activeTab === "write"
+                ? "bg-blush-300 text-white shadow-md"
+                : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
+            }`}
+            data-testid="tab-let-it-flow"
+          >
+            <PenLine className="inline-block mr-2" size={18} />
+            Let It Flow
+          </button>
+          <button
+            onClick={() => handleTabClick("voice")}
+            className={`px-6 py-3 rounded-xl font-medium transition-all shadow-sm ${
+              activeTab === "voice"
+                ? "bg-blush-300 text-white shadow-md"
+                : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
+            }`}
+            data-testid="tab-take-a-moment"
+          >
+            <Mic className="inline-block mr-2" size={18} />
+            Take a Moment
+          </button>
+        </div>
+      )}
 
-      {/* Tab Content */}
-      <div className="max-w-2xl mx-auto">
-        {activeTab === "write" && (
-          <WriteTab 
-            selectedMood={selectedMood} 
-            onResetMood={handleResetMood}
-          />
-        )}
-        {activeTab === "voice" && (
-          <VoiceTab 
-            selectedMood={selectedMood}
-            onResetMood={handleResetMood}
-          />
-        )}
-      </div>
+      {/* Tab Content - Only show when mood is selected */}
+      {selectedMood && (
+        <div 
+          className="max-w-2xl mx-auto animate-in fade-in slide-in-from-top-4 duration-200"
+          aria-expanded={!!selectedMood}
+        >
+          {activeTab === "write" && (
+            <WriteTab 
+              selectedMood={selectedMood} 
+              onResetMood={handleResetMood}
+            />
+          )}
+          {activeTab === "voice" && (
+            <VoiceTab 
+              selectedMood={selectedMood}
+              onResetMood={handleResetMood}
+            />
+          )}
+        </div>
+      )}
 
       {/* Quick Access Button */}
       <div className="flex justify-center mt-12">
