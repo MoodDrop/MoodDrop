@@ -2,7 +2,7 @@ import { useState } from "react";
 import { PlayCircle, Sparkles, Gamepad2, Lock, Laugh, Heart, Music2 } from "lucide-react";
 import relaxingIllustration from "@assets/relaxing-illustration.png";
 import BubblePop from "./BubblePop";
-import ColorDrift from "./ColorDrift";
+import MemoryMatch from "./MemoryMatch";
 import { useAuth } from "@/hooks/useAuth";
 
 type TabType = "videos" | "sounds" | "games";
@@ -47,7 +47,7 @@ const VIDEOS: Video[] = [
 export default function FindYourCalm() {
   const [activeTab, setActiveTab] = useState<TabType | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<VideoCategory>("all");
-  const [selectedGame, setSelectedGame] = useState<'bubble' | 'color' | null>('bubble');
+  const [selectedGame, setSelectedGame] = useState<'bubble' | 'memory' | null>('bubble');
   const { isAuthenticated } = useAuth();
 
   const filteredVideos = selectedCategory === "all" 
@@ -260,15 +260,15 @@ export default function FindYourCalm() {
                 🫧 Bubble Pop
               </button>
               <button
-                onClick={() => setSelectedGame('color')}
+                onClick={() => setSelectedGame('memory')}
                 className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
-                  selectedGame === 'color'
+                  selectedGame === 'memory'
                     ? "bg-blush-300 text-white"
                     : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
                 }`}
-                data-testid="select-color-drift"
+                data-testid="select-memory-match"
               >
-                🎨 Color Drift
+                🎴 Memory Match
               </button>
               <button
                 className="px-4 py-2 rounded-lg whitespace-nowrap bg-gray-100 text-gray-400 cursor-not-allowed flex items-center gap-2"
@@ -276,7 +276,7 @@ export default function FindYourCalm() {
                 data-testid="locked-game-3"
               >
                 <Lock size={14} />
-                Memory Match
+                Color Drift
                 {!isAuthenticated && <span className="text-xs">(Sign up)</span>}
               </button>
               <button
@@ -292,7 +292,7 @@ export default function FindYourCalm() {
 
             {/* Active Game */}
             {selectedGame === 'bubble' && <BubblePop />}
-            {selectedGame === 'color' && <ColorDrift />}
+            {selectedGame === 'memory' && <MemoryMatch />}
           </div>
         )}
 
