@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Sparkles } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Sparkles, Timer } from "lucide-react";
 
 interface Card {
   id: number;
@@ -9,6 +9,7 @@ interface Card {
 }
 
 const EMOJIS = ["🌸", "🌺", "🌼", "🌻", "🌷", "🌹", "🪷", "🏵️"];
+const TIMER_DURATION = 20; // seconds
 
 export default function MemoryMatch() {
   const [cards, setCards] = useState<Card[]>([]);
@@ -17,16 +18,54 @@ export default function MemoryMatch() {
   const [matches, setMatches] = useState(0);
   const [isChecking, setIsChecking] = useState(false);
   const [gameWon, setGameWon] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
+  const [gameOver, setGameOver] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     initializeGame();
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
-    if (matches === EMOJIS.length) {
+    if (matches === EMOJIS.length && !gameOver) {
       setGameWon(true);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
     }
-  }, [matches]);
+  }, [matches, gameOver]);
+
+  useEffect(() => {
+    if (gameOver || gameWon) return;
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          setGameOver(true);
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [cards, gameOver, gameWon]);
 
   const initializeGame = () => {
     const shuffledCards = [...EMOJIS, ...EMOJIS]
@@ -43,12 +82,16 @@ export default function MemoryMatch() {
     setMoves(0);
     setMatches(0);
     setGameWon(false);
+    setGameOver(false);
     setIsChecking(false);
+    setTimeLeft(TIMER_DURATION);
   };
 
   const handleCardClick = (index: number) => {
     if (
       isChecking ||
+      gameOver ||
+      gameWon ||
       cards[index].isFlipped ||
       cards[index].isMatched ||
       flippedIndices.length >= 2
@@ -96,10 +139,24 @@ export default function MemoryMatch() {
   return (
     <div className="w-full max-w-2xl mx-auto" data-testid="game-memory-match">
       {/* Game Header */}
-      <div className="mb-6 text-center">
-        <h3 className="text-xl font-semibold text-warm-gray-700 mb-2">
-          Memory Match
-        </h3>
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xl font-semibold text-warm-gray-700">
+            Memory Match
+          </h3>
+          {/* Timer */}
+          <div 
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
+              timeLeft <= 5 && !gameOver && !gameWon
+                ? "bg-red-100 text-red-700 animate-pulse"
+                : "bg-cream-100 text-warm-gray-700"
+            }`}
+            data-testid="memory-timer"
+          >
+            <Timer size={18} />
+            <span>{timeLeft}s</span>
+          </div>
+        </div>
         <div className="flex justify-center gap-6 text-sm text-warm-gray-600">
           <span data-testid="memory-moves">Moves: {moves}</span>
           <span data-testid="memory-matches">Matches: {matches}/{EMOJIS.length}</span>
@@ -114,7 +171,7 @@ export default function MemoryMatch() {
             Wonderful! 🎉
           </h4>
           <p className="text-warm-gray-600 mb-4">
-            You completed the game in {moves} moves!
+            You completed the game in {moves} moves with {timeLeft} seconds remaining!
           </p>
           <button
             onClick={initializeGame}
@@ -126,13 +183,33 @@ export default function MemoryMatch() {
         </div>
       )}
 
+      {/* Game Over Message */}
+      {gameOver && (
+        <div className="mb-6 p-6 bg-gradient-to-br from-cream-50 to-blush-50 border-2 border-cream-200 rounded-2xl text-center animate-in fade-in duration-500">
+          <div className="text-4xl mb-3">⏳</div>
+          <h4 className="text-lg font-semibold text-warm-gray-700 mb-2">
+            Time's up — want to try again?
+          </h4>
+          <p className="text-warm-gray-600 mb-4">
+            You matched {matches} out of {EMOJIS.length} pairs!
+          </p>
+          <button
+            onClick={initializeGame}
+            className="bg-blush-300 hover:bg-blush-400 text-white px-6 py-2 rounded-xl transition"
+            data-testid="button-restart-memory"
+          >
+            Restart
+          </button>
+        </div>
+      )}
+
       {/* Game Grid */}
       <div className="grid grid-cols-4 gap-3 sm:gap-4 mb-6">
         {cards.map((card, index) => (
           <button
             key={card.id}
             onClick={() => handleCardClick(index)}
-            disabled={card.isMatched || card.isFlipped || isChecking}
+            disabled={card.isMatched || card.isFlipped || isChecking || gameOver || gameWon}
             className={`
               aspect-square rounded-xl transition-all duration-300 transform
               ${
@@ -141,6 +218,7 @@ export default function MemoryMatch() {
                   : "bg-cream-200 hover:bg-cream-300 hover:scale-105"
               }
               ${card.isMatched ? "opacity-60" : ""}
+              ${gameOver ? "opacity-50 cursor-not-allowed" : ""}
               disabled:cursor-not-allowed
               shadow-md hover:shadow-lg
               flex items-center justify-center
