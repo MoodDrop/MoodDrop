@@ -1,0 +1,107 @@
+Goal
+Add a visual Mood Selector on the homepage. Users pick a mood (color+shape), then choose to Write or Record voice. Show the mood’s meaning when they choose Write. Include a Reset mood control.
+
+1) Mood Palette (color • shape • meaning)
+
+Use these six moods:
+
+Calm — Soft Blue #A6C8FF • Circle • “Peaceful, centered, emotionally balanced.”
+
+Grounded — Sage Green #A4C3A2 • Leaf/Oval • “Stable, reflective, grateful.”
+
+Joyful — Warm Yellow #FBE694 • Star • “Happy, excited, hopeful.”
+
+Tender — Blush Pink #F6C1B4 • Heart • “Loving, affectionate, sensitive.”
+
+Overwhelmed — Lavender Gray #C9C7D2 • Cloud • “Tired, unsure, emotionally heavy.”
+
+Frustrated — Soft Coral Red #E98A7A • Triangle • “Irritated, tense, needing release.”
+
+Arrange as two rows of three icons. Prompt text above:
+“What type of mood are you feeling today?”
+
+2) Selection Behavior
+
+Clicking an icon selects the mood (soft highlight/scale + aria-selected).
+
+Reveal two primary actions under the selected mood:
+
+Write (opens text input)
+
+Record voice (opens voice note control)
+
+Keep layout minimal, soft shadows, blush/cream background.
+
+3) “Write” Flow — show meaning
+
+When Write is chosen:
+
+Display the mood name + description above or beside the textarea.
+
+Example:
+Calm — peaceful, centered, emotionally balanced.
+
+Show a large, comfy textarea with placeholder:
+“Let it flow…”
+
+4) “Record voice” Flow
+
+Show a simple voice recorder (start/stop, timer, playback).
+
+Save file in memory for now (no backend required yet); allow re-record.
+
+5) Reset & Text Safety
+
+Add a secondary “Reset mood” button near the mood label.
+
+On click: clear selected mood + hide description + return to mood grid.
+
+Do not erase any typed text by default (preserve draft).
+
+Optional link: “Clear text” to intentionally wipe the textarea.
+
+6) Accessibility & UX
+
+Icons are keyboard-focusable; Enter/Space selects.
+
+Add aria-label per icon, e.g., “Calm — blue circle.”
+
+Motion: gentle 150–250ms ease-out (respect prefers-reduced-motion).
+
+7) State Model (suggested)
+type MoodKey = "Calm"|"Grounded"|"Joyful"|"Tender"|"Overwhelmed"|"Frustrated";
+selectedMood: MoodKey | null
+draftText: string
+recordingState: "idle"|"recording"|"review"
+
+8) Files to touch (example Next.js)
+
+components/MoodSelector.tsx (icons grid + selection)
+
+components/MoodComposer.tsx (Write/Voice UI, meaning display, reset)
+
+lib/moods.ts (export palette: color, shape, meaning)
+
+app/page.tsx or pages/index.tsx (wire it in)
+
+9) Visual Tone
+
+Soft gradients (blush/cream), rounded-2xl corners, subtle shadows.
+
+Icon hover glow is minimal; no harsh colors.
+
+Keep everything calming and uncluttered.
+
+Done criteria
+
+Selecting any of the 6 icons shows actions (Write / Record voice).
+
+Write displays the correct mood meaning and preserves text when mood is reset.
+
+Record voice works (basic start/stop/playback).
+
+Keyboard + screen-reader friendly.
+
+Matches MoodDrop’s calm aesthetic.
+
+Replace color drift game with the matching game. 
