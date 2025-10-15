@@ -10,8 +10,9 @@ Preferred communication style: Simple, everyday language.
 ### Homepage Mood Circles & Tab Integration (October 2025)
 - **Horizontal Mood Circles**: Added 6 color-coded mood circles (28px/24px) displayed horizontally above tabs with header "What type of mood are you feeling today?" Each mood has unique color (#A6C8FF Calm, #A4C3A2 Grounded, #FBE694 Joyful, #F6C1B4 Tender, #C9C7D2 Overwhelmed, #E98A7A Frustrated)
 - **Tab-Based Interface**: Homepage features two tabs - "Let It Flow" (Write) and "Take a Moment" (Voice). Mood selection integrates with both tabs showing mood name and meaning
-- **Interactive Tooltips**: Hover/selection shows mood name + meaning. Full keyboard accessibility with ARIA labels. Reset button clears mood selection without deleting text
-- **Memory Match Timer**: Added 20-second countdown timer to Memory Match game. Timer displays in top-right corner, pulses when under 5 seconds, shows timeout message with restart button, and resets cleanly each round
+- **Interactive Tooltips**: Hover/selection shows mood name + meaning. Full keyboard accessibility with ARIA labels and auto-focus on textarea when composer opens
+- **Write It Out Composer Visibility**: Composer hidden by default on page load, reveals with smooth fade/slide animation (200ms) when mood selected. Text preserved across mood changes and cleared only on successful submission or explicit clear action
+- **Memory Match Game**: 8-pair memory game without timer - users can play at their own pace with move and match counters. Includes reset functionality and win celebration
 - **Preserved Layout**: Maintained original hero header, tagline, and overall homepage aesthetic
 
 ### Previous Updates
@@ -30,11 +31,11 @@ Preferred communication style: Simple, everyday language.
 - **Build Tool**: Vite
 - **UI/UX**: Mobile-first responsive design, accessibility-focused (semantic HTML, ARIA labels), toast notifications, progressive enhancement, calming tab transitions, animated Mood Garden elements, and a floating petal footer animation.
 - **Key Pages**:
-    - **Homepage with Mood Circles**: Horizontal row of 6 color-coded mood circles with tooltips. Tab-based interface with "Let It Flow" (Write) and "Take a Moment" (Voice). Mood selection displays within active tab. Write tab supports text input with affirmation feedback.
+    - **Homepage with Mood Circles**: Horizontal row of 6 color-coded mood circles with tooltips. Composer hidden by default, reveals with fade/slide animation on mood selection. Tab-based interface with "Let It Flow" (Write) and "Take a Moment" (Voice). Write tab supports text input with affirmation feedback. Draft text preserved across mood changes, cleared only on submission.
     - **Message System**: Emotion tagging, text input, voice notes (in development), affirmation feedback, favorites.
     - **Mood Garden**: Visual representation of emotional journey using color-coded Droplets, Flowers, and Trees with growth animations.
     - **Engagement Features**: Daily streak tracking, 30-day Mood Calendar (GitHub-style), Insights Dashboard (emotion distribution, activity summary), and a Favorites system.
-    - **Comfort Page ("Find Your Calm")**: Inspirational quotes, coping strategies, crisis resources, curated YouTube videos, interactive calming games (Bubble Pop with gentle pop sounds, Memory Match with 8 pairs and 20-second timer; Color Drift and Zen Garden locked), and Soothing Sounds placeholder.
+    - **Comfort Page ("Find Your Calm")**: Inspirational quotes, coping strategies, crisis resources, curated YouTube videos, interactive calming games (Bubble Pop with gentle pop sounds, Memory Match with 8 pairs at user's own pace; Color Drift and Zen Garden locked), and Soothing Sounds placeholder.
     - **Admin Moderation System**: Dedicated dashboard for content review, analytics, content filtering, bulk operations, message status management, and audio playback for voice messages.
     - **Auth**: Replit Auth integration (Google, GitHub, Apple, X, email/password), dual mode for authenticated and anonymous users, PostgreSQL-backed session persistence.
 
