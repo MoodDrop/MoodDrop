@@ -53,4 +53,5 @@ export const MOOD_PALETTE: Record<MoodKey, MoodData> = {
   }
 };
 
+export const moods = MOOD_PALETTE;
 export const MOODS_ARRAY: MoodData[] = Object.values(MOOD_PALETTE);
