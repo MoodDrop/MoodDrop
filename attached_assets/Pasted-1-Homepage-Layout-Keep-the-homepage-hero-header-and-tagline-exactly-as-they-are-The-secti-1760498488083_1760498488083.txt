@@ -1,0 +1,98 @@
+1️⃣ Homepage Layout
+
+Keep the homepage hero, header, and tagline exactly as they are.
+
+The section title “What type of mood are you feeling today?” remains centered directly above the mood color circles.
+
+2️⃣ Animated Interaction Hint
+
+Place a gentle instruction line below “What type of mood are you feeling today?” and above the colored mood circles:
+
+✨ Choose a mood to begin…
+
+Font style:
+
+text-sm, text-zinc-500 (or a soft beige tone that matches MoodDrop’s background).
+
+Center-aligned.
+
+Light fade-in on page load.
+
+Animation Behavior
+
+Every 4–5 seconds, the text should fade in and out smoothly (opacity 0.6 → 1.0 → 0.6).
+
+Duration: 2–3 seconds, ease-in-out transition.
+
+The animation should feel calm and unintrusive — no harsh blinking or jerky movement.
+
+Once a user selects a mood circle, the line fades out completely and remains hidden.
+
+3️⃣ Mood Circle Glow Animation
+
+Each mood circle should have a slow, rhythmic glow to suggest it’s clickable.
+
+Apply a soft box-shadow pulse animation:
+
+Duration: 3–5 seconds.
+
+Repeat: infinite.
+
+Opacity range: from 0 → 0.2 → 0.
+
+Color: a slightly lighter tone of each circle’s base color.
+
+The glow animation should pause when the user hovers or clicks a circle.
+4️⃣ User Interaction Flow
+
+When a mood circle is clicked:
+
+The ✨ “Choose a mood to begin…” text fades out.
+
+The selected mood name + meaning appear (as they currently do).
+
+The “Write it out” panel then opens smoothly beneath the mood description.
+
+The panel stays hidden until a mood is selected.
+
+5️⃣ Restore Voice Note Flow (Under “Take a Moment”)
+
+Within the “Take a Moment” tab:
+
+When a mood circle is clicked, show the selected mood color, name, and meaning (same as the “Write It Out” tab).
+
+Instead of the text box, display a Voice Note panel with:
+
+🎤 Record, ⏹ Stop, ▶️ Play, and ❌ Delete buttons.
+
+Maximum recording length: 60 seconds.
+
+Display a live timer (MM:SS) while recording.
+
+Store audio locally only (no upload or backend connection yet).
+
+Reset Mood hides the voice panel and deselects the mood.
+
+Accessibility:
+
+Support keyboard shortcuts — Spacebar toggles Record/Stop.
+
+Design:
+
+Rounded, soft blush/neutral buttons.
+
+Subtle shadows and centered layout.
+
+Match existing MoodDrop aesthetic for consistency.
+
+✅ Done Criteria
+
+Homepage layout remains unchanged.
+
+The ✨ “Choose a mood to begin…” line gently animates and disappears after selection.
+
+Mood circles have a calm glowing pulse that pauses on interaction.
+
+“Write it out” appears only when a mood is chosen.
+
+“Take a Moment” tab shows a working Voice Note panel with recording, playback, and reset features.

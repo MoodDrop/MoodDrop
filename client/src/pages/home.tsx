@@ -48,6 +48,13 @@ export default function Home() {
           What type of mood are you feeling today?
         </p>
 
+        {/* Animated Hint Text - Only show when no mood is selected */}
+        {!selectedMood && (
+          <p className="text-sm text-zinc-500 mb-3 animate-pulse-gentle">
+            ✨ Choose a mood to begin…
+          </p>
+        )}
+
         {/* Horizontal Mood Circles */}
         <div className="flex justify-center items-center gap-2 sm:gap-3 mb-2">
           {Object.entries(moods).map(([key, mood]) => (
@@ -59,14 +66,12 @@ export default function Home() {
               className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full transition-all duration-200 ${
                 selectedMood === key
                   ? "ring-2 ring-offset-2 ring-warm-gray-400 scale-110"
-                  : "hover:scale-110"
+                  : "hover:scale-110 animate-glow-pulse"
               }`}
               style={{
                 backgroundColor: mood.color,
-                boxShadow: hoveredMood === key || selectedMood === key 
-                  ? '0 0 12px rgba(0,0,0,0.1)' 
-                  : 'none'
-              }}
+                '--glow-color': mood.color,
+              } as React.CSSProperties}
               aria-label={`${mood.key}: ${mood.meaning}`}
               title={`${mood.key}: ${mood.meaning}`}
               data-testid={`mood-circle-${key.toLowerCase()}`}
