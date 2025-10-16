@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
 import { moods, type MoodKey } from "@/lib/moods";
 import { getAffirmation } from "@/lib/affirmations";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface WriteTabProps {
   selectedMood: MoodKey | null;
@@ -15,6 +13,7 @@ interface WriteTabProps {
 export default function WriteTab({ selectedMood, onResetMood, draftText, onTextChange }: WriteTabProps) {
   const [showAffirmation, setShowAffirmation] = useState(false);
   const [affirmation, setAffirmation] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const affirmationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -33,51 +32,44 @@ export default function WriteTab({ selectedMood, onResetMood, draftText, onTextC
     }
   }, []);
 
-  const submitMutation = useMutation({
-    mutationFn: async (data: { content: string; emotion: string }) => {
-      const res = await apiRequest("POST", "/api/messages", data);
-      return res.json();
-    },
-    onSuccess: (data, variables) => {
-      const encouragingMessage = getAffirmation(variables.content, variables.emotion);
-      
-      if (affirmationTimerRef.current) {
-        clearTimeout(affirmationTimerRef.current);
-      }
-      
-      setAffirmation(encouragingMessage);
-      setShowAffirmation(true);
-      onTextChange("");
-      
-      affirmationTimerRef.current = setTimeout(() => {
-        setShowAffirmation(false);
-        setAffirmation("");
-        affirmationTimerRef.current = null;
-      }, 8000);
-
-      queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
-    },
-    onError: (error: any) => {
-      if (affirmationTimerRef.current) {
-        clearTimeout(affirmationTimerRef.current);
-        affirmationTimerRef.current = null;
-      }
-      setAffirmation(`Unable to submit: ${error.message}`);
-      setShowAffirmation(true);
-
-      setTimeout(() => {
-        setShowAffirmation(false);
-        setAffirmation("");
-      }, 5000);
-    },
-  });
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!draftText.trim()) return;
+    if (!draftText.trim() || isSubmitting) return;
 
+    setIsSubmitting(true);
     const emotion = selectedMood ? moods[selectedMood].key : "Calm";
-    submitMutation.mutate({ content: draftText.trim(), emotion });
+
+    // Save to localStorage (anonymous, client-side only)
+    try {
+      const savedMessages = JSON.parse(localStorage.getItem('mooddrop_messages') || '[]');
+      savedMessages.push({
+        id: Date.now(),
+        content: draftText.trim(),
+        emotion,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('mooddrop_messages', JSON.stringify(savedMessages));
+    } catch (error) {
+      console.log('LocalStorage not available, continuing anyway');
+    }
+
+    // Get affirmation message
+    const encouragingMessage = getAffirmation(draftText.trim(), emotion);
+    
+    if (affirmationTimerRef.current) {
+      clearTimeout(affirmationTimerRef.current);
+    }
+    
+    setAffirmation(encouragingMessage);
+    setShowAffirmation(true);
+    onTextChange("");
+    setIsSubmitting(false);
+    
+    affirmationTimerRef.current = setTimeout(() => {
+      setShowAffirmation(false);
+      setAffirmation("");
+      affirmationTimerRef.current = null;
+    }, 8000);
   };
 
   const mood = selectedMood ? moods[selectedMood] : null;
@@ -146,11 +138,11 @@ export default function WriteTab({ selectedMood, onResetMood, draftText, onTextC
 
         <button
           type="submit"
-          disabled={!draftText.trim() || submitMutation.isPending}
+          disabled={!draftText.trim() || isSubmitting}
           className="w-full bg-blush-300 hover:bg-blush-400 disabled:bg-warm-gray-200 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-all shadow-md hover:shadow-lg"
           data-testid="button-submit-write"
         >
-          {submitMutation.isPending ? "Sharing..." : "Share Your Feelings"}
+          {isSubmitting ? "Sharing..." : "Share Your Feelings"}
         </button>
       </form>
     </div>
