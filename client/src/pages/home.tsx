@@ -44,8 +44,12 @@ export default function Home() {
 
       {/* Mood Selector Row */}
       <div className="text-center mb-6">
-        <p className="text-warm-gray-600 font-medium mb-4">
+        <p className="text-warm-gray-600 font-medium mb-2">
           What type of mood are you feeling today?
+        </p>
+        
+        <p className="text-xs text-warm-gray-500 mb-4">
+          No account needed — everything here is anonymous.
         </p>
 
         {/* Animated Hint Text - Only show when no mood is selected */}

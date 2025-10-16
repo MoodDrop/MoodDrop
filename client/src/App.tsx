@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
-import Release from "@/pages/release";
+import TakeABreath from "@/pages/take-a-breath";
 import ThankYou from "@/pages/thank-you";
 import Comfort from "@/pages/comfort";
 import Garden from "@/pages/garden";
@@ -23,7 +23,8 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
-      <Route path="/release" component={Release} />
+      <Route path="/release" component={TakeABreath} />
+      <Route path="/breathe" component={TakeABreath} />
       <Route path="/thank-you" component={ThankYou} />
       <Route path="/comfort" component={Comfort} />
       <Route path="/garden" component={Garden} />

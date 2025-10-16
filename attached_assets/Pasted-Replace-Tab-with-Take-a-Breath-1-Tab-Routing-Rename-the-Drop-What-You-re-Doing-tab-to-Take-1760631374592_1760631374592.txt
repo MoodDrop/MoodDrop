@@ -1,0 +1,183 @@
+Replace Tab with Take a Breath
+1) Tab & Routing
+
+Rename the “Drop What You’re Doing” tab to “Take a Breath.”
+
+Keep the tab in the same position in navigation; route stays the same path if possible (redirect old path → new tab).
+
+2) Purpose & UX
+
+A gentle, one-screen breathing aid to help users regulate before writing or recording.
+
+Minimal card centered on the page.
+
+Soft, calm visuals; no sign-up required.
+
+Works offline; no backend calls.
+
+3) Presets (selector at top of card)
+
+Provide three presets the user can choose:
+
+Box Breathing — Inhale 4 • Hold 4 • Exhale 4 • Hold 4
+
+4-7-8 — Inhale 4 • Hold 7 • Exhale 8
+
+Long Exhale — Inhale 4 • Exhale 6 (no holds)
+
+Default preset: Box Breathing.
+
+4) Visual Guidance (ring animation)
+
+A circular ring that expands/contracts to guide breathing.
+
+Phase labels below the ring, updating live: Inhale / Hold / Exhale / Hold.
+
+Animation is gentle (ease-in-out, 1500–2000ms per 4 count).
+
+Respect prefers-reduced-motion:
+
+If enabled, pause animation and show a static progress bar + text cues only.
+
+5) Controls
+
+Start / Pause / Reset buttons (large, rounded, subtle shadows).
+
+Keyboard shortcuts:
+
+Space → Start/Pause
+
+Enter → Reset
+
+Announce phase changes for screen readers:
+aria-live="polite" (e.g., “Inhale for 4”, “Hold for 4”, “Exhale for 4”).
+
+6) Copy & Hints
+
+Title: Take a Breath
+
+Small caption under title (muted text):
+“Follow the ring or the cues below.”
+
+Under the controls, show the current preset formula (e.g., “Inhale 4 • Hold 4 • Exhale 4 • Hold 4”).
+
+7) Optional Sound (off by default)
+
+Soft, very low-volume chime at phase changes (toggle switch: Sound on/off; default off).
+
+File suggestion (hosted as static): /public/sounds/breath-chime.mp3, volume ~ 0.15.
+
+No autoplay; only when session running.
+
+8) Styling
+
+Match MoodDrop palette (blush/cream/neutral).
+
+Card: rounded-2xl, soft shadow, generous padding.
+
+Ring uses a gentle gradient or subtle glow; avoid harsh colors.
+
+9) Mobile
+
+Ring scales to fit small screens (min 220–260px).
+
+Controls stack vertically with comfortable touch targets.
+
+10) Non-goals (do NOT add)
+
+No timers, achievements, or streaks here.
+
+No sign-up/login prompts.
+
+11) Done Criteria
+
+Tab reads “Take a Breath” and opens a breathing card.
+
+Preset selector switches the cycle correctly and updates labels.
+
+Start/Pause/Reset work; keyboard shortcuts work.
+
+Ring animation smooth; honors prefers-reduced-motion.
+
+Optional sound toggle works (off by default).
+
+No console errors; fully usable on mobile.
+
+Remove Sign-Up (Anonymous by Default) + Keep Admin
+1) Disable user sign-up / log-in (front & back)
+
+Hide or remove all Sign Up / Log In buttons and routes from the public UI.
+
+Remove any auth guards/redirects that block access to:
+
+Let It Flow (write)
+
+Take a Moment (voice notes)
+
+Games (Bubble Pop / Matching)
+
+Soothing Sounds / Watch & Smile (if present)
+
+If there’s any auth middleware (e.g., Next.js middleware, Supabase session checks), bypass it for public routes.
+
+Copy hint (small, muted text near the mood circles):
+
+“No account needed — everything here is anonymous.”
+
+2) Keep Admin (private)
+
+Preserve the admin route (e.g., /admin) for owner use only.
+
+Protect admin with one of:
+
+Simple password gate via env var (ADMIN_PASS) or
+
+IP allow list (if applicable).
+
+Ensure no admin APIs or data endpoints are exposed to anonymous users.
+
+If Supabase is wired, keep RLS enabled; do not require user auth for public views.
+
+3) Remove/disable auth calls that cause errors
+
+Remove any client calls like supabase.auth.getUser() or signUp() in public flows.
+
+Remove 404/redirects for /signup, /auth, /profile.
+
+If a component expects user, make it optional and default to anonymous state.
+
+4) Voice notes & Write It Out remain local
+
+Voice notes: record/playback locally only (no upload).
+
+Write It Out: show text area only after a mood is selected; no persistence.
+
+Keep Reset mood behavior (don’t clear typed text unless the user taps “Clear”).
+
+5) Mood Garden / saving features (future-ready)
+
+If “Mood Garden” or “Track Progress” exists, switch to Coming Soon / Optional (requires account).
+
+Do not prompt to sign up now; just show a calm placeholder card.
+
+6) Visual tweaks (small)
+
+Where the Sign Up button used to be, either remove it or replace with subtle text:
+
+“Accounts coming later for optional saved progress.”
+
+Keep the current homepage layout, palette, and animations unchanged.
+
+7) QA checklist (Done criteria)
+
+Public users can use all core features without any auth prompt or error.
+
+No broken links to /signup, /login, or /profile.
+
+Admin route works and is not discoverable from main navigation.
+
+Voice + Write flows work exactly as before, fully anonymous.
+
+Mood Garden (if visible) shows Coming Soon (no sign-up).
+
+Lighthouse/console shows no auth errors on public pages.

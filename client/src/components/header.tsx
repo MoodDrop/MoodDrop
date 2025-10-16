@@ -24,26 +24,7 @@ export default function Header() {
             </div>
           </Link>
 
-          <div className="flex items-center gap-2">
-            {isAuthenticated ? (
-              <a
-                href="/api/logout"
-                className="flex items-center gap-1 text-xs text-blush-400 hover:text-blush-500 transition-colors"
-                data-testid="button-logout"
-              >
-                <LogOut size={14} />
-                <span>Logout</span>
-              </a>
-            ) : (
-              <a
-                href="/api/login"
-                className="text-xs text-white px-3 py-1.5 rounded-lg bg-blush-300 hover:bg-blush-400 transition-colors duration-300 font-medium"
-                data-testid="button-signup"
-              >
-                Sign Up
-              </a>
-            )}
-          </div>
+          {/* Auth buttons removed - anonymous by default */}
         </div>
 
         <nav className="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm">
@@ -61,11 +42,11 @@ export default function Header() {
           <Link href="/release">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                location === "/release" ? "text-blush-400 font-medium" : "text-warm-gray-600 hover:text-blush-300"
+                location === "/release" || location === "/breathe" ? "text-blush-400 font-medium" : "text-warm-gray-600 hover:text-blush-300"
               }`}
-              data-testid="nav-release"
+              data-testid="nav-breathe"
             >
-              Drop What You're Holding
+              Take a Breath
             </button>
           </Link>
           <span className="text-warm-gray-400">•</span>
