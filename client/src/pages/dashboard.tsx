@@ -37,8 +37,10 @@ export default function Dashboard() {
     );
   }
 
-  // Show soft prompt for unauthenticated users
-  if (!isAuthenticated) {
+  // Dashboard is "Coming Soon" (anonymous by default - no auth required)
+  const showComingSoon = true;
+  
+  if (showComingSoon) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blush-50 to-cream-50 px-6 py-8">
         <div className="max-w-4xl mx-auto">
@@ -54,10 +56,10 @@ export default function Dashboard() {
           <div className="bg-white rounded-2xl p-8 shadow-lg text-center">
             <Sparkles className="w-16 h-16 mx-auto text-blush-300 mb-4" />
             <h2 className="text-xl font-semibold text-warm-gray-700 mb-3">
-              Sign up to unlock your dashboard
+              Coming Soon
             </h2>
             <p className="text-warm-gray-600 mb-6 max-w-md mx-auto">
-              Create an account to track your emotional patterns, build streaks, view insights, and save your favorite moments
+              Optional accounts for saved progress and tracking are on the way
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -78,16 +80,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <a
-              href="/api/login"
-              className="inline-block bg-blush-300 hover:bg-blush-400 text-white font-medium px-8 py-3 rounded-xl transition-all shadow-md hover:shadow-lg"
-              data-testid="button-dashboard-signup"
-            >
-              <span className="mr-2">✨</span>
-              Get Started Free
-            </a>
-            <p className="text-xs text-warm-gray-500 mt-4">
-              No credit card required • Takes less than a minute
+            <p className="text-sm text-warm-gray-500">
+              For now, everything is fully anonymous
             </p>
           </div>
         </div>

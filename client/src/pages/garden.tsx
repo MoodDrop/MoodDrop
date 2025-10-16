@@ -119,8 +119,10 @@ export default function Garden() {
     );
   }
 
-  // Show soft prompt for unauthenticated users
-  if (!isAuthenticated) {
+  // Garden is "Coming Soon" (anonymous by default - no auth required)
+  const showComingSoon = true;
+  
+  if (showComingSoon) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 px-6 py-8">
         <div className="max-w-6xl mx-auto">
@@ -136,21 +138,13 @@ export default function Garden() {
           <div className="text-center py-16">
             <GardenIllustration />
             <h2 className="text-xl font-semibold text-warm-gray-700 mb-3" data-testid="text-garden-signin-title">
-              Sign up to grow your garden
+              Coming Soon
             </h2>
             <p className="text-warm-gray-600 mb-6 max-w-md mx-auto" data-testid="text-garden-signin-message">
-              Create an account to track your emotional journey and watch your feelings bloom into a beautiful visual garden
+              Optional accounts for visualizing your emotional journey are on the way
             </p>
-            <a
-              href="/api/login"
-              className="inline-block bg-blush-300 hover:bg-blush-400 text-white font-medium px-8 py-3 rounded-xl transition-all shadow-md hover:shadow-lg"
-              data-testid="button-garden-signup"
-            >
-              <span className="mr-2">🌸</span>
-              Sign Up Free
-            </a>
-            <p className="text-xs text-warm-gray-500 mt-4">
-              No credit card required • Takes less than a minute
+            <p className="text-sm text-warm-gray-500">
+              For now, everything is fully anonymous
             </p>
           </div>
         </div>

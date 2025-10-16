@@ -277,7 +277,6 @@ export default function FindYourCalm() {
               >
                 <Lock size={14} />
                 Color Drift
-                {!isAuthenticated && <span className="text-xs">(Sign up)</span>}
               </button>
               <button
                 className="px-4 py-2 rounded-lg whitespace-nowrap bg-gray-100 text-gray-400 cursor-not-allowed flex items-center gap-2"
@@ -286,7 +285,6 @@ export default function FindYourCalm() {
               >
                 <Lock size={14} />
                 Zen Garden
-                {!isAuthenticated && <span className="text-xs">(Sign up)</span>}
               </button>
             </div>
 
