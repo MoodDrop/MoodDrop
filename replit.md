@@ -1,12 +1,26 @@
 # MoodDrop - Emotional Wellness & Growth Platform
 
 ## Overview
-MoodDrop is a full-stack web application designed as a safe space for users to express emotions via text or voice. It supports both authenticated and anonymous posting, providing supportive affirmations, comfort resources, and a visual "Mood Garden" to track emotional journeys. The platform features a mobile-first design, robust admin moderation, engagement features (streaks, insights, favorites), and persistent PostgreSQL storage. Its core purpose is to foster emotional wellness and personal growth.
+MoodDrop is a fully anonymous emotional wellness platform designed as a safe space for users to express emotions via text or voice. No sign-up or authentication required—users can immediately select from 6 color-coded moods, express feelings through "Let It Flow" (Write) or "Take a Moment" (Voice) tabs, practice guided breathing exercises, and access comfort resources and interactive games. The platform features a mobile-first design with calming animations, accessibility-first interactions, and client-side storage. Its core purpose is to foster emotional wellness and personal growth through immediate, anonymous support.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+### Take a Breath Breathing Exercise & Anonymous Mode (October 2025)
+- **Fully Anonymous Platform**: Removed all authentication requirements—no sign-up, login, or account needed. Admin routes preserved but hidden from navigation
+- **Take a Breath Page**: Replaced "Drop What You're Doing" with guided breathing exercises featuring three scientifically-backed presets:
+  - **Box Breathing**: 4s inhale, 4s hold, 4s exhale, 4s hold (stress reduction, focus)
+  - **4-7-8 Breathing**: 4s inhale, 7s hold, 8s exhale (sleep aid, anxiety relief)
+  - **Long Exhale (Calming)**: 4s inhale, 6s exhale (nervous system regulation)
+- **Visual Ring Animation**: Expanding/contracting ring synchronized with breath phases (blue on inhale, yellow on exhale, gray on hold). Respects `prefers-reduced-motion` with fallback to static progress indicator
+- **Interactive Controls**: Start/Pause/Reset buttons with keyboard shortcuts (Spacebar to toggle, Enter to reset). Optional sound toggle (off by default) with gentle breath-chime audio
+- **Phase Labels & Progress**: Real-time phase display ("Breathe in", "Hold", "Breathe out") with live countdown and visual progress ring driven by requestAnimationFrame for smooth 60fps animation
+- **Accessibility Features**: ARIA live regions for screen readers, keyboard navigation, reduced-motion support, graceful audio fallback if sound file missing
+- **Coming Soon Pages**: Dashboard and Garden now show "Coming Soon" placeholders with messaging: "Optional accounts for saved progress and tracking are on the way. For now, everything is fully anonymous"
+- **Unlocked Games**: Removed "(Sign up)" text from locked games (Color Drift, Zen Garden) in Find Your Calm—they simply show lock icon
+- **Routes Updated**: `/release` and `/breathe` both navigate to breathing exercise. Header navigation renamed to "Take a Breath"
+
 ### Homepage Mood Circles & Tab Integration (October 2025)
 - **Horizontal Mood Circles**: Added 6 color-coded mood circles (28px/24px) displayed horizontally above tabs with header "What type of mood are you feeling today?" Each mood has unique color (#A6C8FF Calm, #A4C3A2 Grounded, #FBE694 Joyful, #F6C1B4 Tender, #C9C7D2 Overwhelmed, #E98A7A Frustrated)
 - **Animated Hint Text**: "✨ Choose a mood to begin…" appears below section title with gentle pulse animation (4s ease-in-out, opacity 0.6→1.0→0.6). Automatically fades out when mood is selected
