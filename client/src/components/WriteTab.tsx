@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { RotateCcw } from "lucide-react";
 import { moods, type MoodKey } from "@/lib/moods";
 import { getAffirmation } from "@/lib/affirmations";
+import Link from "next/link";
 
 interface WriteTabProps {
   selectedMood: MoodKey | null;
@@ -120,6 +121,16 @@ export default function WriteTab({
         >
           {isSubmitting ? "Dropping..." : "Drop It"}
         </button>
+        {/* Secondary: View My Drops */}
+<div className="mt-2">
+  <Link
+    href="/my-drops"
+    className="inline-flex w-full items-center justify-center rounded-xl border border-blush-200 bg-white/90 py-3 text-warm-gray-800 shadow-sm transition hover:bg-cream-50"
+  >
+    View My Drops
+  </Link>
+</div>
+
 
         {showAffirmation && affirmation && (
           <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-emerald-800">
