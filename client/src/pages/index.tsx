@@ -1,2 +1,3 @@
 // client/src/pages/index.tsx
-export { default } from "./landing";
+export { default } from "./home";
+
