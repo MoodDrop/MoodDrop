@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { RotateCcw } from "lucide-react";
 import { moods, type MoodKey } from "@lib/moods";
-import { getAffirmation } from "@lib/affirmations";
+import { getAffirmation } from "@/lib/affirmations";
 
 interface WriteTabProps {
   selectedMood: MoodKey | null;
