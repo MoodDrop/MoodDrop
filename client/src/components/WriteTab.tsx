@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { RotateCcw } from "lucide-react";
 import { moods, type MoodKey } from "@/lib/moods";
 import { getAffirmation } from "@/lib/affirmations";
+import Link from "next/link";
 
 interface WriteTabProps {
   selectedMood: MoodKey | null;
