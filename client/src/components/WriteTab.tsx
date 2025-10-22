@@ -99,39 +99,44 @@ export default function WriteTab({
       )}
 
       {/* Main form */}
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="write-textarea" className="sr-only">
-          Write it out
-        </label>
-        <textarea
-          id="write-textarea"
-          ref={textareaRef}
-          value={draftText}
-          onChange={(e) => onTextChange(e.target.value)}
-          placeholder="Let it all drop here — one mood at a time!"
-          className="w-full rounded-2xl border border-zinc-200/70 bg-white/80 p-4 outline-none shadow-sm focus:ring-2 focus:ring-rose-200 min-h-[140px]"
-        />
+     {/* Main form — navigation-proof version */}
+<div role="form" aria-labelledby="write-label">
+  <label id="write-label" htmlFor="write-textarea" className="sr-only">
+    Write it out
+  </label>
 
-        <button
-          type="submit"
-          disabled={!draftText.trim() || isSubmitting}
-          className="mt-3 w-full bg-blush-300 hover:bg-blush-400 disabled:bg-warm-gray-200 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-all shadow-md hover:shadow-lg"
-          data-testid="button-submit-write"
-        >
-          {isSubmitting ? "Dropping..." : "Drop It"}
-        </button>
+  <textarea
+    id="write-textarea"
+    ref={textareaRef}
+    value={draftText}
+    onChange={(e) => onTextChange(e.target.value)}
+    placeholder="Let it all drop here — one mood at a time."
+    className="w-full rounded-2xl border border-zinc-200/70 bg-white/80 p-4 outline-none shadow-sm focus:ring-2 focus:ring-rose-200 min-h-[140px]"
+  />
 
-        {showAffirmation && affirmation && (
-          <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-emerald-800">
-            {affirmation}
-          </div>
-        )}
+  <button
+    type="button"
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
+    }}
+    disabled={!draftText.trim() || isSubmitting}
+    className="mt-3 w-full bg-blush-300 hover:bg-blush-400 disabled:bg-warm-gray-200 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-all shadow-md hover:shadow-lg"
+    data-testid="button-submit-write"
+  >
+    {isSubmitting ? "Dropping..." : "Drop It"}
+  </button>
 
-        <p className="mt-2 text-xs text-zinc-400">
-          Your words stay on your device — private, safe, and yours.
-        </p>
-      </form>
+  {showAffirmation && affirmation && (
+    <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-emerald-800">
+      {affirmation}
     </div>
-  );
-}
+  )}
+
+  <p className="mt-2 text-xs text-zinc-400">
+    Your words stay on your device — private, safe, and yours.
+  </p>
+</div>
+
 
