@@ -108,7 +108,7 @@ export default function WriteTab({
           ref={textareaRef}
           value={draftText}
           onChange={(e) => onTextChange(e.target.value)}
-          placeholder="Let it all drop here — one mood at a time."
+          placeholder="Let it all drop here — one mood at a time!"
           className="w-full rounded-2xl border border-zinc-200/70 bg-white/80 p-4 outline-none shadow-sm focus:ring-2 focus:ring-rose-200 min-h-[140px]"
         />
 
