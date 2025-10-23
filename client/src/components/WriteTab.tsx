@@ -98,17 +98,17 @@ export default function WriteTab({
         </div>
       )}
 
-      {/* ✅ View My Drops Button */}
-      <div className="mt-4 text-center">
-        <a
-          href="/my-drops"
-          className="inline-flex items-center text-sm text-warm-gray-600 underline hover:text-warm-gray-800"
-        >
-          View My Drops
-        </a>
-      </div>
-    </div>
-  );
-}
+  {/* ✅ View My Drops Button */}
+<div className="mt-4 text-center">
+  <a
+    href="/my-drops.html"
+    className="inline-block px-4 py-2 bg-cream-50 text-warm-gray-700 border border-blush-100 rounded-md 
+               shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:bg-blush-50 hover:text-warm-gray-800 
+               transition-all duration-200 ease-in-out"
+  >
+    View My Drops
+  </a>
+</div>
+
 
 
