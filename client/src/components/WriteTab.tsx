@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { RotateCcw } from "lucide-react";
-import { moods, type MoodKey } from "@lib/moods";
+import { moods, type MoodKey } from "@/lib/moods";
+
 import { getAffirmation } from "@/lib/affirmations";
 
 interface WriteTabProps {
