@@ -9,7 +9,8 @@ type SavedMessage = {
   timestamp: string;
 };
 
-const STORAGE_KEY = "mooddrop_messages";
+const STORAGE_KEY = "moodDrops";
+
 
 export default function MyDropsPage() {
   const [items, setItems] = React.useState<SavedMessage[]>([]);
