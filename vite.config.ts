@@ -24,10 +24,12 @@ export default defineConfig({
     },
   },
   root: path.resolve(import.meta.dirname, "client"),
-  build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
-    emptyOutDir: true,
-  },
+ build: {
+  outDir: "dist",       // outputs to client/dist instead of dist/public
+  assetsDir: "assets",  // optional, keeps assets organized
+  emptyOutDir: true,
+},
+
   server: {
     fs: {
       strict: true,
