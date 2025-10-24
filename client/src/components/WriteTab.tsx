@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import * as React from "react";
 import { RotateCcw } from "lucide-react";
 import { moods, type MoodKey } from "@/lib/moods";
-
 import { getAffirmation } from "@/lib/affirmations";
 
 interface WriteTabProps {
@@ -19,136 +18,149 @@ export default function WriteTab({
   draftText,
   onTextChange,
 }: WriteTabProps) {
-  const [showAffirmation, setShowAffirmation] = useState(false);
-  const [affirmation, setAffirmation] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const affirmationTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [showAffirmation, setShowAffirmation] = React.useState(false);
+  const [affirmation, setAffirmation] = React.useState("");
+  const [isClicked, setIsClicked] = React.useState(false);
+  const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  const mood = selectedMood ? moods[selectedMood] : null;
-
-  useEffect(() => {
+  React.useEffect(() => {
     return () => {
-      if (affirmationTimerRef.current) clearTimeout(affirmationTimerRef.current);
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, []);
+
+  const mood = selectedMood ? (moods as any)[selectedMood] : null;
 
   const handleAffirmation = () => {
     const quote = getAffirmation();
     setAffirmation(quote);
     setShowAffirmation(true);
-    affirmationTimerRef.current = setTimeout(() => setShowAffirmation(false), 5000);
+    timerRef.current = setTimeout(() => setShowAffirmation(false), 5000);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!draftText.trim()) return;
 
-    setIsSubmitting(true);
-    try {
-      const existingDrops = JSON.parse(localStorage.getItem("moodDrops") || "[]");
-      const newDrop = {
-        id: Date.now(),
-        mood: selectedMood,
-        text: draftText.trim(),
-        date: new Date().toISOString(),
-      };
-      localStorage.setItem("moodDrops", JSON.stringify([newDrop, ...existingDrops]));
+    setIsClicked(true);
+    setTimeout(() => setIsClicked(false), 600); // pulse animation duration
 
-      onTextChange("");
-      handleAffirmation();
-    } catch (error) {
-      console.error("Error saving drop:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    const existing = JSON.parse(localStorage.getItem("moodDrops") || "[]");
+    const newDrop = {
+      id: Date.now(),
+      mood: selectedMood,
+      text: draftText.trim(),
+      date: new Date().toISOString(),
+    };
+    localStorage.setItem("moodDrops", JSON.stringify([newDrop, ...existing]));
+    onTextChange("");
+    handleAffirmation();
   };
 
   return (
     <div className="space-y-4">
-      {/* Mood Card */}
-      {mood && (
-        <div className="rounded-2xl border border-blush-100 bg-cream-50 p-4">
-          <div className="flex items-center gap-3">
-            <span
-              className="h-9 w-9 rounded-full ring-2 ring-white"
-              style={{ backgroundColor: mood.color }}
-              aria-hidden
-            />
-            <div>
-              <div className="font-medium text-warm-gray-900">{mood.label}</div>
-              <div className="text-sm text-warm-gray-600">
-                {mood.summary || mood.description}
-              </div>
+      {/* Mood summary with color + reset */}
+      <div className="rounded-2xl border border-blush-100 bg-white/80 p-4 flex items-start justify-between">
+        <div className="flex items-start gap-3">
+          <span
+            className="h-9 w-9 rounded-full ring-1 ring-black/5"
+            style={{
+              backgroundColor:
+                (mood?.color as string) ||
+                (mood?.bgColor as string) ||
+                (mood?.hex as string) ||
+                "#A3A3A3",
+            }}
+            aria-hidden
+          />
+          <div>
+            <div className="text-warm-gray-900 font-medium">
+              {selectedMood
+                ? String(selectedMood).charAt(0).toUpperCase() +
+                  String(selectedMood).slice(1)
+                : "Select a mood"}
+            </div>
+            <div className="text-sm text-warm-gray-600">
+              {mood?.meaning || "Stable, reflective, grateful."}
             </div>
           </div>
         </div>
-      )}
 
-      {/* Form */}
+        <button
+          type="button"
+          onClick={onResetMood}
+          className="inline-flex items-center text-sm text-warm-gray-600 hover:text-warm-gray-800"
+        >
+          <RotateCcw className="w-4 h-4 mr-1" />
+          Reset
+        </button>
+      </div>
+
+      {/* Input box and Drop It */}
       <form onSubmit={handleSubmit}>
         <textarea
           ref={textareaRef}
           value={draftText}
           onChange={(e) => onTextChange(e.target.value)}
-          placeholder="Let it all drop here — one mood at a time!"
-          className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-warm-gray-400"
+          placeholder="Drop your thoughts here..."
           rows={5}
+          className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-warm-gray-400"
         />
 
-        {/* Buttons Row */}
-        <div className="flex justify-between items-center mt-2">
-          {/* Reset Button */}
-          <button
-            type="button"
-            onClick={onResetMood}
-            className="inline-flex items-center text-sm text-warm-gray-500 hover:text-warm-gray-700"
-          >
-            <RotateCcw className="w-4 h-4 mr-1" /> Reset
-          </button>
+        {/* Always enabled Drop It button with pulse */}
+        <button
+          type="submit"
+          className={`mt-3 w-full rounded-xl py-3 text-white font-medium transition transform active:scale-[0.98]
+            ${
+              isClicked
+                ? "bg-[#E6C3B2] animate-[pulseGlow_0.6s_ease-in-out]"
+                : "bg-[#E6C3B2] hover:bg-[#dcb2a0]"
+            }`}
+        >
+          Drop It
+        </button>
 
-          {/* Drop It Button */}
-          <button
-            type="submit"
-            disabled={isSubmitting || !draftText.trim()}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition
-              ${
-                draftText.trim()
-                  ? "bg-warm-gray-700 text-white hover:bg-warm-gray-800"
-                  : "bg-warm-gray-200 text-warm-gray-500 cursor-not-allowed"
-              }`}
-          >
-            {isSubmitting ? "Saving..." : "Drop It"}
-          </button>
-        </div>
+        {/* reassurance line */}
+        <p className="mt-2 text-xs text-warm-gray-500 text-center">
+          Your words stay on your device — private, safe, and yours.
+        </p>
       </form>
 
-      {/* Privacy Line */}
-      <p className="text-xs text-warm-gray-500 mt-2">
-        Your words stay on your device — private, safe, and yours.
-      </p>
+      {/* affirmation popup */}
+      {showAffirmation && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-amber-900 text-sm text-center">
+          {affirmation}
+        </div>
+      )}
 
-      {/* View My Drops Button */}
-      <div className="mt-4 flex justify-center">
+      {/* View My Drops */}
+      <div className="pt-1 text-center">
         <a
           href="/my-drops"
-          className="inline-flex items-center justify-center rounded-2xl border border-zinc-200
-                     px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-white/90 hover:bg-gray-50 transition"
+          className="inline-flex items-center rounded-xl border border-zinc-200 px-4 py-2 text-sm text-warm-gray-600 hover:bg-gray-50"
         >
           View My Drops
         </a>
       </div>
 
-      {/* Affirmation */}
-      {showAffirmation && (
-        <div className="text-center text-sm text-warm-gray-600 italic mt-3">
-          {affirmation}
-        </div>
-      )}
+      {/* pulse animation keyframes */}
+      <style jsx>{`
+        @keyframes pulseGlow {
+          0% {
+            box-shadow: 0 0 0 0 rgba(230, 195, 178, 0.6);
+          }
+          70% {
+            box-shadow: 0 0 0 10px rgba(230, 195, 178, 0);
+          }
+          100% {
+            box-shadow: 0 0 0 0 rgba(230, 195, 178, 0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
-
 
   
 
