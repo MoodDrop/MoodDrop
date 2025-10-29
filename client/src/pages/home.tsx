@@ -150,11 +150,20 @@ export default function Home() {
         </div>
       )}
 
-      {/* Quick Access Button */}
-      <div className="flex justify-center mt-12">
+      {/* Quick Access Buttons */}
+      <div className="flex flex-col sm:flex-row justify-center gap-4 mt-12">
+        <Link href="/my-drops">
+          <button 
+            className="bg-blush-200 hover:bg-blush-300 text-warm-gray-700 font-medium px-8 py-4 rounded-xl transition-all shadow-md hover:shadow-lg w-full sm:w-auto"
+            data-testid="button-my-drops"
+          >
+            <span className="mr-2">💧</span>
+            View My Drops
+          </button>
+        </Link>
         <Link href="/comfort">
           <button 
-            className="bg-cream-200 hover:bg-cream-300 text-warm-gray-700 font-medium px-8 py-4 rounded-xl transition-all shadow-md hover:shadow-lg"
+            className="bg-cream-200 hover:bg-cream-300 text-warm-gray-700 font-medium px-8 py-4 rounded-xl transition-all shadow-md hover:shadow-lg w-full sm:w-auto"
             data-testid="button-comfort"
           >
             <span className="mr-2">🤗</span>

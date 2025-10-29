@@ -11,6 +11,7 @@ import TakeABreath from "@/pages/take-a-breath";
 import ThankYou from "@/pages/thank-you";
 import Comfort from "@/pages/comfort";
 import Garden from "@/pages/garden";
+import MyDropsPage from "@/pages/MyDropsPage";
 import About from "@/pages/about";
 import Privacy from "@/pages/privacy";
 import AdminLogin from "@/pages/admin-login";
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/thank-you" component={ThankYou} />
       <Route path="/comfort" component={Comfort} />
       <Route path="/garden" component={Garden} />
+      <Route path="/my-drops" component={MyDropsPage} />
       <Route path="/about" component={About} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/admin" component={AdminLogin} />
