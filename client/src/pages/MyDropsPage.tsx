@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Link } from "wouter";
 import { ArrowLeft, Trash2, Undo2, ChevronDown, ChevronUp } from "lucide-react";
+import { motion } from "framer-motion";
 import { Flower } from "@/components/Flower";
 
 type Drop = {
@@ -40,6 +41,49 @@ function loadDrops(): Drop[] {
   const merged = [...a.map(coerce), ...b.map(coerce)];
   merged.sort((p, q) => new Date(q.timestamp).getTime() - new Date(p.timestamp).getTime());
   return merged;
+}
+
+// Generate stable random position for each flower based on its ID
+function getFlowerPosition(id: number, index: number, total: number) {
+  const seed = id * 9301 + 49297;
+  const rng = () => ((seed * 9301 + 49297) % 233280) / 233280;
+  
+  return {
+    left: `${10 + (rng() * 80)}%`,
+    top: `${10 + (rng() * 80)}%`,
+    size: 0.8 + rng() * 0.4,
+    rotation: -15 + rng() * 30,
+    delay: index * 0.1,
+  };
+}
+
+// Butterfly component
+function Butterfly({ delay = 0 }: { delay?: number }) {
+  const [path] = React.useState(() => {
+    const startX = Math.random() * 100;
+    const startY = Math.random() * 100;
+    return { startX, startY };
+  });
+
+  return (
+    <motion.div
+      className="absolute pointer-events-none"
+      initial={{ left: `${path.startX}%`, top: `${path.startY}%`, opacity: 0 }}
+      animate={{
+        left: [`${path.startX}%`, `${(path.startX + 50) % 100}%`, `${path.startX}%`],
+        top: [`${path.startY}%`, `${(path.startY + 30) % 100}%`, `${path.startY}%`],
+        opacity: [0, 0.6, 0.6, 0],
+      }}
+      transition={{
+        duration: 15 + Math.random() * 10,
+        repeat: Infinity,
+        delay: delay,
+        ease: "easeInOut",
+      }}
+    >
+      <span className="text-2xl">🦋</span>
+    </motion.div>
+  );
 }
 
 export default function MyDropsPage() {
@@ -209,8 +253,8 @@ export default function MyDropsPage() {
             })}
           </div>
 
-          {/* Mood Garden */}
-          <section className="mt-6 rounded-2xl border border-blush-100 bg-cream-50 p-5">
+          {/* Natural Mood Garden */}
+          <section className="mt-6 rounded-2xl border border-blush-100 bg-gradient-to-b from-sky-100 via-green-50 to-amber-50 p-5 overflow-hidden">
             <h3 className="text-center text-lg font-semibold text-warm-gray-900">
               Your Mood Garden <span className="ml-1">🌸</span>
             </h3>
@@ -218,15 +262,62 @@ export default function MyDropsPage() {
               Each flower represents a drop. Watch your garden bloom!
             </p>
 
-            <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
-              {items.map((d) => (
-                <Flower
-                  key={d.id}
-                  color={getColor(d.emotion, d.color)}
-                  title={`${d.emotion} — ${new Date(d.timestamp).toLocaleString()}`}
-                  onClick={() => setOpenId(openId === d.id ? null : d.id)}
-                />
-              ))}
+            {/* Garden Container */}
+            <div className="relative mt-6 rounded-xl bg-gradient-to-b from-green-100/30 to-green-200/40 border border-green-200/50" style={{ minHeight: "400px" }}>
+              {/* Decorative grass blades at bottom */}
+              <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none">
+                {[...Array(20)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute bottom-0 text-green-600 text-2xl"
+                    style={{ left: `${i * 5}%` }}
+                    animate={{
+                      rotate: [-2, 2, -2],
+                    }}
+                    transition={{
+                      duration: 2 + Math.random(),
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: i * 0.1,
+                    }}
+                  >
+                    🌿
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Butterflies */}
+              {items.length > 3 && (
+                <>
+                  <Butterfly delay={0} />
+                  <Butterfly delay={5} />
+                  {items.length > 10 && <Butterfly delay={10} />}
+                </>
+              )}
+
+              {/* Scattered Flowers */}
+              {items.map((d, index) => {
+                const pos = getFlowerPosition(d.id, index, items.length);
+                return (
+                  <div
+                    key={d.id}
+                    className="absolute"
+                    style={{
+                      left: pos.left,
+                      top: pos.top,
+                    }}
+                  >
+                    <Flower
+                      color={getColor(d.emotion, d.color)}
+                      title={`${d.emotion} — ${new Date(d.timestamp).toLocaleString()}`}
+                      onClick={() => setOpenId(openId === d.id ? null : d.id)}
+                      size={pos.size}
+                      rotation={pos.rotation}
+                      delay={pos.delay}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </section>
         </>
