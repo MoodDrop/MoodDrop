@@ -17,6 +17,20 @@ interface DeletedDrop {
   index: number;
 }
 
+const EMOTION_COLORS: Record<string, string> = {
+  Calm: "#93c5fd",
+  Grounded: "#86efac",
+  Joyful: "#fde68a",
+  Tender: "#fca5a5",
+  Overwhelmed: "#c7d2fe",
+  Frustrated: "#fca5a5",
+};
+
+function getMoodColor(emotion?: string) {
+  if (!emotion) return "#94a3b8";
+  return moods[emotion as MoodKey]?.color || EMOTION_COLORS[emotion] || "#94a3b8";
+}
+
 export default function MyDropsPage() {
   const [drops, setDrops] = useState<Drop[]>([]);
   const [deletedDrop, setDeletedDrop] = useState<DeletedDrop | null>(null);
@@ -146,7 +160,6 @@ export default function MyDropsPage() {
           <div className="space-y-4 mb-12">
             <AnimatePresence mode="popLayout">
               {drops.map((drop, index) => {
-                const mood = moods[drop.emotion];
                 return (
                   <motion.div
                     key={drop.id}
@@ -162,7 +175,7 @@ export default function MyDropsPage() {
                         <div className="flex items-center gap-3 mb-2">
                           <div
                             className="w-6 h-6 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: mood.color }}
+                            style={{ backgroundColor: getMoodColor(drop.emotion) }}
                           />
                           <div className="flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
@@ -200,7 +213,7 @@ export default function MyDropsPage() {
             </h2>
             <div className="flex flex-wrap justify-center gap-6">
               {Object.entries(moodCounts).map(([emotion, count]) => {
-                const mood = moods[emotion as MoodKey];
+                const color = getMoodColor(emotion);
                 return (
                   <motion.div
                     key={emotion}
@@ -228,8 +241,8 @@ export default function MyDropsPage() {
                       <div
                         className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg cursor-pointer transition-transform group-hover:scale-110"
                         style={{
-                          backgroundColor: mood.color,
-                          boxShadow: `0 4px 20px ${mood.color}40`,
+                          backgroundColor: color,
+                          boxShadow: `0 4px 20px ${color}40`,
                         }}
                       >
                         <Flower2 className="text-white" size={28} />

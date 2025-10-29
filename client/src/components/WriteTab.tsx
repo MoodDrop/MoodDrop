@@ -135,17 +135,18 @@ export default function WriteTab({
       )}
 
       {/* View My Drops */}
-      <div className="pt-1 text-center">
+      <div className="mt-3 flex justify-center">
         <a
           href="/my-drops"
-          className="inline-flex items-center rounded-xl border border-zinc-200 px-4 py-2 text-sm text-warm-gray-600 hover:bg-gray-50"
+          className="inline-flex items-center gap-2 rounded-2xl border border-blush-100 bg-cream-50 px-4 py-2 text-warm-gray-800 shadow-sm hover:bg-cream-100 transition"
         >
-          View My Drops
+          <span className="text-sky-500">💧</span>
+          <span className="font-medium">View My Drops</span>
         </a>
       </div>
 
       {/* pulse animation keyframes */}
-      <style jsx>{`
+      <style>{`
         @keyframes pulseGlow {
           0% {
             box-shadow: 0 0 0 0 rgba(230, 195, 178, 0.6);
