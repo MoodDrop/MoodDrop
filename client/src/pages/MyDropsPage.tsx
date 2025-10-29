@@ -1,151 +1,430 @@
 import * as React from "react";
 import { Link } from "wouter";
-import { ArrowLeft, Trash2, Undo2, ChevronDown, ChevronUp } from "lucide-react";
-import { motion } from "framer-motion";
-import { Flower } from "@/components/Flower";
+import { ArrowLeft, Trash2, Undo2, Search, Download, Upload, X, Mic, Square, Play, Pause } from "lucide-react";
+import { getMoodColor, MOODS_ARRAY } from "@/lib/moods";
+import { useToast } from "@/hooks/use-toast";
 
-type Drop = {
+type SavedDrop = {
   id: number;
   content: string;
   emotion: string;
+  moodColor?: string;
   timestamp: string;
-  color?: string;
-};
-
-const EMOTION_COLORS: Record<string, string> = {
-  Grounded: "#86efac",
-  Calm: "#93c5fd",
-  Joyful: "#fde68a",
-  Reflective: "#fca5a5",
-  Anxious: "#c7d2fe",
-  Tender: "#F6C1B4",
-  Overwhelmed: "#C9C7D2",
-  Frustrated: "#E98A7A",
-};
-
-const getColor = (emotion?: string, saved?: string) =>
-  saved ?? (emotion ? EMOTION_COLORS[emotion] : undefined) ?? "#94a3b8";
-
-function loadDrops(): Drop[] {
-  const a = JSON.parse(localStorage.getItem("moodDrops") || "[]");
-  const b = JSON.parse(localStorage.getItem("mooddrop_messages") || "[]");
-
-  const coerce = (x: any): Drop => ({
-    id: Number(x.id ?? Date.now()),
-    content: String(x.content ?? x.text ?? ""),
-    emotion: String(x.emotion ?? x.mood?.label ?? x.mood ?? "Unknown"),
-    timestamp: String(x.timestamp ?? x.date ?? new Date().toISOString()),
-    color: getColor(x.emotion ?? x.mood?.label ?? x.mood, x.color ?? x.mood?.color),
-  });
-
-  const merged = [...a.map(coerce), ...b.map(coerce)];
-  merged.sort((p, q) => new Date(q.timestamp).getTime() - new Date(p.timestamp).getTime());
-  return merged;
-}
-
-// Generate stable random position for each flower based on its ID
-function getFlowerPosition(id: number, index: number, total: number) {
-  const seed = id * 9301 + 49297;
-  const rng = () => ((seed * 9301 + 49297) % 233280) / 233280;
-  
-  return {
-    left: `${10 + (rng() * 80)}%`,
-    top: `${10 + (rng() * 80)}%`,
-    size: 0.8 + rng() * 0.4,
-    rotation: -15 + rng() * 30,
-    delay: index * 0.1,
+  audio?: {
+    blobUrl: string;
+    durationMs?: number;
   };
+};
+
+const STORAGE_KEY = "mooddrop_messages";
+
+function loadDrops(): SavedDrop[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return [];
+    
+    const items = JSON.parse(stored);
+    const drops = items.map((x: any, index: number) => ({
+      id: Number(x.id ?? Date.now() + index),
+      content: String(x.content ?? x.text ?? ""),
+      emotion: String(x.emotion ?? x.mood?.label ?? x.mood ?? "Unknown"),
+      moodColor: x.moodColor ?? x.color ?? x.mood?.color,
+      timestamp: String(x.timestamp ?? x.date ?? new Date().toISOString()),
+      audio: x.audio,
+    }));
+
+    // Ensure unique IDs
+    const seen = new Set<number>();
+    const unique = drops.map((drop: SavedDrop) => {
+      let id = drop.id;
+      while (seen.has(id)) {
+        id = Date.now() + Math.floor(Math.random() * 100000);
+      }
+      seen.add(id);
+      return { ...drop, id };
+    });
+
+    return unique.sort((a: SavedDrop, b: SavedDrop) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  } catch (error) {
+    console.error("Error loading drops:", error);
+    return [];
+  }
 }
 
-// Butterfly component
-function Butterfly({ delay = 0 }: { delay?: number }) {
-  const [path] = React.useState(() => {
-    const startX = Math.random() * 100;
-    const startY = Math.random() * 100;
-    return { startX, startY };
-  });
+function saveDrops(drops: SavedDrop[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(drops));
+  } catch (error: any) {
+    if (error?.name === "QuotaExceededError") {
+      throw new Error("Storage is full. Please export & clear some drops or delete older voice notes.");
+    }
+    throw error;
+  }
+}
+
+function formatDate(timestamp: string) {
+  try {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(hours / 24);
+
+    if (hours < 1) return "Just now";
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    
+    return date.toLocaleDateString("en-US", { 
+      month: "short", 
+      day: "numeric",
+      year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined 
+    });
+  } catch {
+    return "Recently";
+  }
+}
+
+function VoiceRecorder({ 
+  onSave, 
+  onCancel 
+}: { 
+  onSave: (blobUrl: string, durationMs: number) => void;
+  onCancel: () => void;
+}) {
+  const [isRecording, setIsRecording] = React.useState(false);
+  const [seconds, setSeconds] = React.useState(0);
+  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const chunksRef = React.useRef<Blob[]>([]);
+  const timerRef = React.useRef<NodeJS.Timeout>();
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const url = URL.createObjectURL(blob);
+        onSave(url, seconds * 1000);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      
+      timerRef.current = setInterval(() => {
+        setSeconds(s => s + 1);
+      }, 1000);
+    } catch (error) {
+      alert("Recording isn't supported on this device/browser.");
+      onCancel();
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+  };
+
+  const handleCancel = () => {
+    if (isRecording) stopRecording();
+    if (timerRef.current) clearInterval(timerRef.current);
+    onCancel();
+  };
+
+  React.useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const formatTime = (s: number) => {
+    const mins = Math.floor(s / 60);
+    const secs = s % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   return (
-    <motion.div
-      className="absolute pointer-events-none"
-      initial={{ left: `${path.startX}%`, top: `${path.startY}%`, opacity: 0 }}
-      animate={{
-        left: [`${path.startX}%`, `${(path.startX + 50) % 100}%`, `${path.startX}%`],
-        top: [`${path.startY}%`, `${(path.startY + 30) % 100}%`, `${path.startY}%`],
-        opacity: [0, 0.6, 0.6, 0],
-      }}
-      transition={{
-        duration: 15 + Math.random() * 10,
-        repeat: Infinity,
-        delay: delay,
-        ease: "easeInOut",
-      }}
-    >
-      <span className="text-2xl">🦋</span>
-    </motion.div>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-warm-gray-900">Record Voice Note</h3>
+          <button onClick={handleCancel} className="text-warm-gray-400 hover:text-warm-gray-600">
+            <X size={20} />
+          </button>
+        </div>
+        
+        <div className="text-center py-8">
+          <div className="text-4xl mb-4">{isRecording ? "🎙️" : "🎤"}</div>
+          <div className="text-2xl font-mono text-warm-gray-700 mb-6">
+            {formatTime(seconds)}
+          </div>
+          
+          {!isRecording ? (
+            <button
+              onClick={startRecording}
+              className="px-6 py-3 bg-blush-300 text-white rounded-xl hover:bg-blush-400 transition-colors"
+              data-testid="button-start-recording"
+            >
+              Start Recording
+            </button>
+          ) : (
+            <button
+              onClick={stopRecording}
+              className="px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors flex items-center gap-2 mx-auto"
+              data-testid="button-stop-recording"
+            >
+              <Square size={16} fill="white" />
+              Stop & Save
+            </button>
+          )}
+        </div>
+        
+        <p className="text-xs text-warm-gray-500 text-center">
+          Voice notes are stored privately on this device
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function AudioPlayer({ blobUrl, durationMs }: { blobUrl: string; durationMs?: number }) {
+  return (
+    <div className="mt-2 p-2 bg-warm-gray-50 rounded-lg">
+      <audio controls className="w-full h-8" src={blobUrl} />
+    </div>
   );
 }
 
 export default function MyDropsPage() {
-  const [items, setItems] = React.useState<Drop[]>([]);
-  const [openId, setOpenId] = React.useState<number | null>(null);
-  const [deletedDrop, setDeletedDrop] = React.useState<{ drop: Drop; index: number } | null>(null);
+  const [allDrops, setAllDrops] = React.useState<SavedDrop[]>([]);
+  const [filteredDrops, setFilteredDrops] = React.useState<SavedDrop[]>([]);
+  const [displayedCount, setDisplayedCount] = React.useState(10);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [emotionFilter, setEmotionFilter] = React.useState("All");
+  const [timeFilter, setTimeFilter] = React.useState("All time");
+  const [deletedDrop, setDeletedDrop] = React.useState<{ drop: SavedDrop; index: number } | null>(null);
+  const [recordingFor, setRecordingFor] = React.useState<number | null>(null);
+  const { toast } = useToast();
 
   React.useEffect(() => {
-    setItems(loadDrops());
+    setAllDrops(loadDrops());
   }, []);
 
-  const handleDelete = (drop: Drop, index: number) => {
-    const newItems = items.filter((_, i) => i !== index);
-    setItems(newItems);
-    setDeletedDrop({ drop, index });
+  React.useEffect(() => {
+    let filtered = [...allDrops];
 
-    try {
-      localStorage.setItem("moodDrops", JSON.stringify(newItems));
-      localStorage.setItem("mooddrop_messages", JSON.stringify(newItems));
-    } catch (error) {
-      console.error("Error saving to localStorage:", error);
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(d => 
+        d.content.toLowerCase().includes(query) || 
+        d.emotion.toLowerCase().includes(query)
+      );
     }
 
-    setTimeout(() => {
-      setDeletedDrop(null);
-    }, 5000);
+    if (emotionFilter !== "All") {
+      filtered = filtered.filter(d => d.emotion === emotionFilter);
+    }
+
+    if (timeFilter !== "All time") {
+      const now = Date.now();
+      const cutoff = {
+        "Past week": 7 * 24 * 60 * 60 * 1000,
+        "Past month": 30 * 24 * 60 * 60 * 1000,
+        "Past 3 months": 90 * 24 * 60 * 60 * 1000,
+      }[timeFilter] || 0;
+
+      filtered = filtered.filter(d => 
+        now - new Date(d.timestamp).getTime() < cutoff
+      );
+    }
+
+    setFilteredDrops(filtered);
+    setDisplayedCount(10);
+  }, [allDrops, searchQuery, emotionFilter, timeFilter]);
+
+  const handleDelete = (drop: SavedDrop, originalIndex: number) => {
+    const newDrops = allDrops.filter(d => d.id !== drop.id);
+    setAllDrops(newDrops);
+    setDeletedDrop({ drop, index: originalIndex });
+
+    try {
+      saveDrops(newDrops);
+      toast({
+        title: "Drop deleted",
+        description: "You can undo this action.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+
+    setTimeout(() => setDeletedDrop(null), 5000);
   };
 
   const handleUndo = () => {
     if (!deletedDrop) return;
-
-    const restoredItems = [...items];
-    restoredItems.splice(deletedDrop.index, 0, deletedDrop.drop);
-    setItems(restoredItems);
+    
+    const restored = [...allDrops, deletedDrop.drop].sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    setAllDrops(restored);
     setDeletedDrop(null);
 
     try {
-      localStorage.setItem("moodDrops", JSON.stringify(restoredItems));
-      localStorage.setItem("mooddrop_messages", JSON.stringify(restoredItems));
-    } catch (error) {
-      console.error("Error saving to localStorage:", error);
+      saveDrops(restored);
+      toast({ title: "Drop restored" });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
-  const formatDate = (timestamp: string) => {
+  const handleExportCSV = () => {
+    const headers = ["id", "timestamp", "emotion", "content", "audio_blobUrl", "durationMs"];
+    const rows = allDrops.map(d => [
+      d.id,
+      d.timestamp,
+      d.emotion,
+      `"${d.content.replace(/"/g, '""')}"`,
+      d.audio?.blobUrl || "",
+      d.audio?.durationMs || "",
+    ]);
+
+    const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `mooddrop-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    toast({ title: "Exported successfully" });
+  };
+
+  const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const text = evt.target?.result as string;
+        const lines = text.split("\n").slice(1);
+        const imported: SavedDrop[] = [];
+
+        lines.forEach(line => {
+          if (!line.trim()) return;
+          const [id, timestamp, emotion, content, audioBlobUrl, durationMs] = line.split(",");
+          
+          imported.push({
+            id: Number(id),
+            timestamp,
+            emotion,
+            content: content.replace(/^"|"$/g, "").replace(/""/g, '"'),
+            audio: audioBlobUrl ? { blobUrl: audioBlobUrl, durationMs: Number(durationMs) || undefined } : undefined,
+          });
+        });
+
+        const merged = [...allDrops];
+        imported.forEach(imp => {
+          const existing = merged.findIndex(d => d.id === imp.id);
+          if (existing >= 0) {
+            if (new Date(imp.timestamp) > new Date(merged[existing].timestamp)) {
+              merged[existing] = imp;
+            }
+          } else {
+            merged.push(imp);
+          }
+        });
+
+        merged.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        setAllDrops(merged);
+        saveDrops(merged);
+
+        toast({
+          title: "Imported successfully",
+          description: `${imported.length} drops imported`,
+        });
+      } catch (error) {
+        toast({
+          title: "Import failed",
+          description: "Invalid CSV format",
+          variant: "destructive",
+        });
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const handleClearAll = () => {
+    if (!confirm("Are you sure you want to delete all drops? This cannot be undone.")) return;
+
+    setAllDrops([]);
     try {
-      const date = new Date(timestamp);
-      const now = new Date();
-      const diff = now.getTime() - date.getTime();
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-
-      if (hours < 24) return "Recently";
-      return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    } catch {
-      return "Recently";
+      saveDrops([]);
+      toast({ title: "All drops cleared" });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
+
+  const handleVoiceNoteSaved = (dropId: number, blobUrl: string, durationMs: number) => {
+    const updated = allDrops.map(d => 
+      d.id === dropId 
+        ? { ...d, audio: { blobUrl, durationMs } }
+        : d
+    );
+    setAllDrops(updated);
+    setRecordingFor(null);
+
+    try {
+      saveDrops(updated);
+      toast({ title: "Voice note saved" });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const uniqueEmotions = Array.from(new Set(allDrops.map(d => d.emotion)));
+  const mostFrequentEmotion = uniqueEmotions.length > 0
+    ? uniqueEmotions.reduce((a, b) => 
+        allDrops.filter(d => d.emotion === a).length > allDrops.filter(d => d.emotion === b).length ? a : b
+      )
+    : "None";
+  const voiceNotesCount = allDrops.filter(d => d.audio).length;
 
   return (
-    <div className="max-w-3xl mx-auto pb-12">
+    <div className="max-w-4xl mx-auto pb-12">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-4 mb-4">
         <Link href="/">
           <button
             className="w-10 h-10 bg-blush-100 rounded-full flex items-center justify-center hover:bg-blush-200 transition-colors"
@@ -155,25 +434,111 @@ export default function MyDropsPage() {
           </button>
         </Link>
         <div>
-          <h1 className="text-2xl font-semibold text-warm-gray-700">View My Drops</h1>
-          <p className="text-warm-gray-600 text-sm">
-            Your emotional journey, one drop at a time.
+          <h1 className="text-2xl font-semibold text-warm-gray-900">View My Drops</h1>
+          <p className="text-sm text-warm-gray-600">
+            Your private reflections, stored only on this device.
           </p>
         </div>
       </div>
 
+      {/* Summary Strip */}
+      {allDrops.length > 0 && (
+        <div className="mb-6 p-4 bg-blush-50 rounded-xl border border-blush-100">
+          <div className="flex flex-wrap gap-4 text-sm text-warm-gray-700">
+            <span>Total drops: <strong>{allDrops.length}</strong></span>
+            <span>•</span>
+            <span>Most frequent mood: <strong>{mostFrequentEmotion}</strong></span>
+            {voiceNotesCount > 0 && (
+              <>
+                <span>•</span>
+                <span>Voice notes: <strong>{voiceNotesCount}</strong></span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Tools Row */}
+      {allDrops.length > 0 && (
+        <div className="mb-6 space-y-3">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search drops…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-warm-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush-300"
+              data-testid="input-search"
+            />
+          </div>
+
+          {/* Filters & Actions */}
+          <div className="flex flex-wrap gap-2">
+            <select
+              value={emotionFilter}
+              onChange={(e) => setEmotionFilter(e.target.value)}
+              className="px-3 py-2 border border-warm-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blush-300"
+              data-testid="select-emotion-filter"
+            >
+              <option value="All">All moods</option>
+              {uniqueEmotions.map(e => (
+                <option key={e} value={e}>{e}</option>
+              ))}
+            </select>
+
+            <select
+              value={timeFilter}
+              onChange={(e) => setTimeFilter(e.target.value)}
+              className="px-3 py-2 border border-warm-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blush-300"
+              data-testid="select-time-filter"
+            >
+              <option value="All time">All time</option>
+              <option value="Past week">Past week</option>
+              <option value="Past month">Past month</option>
+              <option value="Past 3 months">Past 3 months</option>
+            </select>
+
+            <button
+              onClick={handleExportCSV}
+              className="px-3 py-2 bg-warm-gray-100 text-warm-gray-700 rounded-lg hover:bg-warm-gray-200 transition-colors text-sm flex items-center gap-2"
+              data-testid="button-export-csv"
+            >
+              <Download size={16} />
+              Export CSV
+            </button>
+
+            <label className="px-3 py-2 bg-warm-gray-100 text-warm-gray-700 rounded-lg hover:bg-warm-gray-200 transition-colors text-sm flex items-center gap-2 cursor-pointer">
+              <Upload size={16} />
+              Import CSV
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleImportCSV}
+                className="hidden"
+                data-testid="input-import-csv"
+              />
+            </label>
+
+            <button
+              onClick={handleClearAll}
+              className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm"
+              data-testid="button-clear-all"
+            >
+              Clear All
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Undo Banner */}
       {deletedDrop && (
-        <div
-          className="mb-6 p-4 bg-warm-gray-100 border border-warm-gray-200 rounded-xl flex items-center justify-between"
-          data-testid="undo-banner"
-        >
-          <p className="text-warm-gray-700 text-sm">
-            Drop deleted. <strong>Undo?</strong>
-          </p>
+        <div className="mb-6 p-4 bg-warm-gray-100 border border-warm-gray-200 rounded-xl flex items-center justify-between">
+          <p className="text-warm-gray-700 text-sm">Drop deleted</p>
           <button
             onClick={handleUndo}
-            className="flex items-center gap-2 px-4 py-2 bg-blush-300 text-white rounded-lg hover:bg-blush-400 transition-colors"
+            className="px-4 py-2 bg-blush-300 text-white rounded-lg hover:bg-blush-400 transition-colors text-sm flex items-center gap-2"
             data-testid="button-undo"
           >
             <Undo2 size={16} />
@@ -183,144 +548,105 @@ export default function MyDropsPage() {
       )}
 
       {/* Empty State */}
-      {items.length === 0 ? (
+      {allDrops.length === 0 ? (
         <div className="text-center py-16 px-6">
           <div className="w-20 h-20 mx-auto mb-4 bg-blush-100 rounded-full flex items-center justify-center">
-            <span className="text-4xl">🌸</span>
+            <span className="text-4xl">📝</span>
           </div>
-          <p className="text-warm-gray-600 text-lg">
+          <p className="text-warm-gray-600 text-lg mb-2">
             No drops yet. After you press Drop It, they'll appear here.
           </p>
+        </div>
+      ) : filteredDrops.length === 0 ? (
+        <div className="text-center py-16 px-6">
+          <p className="text-warm-gray-600">No results match your search/filter.</p>
         </div>
       ) : (
         <>
           {/* Drops List */}
-          <div className="space-y-3 mb-8">
-            {items.map((item, index) => {
-              const isOpen = openId === item.id;
-              return (
-                <div
-                  key={item.id}
-                  className="bg-white rounded-xl border border-warm-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-                  data-testid={`drop-${item.id}`}
-                >
-                  {/* Header Row - Always Visible */}
-                  <button
-                    onClick={() => setOpenId(isOpen ? null : item.id)}
-                    className="w-full p-4 flex items-center gap-3 hover:bg-warm-gray-50 transition-colors text-left"
-                  >
-                    <div
-                      className="w-3.5 h-3.5 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: getColor(item.emotion, item.color) }}
-                    />
-                    <div className="flex-1 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-medium text-warm-gray-700">{item.emotion}</span>
-                        <span className="text-xs text-warm-gray-500">
-                          {formatDate(item.timestamp)}
-                        </span>
-                      </div>
-                      {isOpen ? (
-                        <ChevronUp size={18} className="text-warm-gray-400" />
-                      ) : (
-                        <ChevronDown size={18} className="text-warm-gray-400" />
-                      )}
-                    </div>
-                  </button>
+          <div className="space-y-4 mb-6">
+            {filteredDrops.slice(0, displayedCount).map((drop) => (
+              <div
+                key={drop.id}
+                className="bg-white rounded-xl border border-warm-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow"
+                data-testid={`drop-${drop.id}`}
+              >
+                <div className="flex items-start gap-3">
+                  {/* Mood Dot */}
+                  <div
+                    className="w-4 h-4 rounded-full flex-shrink-0 mt-1"
+                    style={{ backgroundColor: getMoodColor(drop.emotion, drop.moodColor) }}
+                  />
 
-                  {/* Expanded Body - Shows Full Text */}
-                  {isOpen && (
-                    <div className="px-4 pb-4 pt-1 border-t border-warm-gray-100">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="flex-1 text-warm-gray-600 leading-relaxed whitespace-pre-wrap">
-                          {item.content}
-                        </p>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(item, index);
-                          }}
-                          className="flex-shrink-0 p-2 text-warm-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          data-testid={`button-delete-${item.id}`}
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 text-sm text-warm-gray-500 mb-1">
+                      <span>{formatDate(drop.timestamp)}</span>
+                      <span>•</span>
+                      <span className="font-medium text-warm-gray-700">{drop.emotion}</span>
                     </div>
-                  )}
+                    
+                    <p className="text-warm-gray-900 whitespace-pre-wrap leading-relaxed">
+                      {drop.content}
+                    </p>
+
+                    {/* Audio Player */}
+                    {drop.audio && (
+                      <AudioPlayer blobUrl={drop.audio.blobUrl} durationMs={drop.audio.durationMs} />
+                    )}
+
+                    {/* Add Voice Note Button */}
+                    {!drop.audio && (
+                      <button
+                        onClick={() => setRecordingFor(drop.id)}
+                        className="mt-2 px-3 py-1.5 bg-blush-50 text-blush-600 rounded-lg hover:bg-blush-100 transition-colors text-sm flex items-center gap-2"
+                        data-testid={`button-add-voice-${drop.id}`}
+                      >
+                        <Mic size={14} />
+                        Add Voice Note
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => handleDelete(drop, allDrops.indexOf(drop))}
+                    className="p-2 text-warm-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                    data-testid={`button-delete-${drop.id}`}
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
 
-          {/* Natural Mood Garden */}
-          <section className="mt-6 rounded-2xl border border-blush-100 bg-gradient-to-b from-sky-100 via-green-50 to-amber-50 p-5 overflow-hidden">
-            <h3 className="text-center text-lg font-semibold text-warm-gray-900">
-              Your Mood Garden <span className="ml-1">🌸</span>
-            </h3>
-            <p className="mt-1 text-center text-sm text-warm-gray-600">
-              Each flower represents a drop. Watch your garden bloom!
-            </p>
-
-            {/* Garden Container */}
-            <div className="relative mt-6 rounded-xl bg-gradient-to-b from-green-100/30 to-green-200/40 border border-green-200/50" style={{ minHeight: "400px" }}>
-              {/* Decorative grass blades at bottom */}
-              <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none">
-                {[...Array(20)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute bottom-0 text-green-600 text-2xl"
-                    style={{ left: `${i * 5}%` }}
-                    animate={{
-                      rotate: [-2, 2, -2],
-                    }}
-                    transition={{
-                      duration: 2 + Math.random(),
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      delay: i * 0.1,
-                    }}
-                  >
-                    🌿
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Butterflies */}
-              {items.length > 3 && (
-                <>
-                  <Butterfly delay={0} />
-                  <Butterfly delay={5} />
-                  {items.length > 10 && <Butterfly delay={10} />}
-                </>
-              )}
-
-              {/* Scattered Flowers */}
-              {items.map((d, index) => {
-                const pos = getFlowerPosition(d.id, index, items.length);
-                return (
-                  <div
-                    key={d.id}
-                    className="absolute"
-                    style={{
-                      left: pos.left,
-                      top: pos.top,
-                    }}
-                  >
-                    <Flower
-                      color={getColor(d.emotion, d.color)}
-                      title={`${d.emotion} — ${new Date(d.timestamp).toLocaleString()}`}
-                      onClick={() => setOpenId(openId === d.id ? null : d.id)}
-                      size={pos.size}
-                      rotation={pos.rotation}
-                      delay={pos.delay}
-                    />
-                  </div>
-                );
-              })}
+          {/* Load More */}
+          {displayedCount < filteredDrops.length && (
+            <div className="text-center">
+              <button
+                onClick={() => setDisplayedCount(c => c + 10)}
+                className="px-6 py-3 bg-blush-100 text-blush-600 rounded-xl hover:bg-blush-200 transition-colors"
+                data-testid="button-load-more"
+              >
+                Load more ({filteredDrops.length - displayedCount} remaining)
+              </button>
             </div>
-          </section>
+          )}
         </>
+      )}
+
+      {/* Privacy Footnote */}
+      <div className="mt-8 p-4 bg-warm-gray-50 rounded-xl text-sm text-warm-gray-600 text-center">
+        Private to this device. Clearing browser storage will remove your drops. Export a CSV to back up.
+      </div>
+
+      {/* Voice Recorder Modal */}
+      {recordingFor !== null && (
+        <VoiceRecorder
+          onSave={(url, duration) => handleVoiceNoteSaved(recordingFor, url, duration)}
+          onCancel={() => setRecordingFor(null)}
+        />
       )}
     </div>
   );

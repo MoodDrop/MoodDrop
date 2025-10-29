@@ -55,3 +55,11 @@ export const MOOD_PALETTE: Record<MoodKey, MoodData> = {
 
 export const moods = MOOD_PALETTE;
 export const MOODS_ARRAY: MoodData[] = Object.values(MOOD_PALETTE);
+
+export function getMoodColor(emotion?: string, savedColor?: string): string {
+  if (savedColor) return savedColor;
+  if (!emotion) return "#94a3b8";
+  
+  const moodData = MOOD_PALETTE[emotion as MoodKey];
+  return moodData?.color ?? "#94a3b8";
+}
