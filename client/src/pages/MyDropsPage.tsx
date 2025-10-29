@@ -1,66 +1,66 @@
-import { useState, useEffect } from "react";
+import * as React from "react";
 import { Link } from "wouter";
-import { ArrowLeft, Trash2, Undo2, Flower2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { moods, type MoodKey } from "@/lib/moods";
-import { format } from "date-fns";
+import { ArrowLeft, Trash2, Undo2, ChevronDown, ChevronUp } from "lucide-react";
+import { Flower } from "@/components/Flower";
 
-interface Drop {
+type Drop = {
   id: number;
   content: string;
-  emotion: MoodKey;
+  emotion: string;
   timestamp: string;
-}
-
-interface DeletedDrop {
-  drop: Drop;
-  index: number;
-}
-
-const EMOTION_COLORS: Record<string, string> = {
-  Calm: "#93c5fd",
-  Grounded: "#86efac",
-  Joyful: "#fde68a",
-  Tender: "#fca5a5",
-  Overwhelmed: "#c7d2fe",
-  Frustrated: "#fca5a5",
+  color?: string;
 };
 
-function getMoodColor(emotion?: string) {
-  if (!emotion) return "#94a3b8";
-  return moods[emotion as MoodKey]?.color || EMOTION_COLORS[emotion] || "#94a3b8";
+const EMOTION_COLORS: Record<string, string> = {
+  Grounded: "#86efac",
+  Calm: "#93c5fd",
+  Joyful: "#fde68a",
+  Reflective: "#fca5a5",
+  Anxious: "#c7d2fe",
+  Tender: "#F6C1B4",
+  Overwhelmed: "#C9C7D2",
+  Frustrated: "#E98A7A",
+};
+
+const getColor = (emotion?: string, saved?: string) =>
+  saved ?? (emotion ? EMOTION_COLORS[emotion] : undefined) ?? "#94a3b8";
+
+function loadDrops(): Drop[] {
+  const a = JSON.parse(localStorage.getItem("moodDrops") || "[]");
+  const b = JSON.parse(localStorage.getItem("mooddrop_messages") || "[]");
+
+  const coerce = (x: any): Drop => ({
+    id: Number(x.id ?? Date.now()),
+    content: String(x.content ?? x.text ?? ""),
+    emotion: String(x.emotion ?? x.mood?.label ?? x.mood ?? "Unknown"),
+    timestamp: String(x.timestamp ?? x.date ?? new Date().toISOString()),
+    color: getColor(x.emotion ?? x.mood?.label ?? x.mood, x.color ?? x.mood?.color),
+  });
+
+  const merged = [...a.map(coerce), ...b.map(coerce)];
+  merged.sort((p, q) => new Date(q.timestamp).getTime() - new Date(p.timestamp).getTime());
+  return merged;
 }
 
 export default function MyDropsPage() {
-  const [drops, setDrops] = useState<Drop[]>([]);
-  const [deletedDrop, setDeletedDrop] = useState<DeletedDrop | null>(null);
+  const [items, setItems] = React.useState<Drop[]>([]);
+  const [openId, setOpenId] = React.useState<number | null>(null);
+  const [deletedDrop, setDeletedDrop] = React.useState<{ drop: Drop; index: number } | null>(null);
 
-  useEffect(() => {
-    loadDrops();
+  React.useEffect(() => {
+    setItems(loadDrops());
   }, []);
 
-  const loadDrops = () => {
-    try {
-      const stored = localStorage.getItem('moodDrops') || localStorage.getItem('mooddrop_messages');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setDrops(parsed.reverse());
-      }
-    } catch (error) {
-      console.error('Error loading drops:', error);
-    }
-  };
-
   const handleDelete = (drop: Drop, index: number) => {
-    const newDrops = drops.filter((_, i) => i !== index);
-    setDrops(newDrops);
+    const newItems = items.filter((_, i) => i !== index);
+    setItems(newItems);
     setDeletedDrop({ drop, index });
 
     try {
-      localStorage.setItem('moodDrops', JSON.stringify(newDrops.reverse()));
-      localStorage.setItem('mooddrop_messages', JSON.stringify(newDrops.reverse()));
+      localStorage.setItem("moodDrops", JSON.stringify(newItems));
+      localStorage.setItem("mooddrop_messages", JSON.stringify(newItems));
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error("Error saving to localStorage:", error);
     }
 
     setTimeout(() => {
@@ -71,31 +71,32 @@ export default function MyDropsPage() {
   const handleUndo = () => {
     if (!deletedDrop) return;
 
-    const restoredDrops = [...drops];
-    restoredDrops.splice(deletedDrop.index, 0, deletedDrop.drop);
-    setDrops(restoredDrops);
+    const restoredItems = [...items];
+    restoredItems.splice(deletedDrop.index, 0, deletedDrop.drop);
+    setItems(restoredItems);
     setDeletedDrop(null);
 
     try {
-      localStorage.setItem('moodDrops', JSON.stringify(restoredDrops.reverse()));
-      localStorage.setItem('mooddrop_messages', JSON.stringify(restoredDrops.reverse()));
+      localStorage.setItem("moodDrops", JSON.stringify(restoredItems));
+      localStorage.setItem("mooddrop_messages", JSON.stringify(restoredItems));
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error("Error saving to localStorage:", error);
     }
   };
 
   const formatDate = (timestamp: string) => {
     try {
-      return format(new Date(timestamp), "MMM d, h:mm a");
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diff = now.getTime() - date.getTime();
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+
+      if (hours < 24) return "Recently";
+      return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
     } catch {
       return "Recently";
     }
   };
-
-  const moodCounts = drops.reduce((acc, drop) => {
-    acc[drop.emotion] = (acc[drop.emotion] || 0) + 1;
-    return acc;
-  }, {} as Record<MoodKey, number>);
 
   return (
     <div className="max-w-3xl mx-auto pb-12">
@@ -110,9 +111,7 @@ export default function MyDropsPage() {
           </button>
         </Link>
         <div>
-          <h1 className="text-2xl font-semibold text-warm-gray-700">
-            View My Drops
-          </h1>
+          <h1 className="text-2xl font-semibold text-warm-gray-700">View My Drops</h1>
           <p className="text-warm-gray-600 text-sm">
             Your emotional journey, one drop at a time.
           </p>
@@ -120,35 +119,30 @@ export default function MyDropsPage() {
       </div>
 
       {/* Undo Banner */}
-      <AnimatePresence>
-        {deletedDrop && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="mb-6 p-4 bg-warm-gray-100 border border-warm-gray-200 rounded-xl flex items-center justify-between"
-            data-testid="undo-banner"
+      {deletedDrop && (
+        <div
+          className="mb-6 p-4 bg-warm-gray-100 border border-warm-gray-200 rounded-xl flex items-center justify-between"
+          data-testid="undo-banner"
+        >
+          <p className="text-warm-gray-700 text-sm">
+            Drop deleted. <strong>Undo?</strong>
+          </p>
+          <button
+            onClick={handleUndo}
+            className="flex items-center gap-2 px-4 py-2 bg-blush-300 text-white rounded-lg hover:bg-blush-400 transition-colors"
+            data-testid="button-undo"
           >
-            <p className="text-warm-gray-700 text-sm">
-              Drop deleted. <strong>Undo?</strong>
-            </p>
-            <button
-              onClick={handleUndo}
-              className="flex items-center gap-2 px-4 py-2 bg-blush-300 text-white rounded-lg hover:bg-blush-400 transition-colors"
-              data-testid="button-undo"
-            >
-              <Undo2 size={16} />
-              Undo
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <Undo2 size={16} />
+            Undo
+          </button>
+        </div>
+      )}
 
       {/* Empty State */}
-      {drops.length === 0 ? (
+      {items.length === 0 ? (
         <div className="text-center py-16 px-6">
           <div className="w-20 h-20 mx-auto mb-4 bg-blush-100 rounded-full flex items-center justify-center">
-            <Flower2 className="text-blush-400" size={32} />
+            <span className="text-4xl">🌸</span>
           </div>
           <p className="text-warm-gray-600 text-lg">
             No drops yet. After you press Drop It, they'll appear here.
@@ -157,119 +151,84 @@ export default function MyDropsPage() {
       ) : (
         <>
           {/* Drops List */}
-          <div className="space-y-4 mb-12">
-            <AnimatePresence mode="popLayout">
-              {drops.map((drop, index) => {
-                return (
-                  <motion.div
-                    key={drop.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="bg-white rounded-xl p-5 shadow-sm border border-warm-gray-100 hover:shadow-md transition-shadow"
-                    data-testid={`drop-${drop.id}`}
+          <div className="space-y-3 mb-8">
+            {items.map((item, index) => {
+              const isOpen = openId === item.id;
+              return (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-xl border border-warm-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                  data-testid={`drop-${item.id}`}
+                >
+                  {/* Header Row - Always Visible */}
+                  <button
+                    onClick={() => setOpenId(isOpen ? null : item.id)}
+                    className="w-full p-4 flex items-center gap-3 hover:bg-warm-gray-50 transition-colors text-left"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div
-                            className="w-6 h-6 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: getMoodColor(drop.emotion) }}
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-medium text-warm-gray-700">
-                                {drop.emotion}
-                              </span>
-                              <span className="text-xs text-warm-gray-500">
-                                {formatDate(drop.timestamp)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <p className="text-warm-gray-600 leading-relaxed pl-9">
-                          {drop.content}
-                        </p>
+                    <div
+                      className="w-3.5 h-3.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: getColor(item.emotion, item.color) }}
+                    />
+                    <div className="flex-1 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-warm-gray-700">{item.emotion}</span>
+                        <span className="text-xs text-warm-gray-500">
+                          {formatDate(item.timestamp)}
+                        </span>
                       </div>
-                      <button
-                        onClick={() => handleDelete(drop, index)}
-                        className="flex-shrink-0 p-2 text-warm-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        data-testid={`button-delete-${drop.id}`}
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      {isOpen ? (
+                        <ChevronUp size={18} className="text-warm-gray-400" />
+                      ) : (
+                        <ChevronDown size={18} className="text-warm-gray-400" />
+                      )}
                     </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+                  </button>
+
+                  {/* Expanded Body - Shows Full Text */}
+                  {isOpen && (
+                    <div className="px-4 pb-4 pt-1 border-t border-warm-gray-100">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="flex-1 text-warm-gray-600 leading-relaxed whitespace-pre-wrap">
+                          {item.content}
+                        </p>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(item, index);
+                          }}
+                          className="flex-shrink-0 p-2 text-warm-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          data-testid={`button-delete-${item.id}`}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
-          {/* Mood Garden Visualization */}
-          <div className="bg-gradient-to-br from-cream-50 to-blush-50 rounded-2xl p-8 border border-blush-100">
-            <h2 className="text-xl font-semibold text-warm-gray-700 mb-6 text-center">
-              Your Mood Garden 🌸
-            </h2>
-            <div className="flex flex-wrap justify-center gap-6">
-              {Object.entries(moodCounts).map(([emotion, count]) => {
-                const color = getMoodColor(emotion);
-                return (
-                  <motion.div
-                    key={emotion}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      delay: Math.random() * 0.3,
-                      duration: 0.6,
-                    }}
-                    className="group relative"
-                    data-testid={`flower-${emotion}`}
-                  >
-                    <motion.div
-                      animate={{
-                        y: [0, -8, 0],
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: Math.random() * 2,
-                      }}
-                      className="relative"
-                    >
-                      <div
-                        className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg cursor-pointer transition-transform group-hover:scale-110"
-                        style={{
-                          backgroundColor: color,
-                          boxShadow: `0 4px 20px ${color}40`,
-                        }}
-                      >
-                        <Flower2 className="text-white" size={28} />
-                      </div>
-                      <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center text-xs font-semibold text-warm-gray-700 shadow-sm border border-warm-gray-200">
-                        {count}
-                      </div>
-                    </motion.div>
-
-                    {/* Tooltip */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                      <div className="bg-warm-gray-800 text-white text-xs px-3 py-2 rounded-lg whitespace-nowrap shadow-lg">
-                        <p className="font-medium">{emotion}</p>
-                        <p className="text-warm-gray-300">
-                          {count} {count === 1 ? 'drop' : 'drops'}
-                        </p>
-                      </div>
-                      <div className="w-2 h-2 bg-warm-gray-800 transform rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1" />
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-            <p className="text-center text-warm-gray-500 text-sm mt-6">
-              Each flower represents your emotional expressions. Watch your garden bloom! 🌿
+          {/* Mood Garden */}
+          <section className="mt-6 rounded-2xl border border-blush-100 bg-cream-50 p-5">
+            <h3 className="text-center text-lg font-semibold text-warm-gray-900">
+              Your Mood Garden <span className="ml-1">🌸</span>
+            </h3>
+            <p className="mt-1 text-center text-sm text-warm-gray-600">
+              Each flower represents a drop. Watch your garden bloom!
             </p>
-          </div>
+
+            <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+              {items.map((d) => (
+                <Flower
+                  key={d.id}
+                  color={getColor(d.emotion, d.color)}
+                  title={`${d.emotion} — ${new Date(d.timestamp).toLocaleString()}`}
+                  onClick={() => setOpenId(openId === d.id ? null : d.id)}
+                />
+              ))}
+            </div>
+          </section>
         </>
       )}
     </div>
