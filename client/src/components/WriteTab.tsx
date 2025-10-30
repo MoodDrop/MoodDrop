@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Link } from "wouter";
 import { RotateCcw, Sparkles } from "lucide-react";
 import { moods, type MoodKey } from "@/lib/moods";
 import { getAffirmation } from "@/lib/affirmations";
@@ -141,23 +142,23 @@ export default function WriteTab({
 
       {/* Two CTAs: View My Drops + Calm Studio */}
       <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-        <a
+        <Link 
           href="/my-drops"
           className="inline-flex items-center gap-2 rounded-2xl border border-blush-100 bg-white/80 px-5 py-3 text-warm-gray-800 shadow-sm hover:shadow-md hover:bg-cream-50 transition-all"
           data-testid="cta-view-my-drops"
         >
           <img src={dropletIcon} alt="" className="w-4 h-4" />
           <span className="font-medium">View My Drops</span>
-        </a>
+        </Link>
         
-        <a
+        <Link 
           href="/calm-studio"
           className="inline-flex items-center gap-2 rounded-2xl border border-blush-100 bg-white/80 px-5 py-3 text-warm-gray-800 shadow-sm hover:shadow-md hover:bg-cream-50 transition-all"
           data-testid="cta-calm-studio"
         >
           <Sparkles className="w-4 h-4" />
           <span className="font-medium">Calm Studio</span>
-        </a>
+        </Link>
       </div>
 
       {/* pulse animation keyframes */}
