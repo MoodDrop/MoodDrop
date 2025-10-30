@@ -1,9 +1,9 @@
-export type MoodKey = "Calm" | "Grounded" | "Joyful" | "Tender" | "Overwhelmed" | "Frustrated";
+export type MoodKey = "Calm" | "Grounded" | "Joyful" | "Overwhelmed" | "Tender";
 
 export interface MoodData {
   key: MoodKey;
   color: string;
-  shape: "circle" | "leaf" | "star" | "heart" | "cloud" | "triangle";
+  shape: "circle" | "leaf" | "star" | "heart" | "cloud";
   meaning: string;
   icon: string;
 }
@@ -30,13 +30,6 @@ export const MOOD_PALETTE: Record<MoodKey, MoodData> = {
     meaning: "Happy, excited, hopeful.",
     icon: "★"
   },
-  Tender: {
-    key: "Tender",
-    color: "#F6C1B4",
-    shape: "heart",
-    meaning: "Loving, affectionate, sensitive.",
-    icon: "♥"
-  },
   Overwhelmed: {
     key: "Overwhelmed",
     color: "#C9C7D2",
@@ -44,12 +37,12 @@ export const MOOD_PALETTE: Record<MoodKey, MoodData> = {
     meaning: "Tired, unsure, emotionally heavy.",
     icon: "☁"
   },
-  Frustrated: {
-    key: "Frustrated",
-    color: "#E98A7A",
-    shape: "triangle",
-    meaning: "Irritated, tense, needing release.",
-    icon: "▲"
+  Tender: {
+    key: "Tender",
+    color: "#F6C1B4",
+    shape: "heart",
+    meaning: "Loving, affectionate, sensitive.",
+    icon: "♥"
   }
 };
 

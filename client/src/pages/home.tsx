@@ -1,31 +1,28 @@
 import { useState } from "react";
-import { Link } from "wouter";
-import { PenLine, Mic } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Sparkles } from "lucide-react";
 import dropletIcon from "@assets/Droplet_1760186315979.png";
 import { moods, type MoodKey } from "@/lib/moods";
-import WriteTab from "@/components/WriteTab";
-import VoiceTab from "@/components/VoiceTab";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"write" | "voice">("write");
   const [selectedMood, setSelectedMood] = useState<MoodKey | null>(null);
   const [hoveredMood, setHoveredMood] = useState<MoodKey | null>(null);
-  const [draftText, setDraftText] = useState("");
-
-  const handleTabClick = (tab: "write" | "voice") => {
-    setActiveTab(tab);
-  };
+  const [, setLocation] = useLocation();
 
   const handleMoodSelect = (moodKey: MoodKey) => {
-    setSelectedMood(moodKey === selectedMood ? null : moodKey);
+    setSelectedMood(moodKey);
   };
 
-  const handleResetMood = () => {
-    setSelectedMood(null);
+  const handleDropIt = () => {
+    if (selectedMood) {
+      // Store selected mood in localStorage for DropItPage
+      localStorage.setItem("mooddrop_selected_mood", selectedMood);
+      setLocation("/drop-it");
+    }
   };
 
   return (
-    <div className="mb-8">
+    <div className="mb-8 max-w-xl mx-auto">
       {/* Hero Section */}
       <div className="text-center mb-8">
         <img
@@ -34,48 +31,41 @@ export default function Home() {
           className="w-32 h-32 mx-auto mb-6 shadow-sm"
         />
 
-        <h2 className="text-2xl font-semibold text-warm-gray-700 mb-4">
+        <h2 className="text-2xl font-semibold text-warm-gray-700 mb-3">
           Welcome to MoodDrop
         </h2>
-        <p className="text-warm-gray-600 leading-relaxed mb-8">
-          Your quiet corner to release, reflect, and grow through every mood.
+        
+        <p className="text-warm-gray-600 leading-relaxed mb-3">
+          A gentle space to release your thoughts, find calm, and grow through every mood.
+        </p>
+        
+        <p className="text-warm-gray-600 leading-relaxed mb-6">
+          Release your thoughts through typing or voice notes, unwind with calming games and soothing videos.
         </p>
       </div>
 
-      {/* Mood Selector Row */}
+      {/* Mood Selector */}
       <div className="text-center mb-6">
-        <p className="text-warm-gray-600 font-medium mb-2">
-          What type of mood are you feeling today?
-        </p>
-        
-        <p className="text-xs text-warm-gray-500 mb-4">
-          No account needed — everything here is anonymous.
+        <p className="text-sm text-warm-gray-600 mb-4">
+          Choose your mood to begin…
         </p>
 
-        {/* Animated Hint Text - Only show when no mood is selected */}
-        {!selectedMood && (
-          <p className="text-sm text-zinc-500 mb-3 animate-pulse-gentle">
-            ✨ Choose a mood to begin…
-          </p>
-        )}
-
-        {/* Horizontal Mood Circles */}
-        <div className="flex justify-center items-center gap-2 sm:gap-3 mb-2">
+        {/* Mood Circles */}
+        <div className="flex justify-center items-center gap-3 mb-3">
           {Object.entries(moods).map(([key, mood]) => (
             <button
               key={key}
               onClick={() => handleMoodSelect(key as MoodKey)}
               onMouseEnter={() => setHoveredMood(key as MoodKey)}
               onMouseLeave={() => setHoveredMood(null)}
-              className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full transition-all duration-200 ${
+              className={`w-8 h-8 rounded-full transition-all duration-200 ${
                 selectedMood === key
                   ? "ring-2 ring-offset-2 ring-warm-gray-400 scale-110"
-                  : "hover:scale-110 animate-glow-pulse"
+                  : "hover:scale-110"
               }`}
               style={{
                 backgroundColor: mood.color,
-                '--glow-color': mood.color,
-              } as React.CSSProperties}
+              }}
               aria-label={`${mood.key}: ${mood.meaning}`}
               title={`${mood.key}: ${mood.meaning}`}
               data-testid={`mood-circle-${key.toLowerCase()}`}
@@ -85,7 +75,7 @@ export default function Home() {
 
         {/* Tooltip - Show on hover or selection */}
         {(hoveredMood || selectedMood) && (
-          <div className="mt-2 text-sm text-warm-gray-600 animate-in fade-in duration-200">
+          <div className="mb-6 text-sm text-warm-gray-600 animate-in fade-in duration-200">
             <span className="font-medium">
               {moods[hoveredMood || selectedMood!].key}
             </span>
@@ -95,61 +85,55 @@ export default function Home() {
             </span>
           </div>
         )}
+
+        {/* Drop It Button */}
+        {selectedMood && (
+          <div className="mt-8 mb-6 animate-in fade-in slide-in-from-top-4 duration-200">
+            <button
+              onClick={handleDropIt}
+              className="w-full max-w-xs mx-auto px-8 py-4 bg-blush-300 hover:bg-blush-400 text-white rounded-2xl font-medium shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              data-testid="button-drop-it"
+            >
+              <span>💧</span>
+              <span>Drop It</span>
+            </button>
+            <p className="mt-3 text-sm text-warm-gray-500">
+              Let it out — this space is just for you.
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Tabs - Only show when mood is selected */}
-      {selectedMood && (
-        <div className="flex flex-wrap justify-center gap-3 mb-6">
-          <button
-            onClick={() => handleTabClick("write")}
-            className={`px-6 py-3 rounded-xl font-medium transition-all shadow-sm ${
-              activeTab === "write"
-                ? "bg-blush-300 text-white shadow-md"
-                : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
-            }`}
-            data-testid="tab-let-it-flow"
-          >
-            <PenLine className="inline-block mr-2" size={18} />
-            Let It Flow
-          </button>
-          <button
-            onClick={() => handleTabClick("voice")}
-            className={`px-6 py-3 rounded-xl font-medium transition-all shadow-sm ${
-              activeTab === "voice"
-                ? "bg-blush-300 text-white shadow-md"
-                : "bg-cream-100 text-warm-gray-700 hover:bg-cream-200"
-            }`}
-            data-testid="tab-take-a-moment"
-          >
-            <Mic className="inline-block mr-2" size={18} />
-            Take a Moment
-          </button>
-        </div>
-      )}
+      {/* Privacy & Description */}
+      <div className="text-center text-sm text-warm-gray-600 mb-8 space-y-2">
+        <p>
+          Type or speak your thoughts — every drop helps you grow.
+        </p>
+        <p className="text-xs text-warm-gray-500">
+          Your words stay on your device — no account needed, fully anonymous.
+        </p>
+      </div>
 
-      {/* Tab Content - Only show when mood is selected */}
-      {selectedMood && (
-        <div 
-          className="max-w-2xl mx-auto animate-in fade-in slide-in-from-top-4 duration-200"
-          aria-expanded={!!selectedMood}
+      {/* Bottom Links */}
+      <div className="flex items-center justify-center gap-4 text-sm text-warm-gray-600">
+        <Link 
+          href="/calm-studio"
+          className="inline-flex items-center gap-1 hover:text-blush-400 transition-colors"
+          data-testid="link-calm-studio"
         >
-          {activeTab === "write" && (
-            <WriteTab 
-              selectedMood={selectedMood} 
-              onResetMood={handleResetMood}
-              draftText={draftText}
-              onTextChange={setDraftText}
-            />
-          )}
-          {activeTab === "voice" && (
-            <VoiceTab 
-              selectedMood={selectedMood}
-              onResetMood={handleResetMood}
-            />
-          )}
-        </div>
-      )}
-
+          <Sparkles className="w-4 h-4" />
+          <span>Open Calm Studio</span>
+        </Link>
+        <span className="text-warm-gray-400">|</span>
+        <Link 
+          href="/my-drops"
+          className="inline-flex items-center gap-1 hover:text-blush-400 transition-colors"
+          data-testid="link-my-drops"
+        >
+          <img src={dropletIcon} alt="" className="w-4 h-4" />
+          <span>View My Drops</span>
+        </Link>
+      </div>
     </div>
   );
 }
