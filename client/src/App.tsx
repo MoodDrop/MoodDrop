@@ -9,7 +9,6 @@ import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import TakeABreath from "@/pages/take-a-breath";
 import ThankYou from "@/pages/thank-you";
-import Comfort from "@/pages/comfort";
 import CalmStudio from "@/pages/CalmStudio";
 import Garden from "@/pages/garden";
 import MyDropsPage from "@/pages/MyDropsPage";
@@ -20,7 +19,6 @@ import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import Redirect from "@/components/Redirect";
 
 function Router() {
   return (
@@ -29,9 +27,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/release" component={TakeABreath} />
       <Route path="/breathe" component={TakeABreath} />
-      <Route path="/comfort">
-        <Redirect to="/calm-studio" />
-      </Route>
+      <Route path="/comfort" component={CalmStudio} />
       <Route path="/calm-studio" component={CalmStudio} />
       <Route path="/garden" component={Garden} />
       <Route path="/my-drops" component={MyDropsPage} />
