@@ -1,71 +1,68 @@
-import { Music, Wind, Youtube, Sparkles, Gamepad2 } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { PlayCircle, Music2, Gamepad2, ChevronLeft } from "lucide-react";
 
 export default function CalmStudio() {
-  const tools = [
-    {
-      icon: <Music className="w-8 h-8 text-warm-gray-600" />,
-      title: "Soundscapes",
-      description: "Ambient sounds to help you focus and relax",
-    },
-    {
-      icon: <Wind className="w-8 h-8 text-warm-gray-600" />,
-      title: "Breathing",
-      description: "Guided breathing exercises for calm",
-    },
-    {
-      icon: <Youtube className="w-8 h-8 text-warm-gray-600" />,
-      title: "Watch & Smile",
-      description: "Curated uplifting videos",
-    },
-    {
-      icon: <Sparkles className="w-8 h-8 text-warm-gray-600" />,
-      title: "Affirmations",
-      description: "Gentle reminders and positive messages",
-    },
-    {
-      icon: <Gamepad2 className="w-8 h-8 text-warm-gray-600" />,
-      title: "Mini Games",
-      description: "Simple interactive calming activities",
-    },
-  ];
+  const [, navigate] = useLocation();
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
-      {/* Header */}
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-semibold text-warm-gray-800 mb-3">
-          Calm Studio
-        </h1>
-        <p className="text-warm-gray-600 leading-relaxed">
-          A small collection of soothing tools. More coming soon.
-        </p>
+    <main className="max-w-2xl mx-auto px-4 py-8">
+      {/* Back Button */}
+      <button
+        onClick={() => navigate("/")}
+        aria-label="Back to home"
+        className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream-50 border border-blush-100 hover:bg-cream-100 shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-blush-300 focus-visible:outline-none"
+        data-testid="button-back-home"
+      >
+        <ChevronLeft className="h-5 w-5 text-warm-gray-700" />
+      </button>
+
+      {/* Title & Subtitle */}
+      <h1 className="text-2xl sm:text-3xl font-semibold text-warm-gray-900">
+        Calm Studio
+      </h1>
+      <p className="mt-2 text-sm text-warm-gray-600">
+        Take a moment to relax and reset. Watch something uplifting, listen to something soothing, or just breathe.
+      </p>
+
+      {/* Three Pill Buttons */}
+      <div className="mt-6 flex flex-col sm:flex-row gap-3">
+        <Link 
+          href="/calm/watch"
+          className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-cream-50 border border-blush-100 hover:bg-cream-100 shadow-sm transition-all text-warm-gray-700 focus-visible:ring-2 focus-visible:ring-blush-300 focus-visible:outline-none"
+          data-testid="link-watch-smile"
+        >
+          <PlayCircle className="h-5 w-5" />
+          <span>Watch &amp; Smile</span>
+        </Link>
+        <Link 
+          href="/calm/sounds"
+          className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-cream-50 border border-blush-100 hover:bg-cream-100 shadow-sm transition-all text-warm-gray-700 focus-visible:ring-2 focus-visible:ring-blush-300 focus-visible:outline-none"
+          data-testid="link-soothing-sounds"
+        >
+          <Music2 className="h-5 w-5" />
+          <span>Soothing Sounds</span>
+        </Link>
+        <Link 
+          href="/calm/games"
+          className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-cream-50 border border-blush-100 hover:bg-cream-100 shadow-sm transition-all text-warm-gray-700 focus-visible:ring-2 focus-visible:ring-blush-300 focus-visible:outline-none"
+          data-testid="link-games"
+        >
+          <Gamepad2 className="h-5 w-5" />
+          <span>Games</span>
+        </Link>
       </div>
 
-      {/* Grid of Coming Soon Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tools.map((tool, index) => (
-          <div
-            key={index}
-            className="rounded-2xl border border-blush-100 bg-white/80 p-6 shadow-sm hover:shadow-md transition-all"
-            data-testid={`tool-card-${tool.title.toLowerCase().replace(/\s+/g, "-")}`}
-          >
-            <div className="flex flex-col items-center text-center space-y-3">
-              <div className="p-3 rounded-full bg-cream-50">
-                {tool.icon}
-              </div>
-              <h3 className="text-lg font-medium text-warm-gray-800">
-                {tool.title}
-              </h3>
-              <p className="text-sm text-warm-gray-600">
-                {tool.description}
-              </p>
-              <span className="inline-block px-3 py-1 rounded-full bg-blush-100 text-blush-600 text-xs font-medium">
-                Coming soon
-              </span>
-            </div>
-          </div>
-        ))}
+      {/* Optional Preview Block */}
+      <div className="mt-6 rounded-2xl border border-zinc-200/70 bg-white/80 p-5 shadow-sm">
+        <div className="flex items-center justify-center h-40 bg-gradient-to-br from-cream-50 to-blush-50 rounded-xl">
+          <p className="text-warm-gray-400 text-sm">Preview coming soon</p>
+        </div>
       </div>
-    </div>
+
+      {/* Helper Text */}
+      <p className="mt-6 text-center text-sm text-warm-gray-500">
+        Choose an activity above to begin your journey to calm
+      </p>
+    </main>
   );
 }

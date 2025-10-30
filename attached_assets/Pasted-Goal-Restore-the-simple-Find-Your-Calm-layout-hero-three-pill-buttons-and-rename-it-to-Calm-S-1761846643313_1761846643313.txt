@@ -1,0 +1,119 @@
+Goal: Restore the simple “Find Your Calm” layout (hero + three pill buttons) and rename it to Calm Studio. Remove the new card grid. Keep styling consistent with the rest of the app (Tailwind + warm palette). Mobile: buttons stack; Desktop: buttons inline.
+
+Do:
+
+Route & file
+
+If the current page lives at client/src/pages/FindYourCalm.tsx (or similar), create/rename to client/src/pages/CalmStudio.tsx.
+
+Expose it at route /calm-studio.
+
+Update navbar label from “Find Your Calm” to “Calm Studio” and link to /calm-studio.
+
+Restore layout (match the old simple version):
+
+Top left circular back button (chevron) that goes to /.
+
+Title: Calm Studio
+
+Subtitle (small, warm-gray): “Take a moment to relax and reset. Watch something uplifting, listen to something soothing, or just breathe.”
+
+Three pill buttons with subtle shadow and icons:
+
+Watch & Smile → route /calm/watch
+
+Soothing Sounds → route /calm/sounds
+
+Games → route /calm/games
+
+Optional small preview/illustration block beneath the buttons (same rounded card + soft shadow).
+
+Helper text: “Choose an activity above to begin your journey to calm.”
+
+Styling requirements
+
+Use the same warm palette & radii as the rest of the app (rounded-2xl, soft shadow, bg-cream-50/100, text-warm-gray-700/900).
+
+Buttons are “pill” style: inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-cream-50 hover:bg-cream-100 border border-blush-100 shadow-sm transition.
+
+Icons: use the existing icon set (e.g., lucide/video for Watch, music for Sounds, gamepad for Games).
+
+Remove the new grid
+
+Delete/rollback the card grid with “Coming soon” chips from the current Calm page. No “coming soon” badges on this screen.
+
+Wiring
+
+Ensure the three buttons navigate (use our existing router).
+
+Keep accessible labels and keyboard focus styles (aria-label, focus-visible:ring etc.).
+
+Acceptance criteria:
+
+Visiting /calm-studio shows the classic simple layout (title, blurb, three pill buttons, optional preview, helper line).
+
+Navbar item reads Calm Studio and points to /calm-studio.
+
+No grid cards remain. No “coming soon” chips on this page.
+
+Mobile: buttons stack with full width; Desktop: buttons inline with gap.
+
+Back button returns to /.
+
+Skeleton component (use this structure & adjust classes to match our tokens):
+
+// client/src/pages/CalmStudio.tsx
+import { Link, useNavigate } from "wouter";
+import { PlayCircle, Music2, Gamepad2, ChevronLeft } from "lucide-react";
+
+export default function CalmStudio() {
+  const nav = useNavigate();
+  return (
+    <main className="max-w-2xl mx-auto px-4 py-8">
+      <button
+        onClick={() => nav("/")}
+        aria-label="Back"
+        className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream-50 border border-blush-100 hover:bg-cream-100 shadow-sm"
+      >
+        <ChevronLeft className="h-5 w-5 text-warm-gray-700" />
+      </button>
+
+      <h1 className="text-2xl sm:text-3xl font-semibold text-warm-gray-900">Calm Studio</h1>
+      <p className="mt-2 text-sm text-warm-gray-600">
+        Take a moment to relax and reset. Watch something uplifting, listen to something soothing, or just breathe.
+      </p>
+
+      <div className="mt-5 flex flex-col sm:flex-row gap-3">
+        <Link href="/calm/watch" className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-cream-50 border border-blush-100 hover:bg-cream-100 shadow-sm transition">
+          <PlayCircle className="h-5 w-5" /> <span>Watch &amp; Smile</span>
+        </Link>
+        <Link href="/calm/sounds" className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-cream-50 border border-blush-100 hover:bg-cream-100 shadow-sm transition">
+          <Music2 className="h-5 w-5" /> <span>Soothing Sounds</span>
+        </Link>
+        <Link href="/calm/games" className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-cream-50 border border-blush-100 hover:bg-cream-100 shadow-sm transition">
+          <Gamepad2 className="h-5 w-5" /> <span>Games</span>
+        </Link>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-zinc-200/70 bg-white/80 p-4 shadow-sm">
+        {/* optional small preview/illustration */}
+        <img src="/attached_assets/calm-preview.jpg" alt="" className="rounded-xl w-full h-40 object-cover" />
+      </div>
+
+      <p className="mt-6 text-center text-sm text-warm-gray-500">
+        Choose an activity above to begin your journey to calm
+      </p>
+    </main>
+  );
+}
+
+
+Also update navbar:
+
+Change the label Find Your Calm → Calm Studio, link /calm-studio.
+
+Out of scope:
+
+Don’t alter Watch/Sounds/Games internals.
+
+Don’t change any global theme tokens.
