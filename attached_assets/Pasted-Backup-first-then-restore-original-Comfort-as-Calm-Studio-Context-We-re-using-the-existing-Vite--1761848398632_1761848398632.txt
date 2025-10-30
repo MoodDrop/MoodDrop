@@ -1,0 +1,108 @@
+Backup first, then restore original Comfort as Calm Studio
+
+Context:
+We’re using the existing Vite + React (no Next.js). Please do not add new frameworks. Everything should stay client-side.
+
+Do this:
+
+1) Create a safety backup
+# Make a backup branch
+git checkout -b backup/calm-studio-restore || true
+
+# Create a backups folder
+mkdir -p backups/calm-studio
+
+# Find all files that define or route the Calm Studio / comfort page
+# and copy them into a timestamped backup folder.
+# (Adjust paths if our repo structure is slightly different.)
+TS=$(date +%Y%m%d-%H%M%S)
+
+# Common locations to back up (copy if they exist)
+for p in \
+  "client/src/pages/CalmStudio.tsx" \
+  "client/src/pages/Comfort.tsx" \
+  "client/src/pages/FindYourCalm.tsx" \
+  "client/src/routes.tsx" \
+  "client/src/App.tsx" \
+  "client/src/components/CalmStudio" \
+  "client/src/components/Comfort" \
+  "client/src/components/FindYourCalm" \
+  "client/src/styles/calm-studio.css" \
+  "client/src/styles/comfort.css"
+do
+  if [ -e "$p" ]; then
+    mkdir -p "backups/calm-studio/$TS/$(dirname "$p")"
+    cp -r "$p" "backups/calm-studio/$TS/$p"
+  fi
+done
+
+# Commit the backup snapshot
+git add backups/calm-studio
+git commit -m "Backup: Calm Studio/Comfort before restore ($TS)" || true
+
+
+If git push is set up, feel free to push the backup branch:
+
+git push -u origin backup/calm-studio-restore || true
+
+2) Restore the original Comfort page as Calm Studio
+
+Goal: Make the page look and behave exactly like your original /comfort page (working YouTube embeds in Watch & Smile, working Soothing Sounds player, and Games), but the page title + nav label should say “Calm Studio”. Route is /calm-studio.
+
+Instructions:
+
+- Reuse the existing code from the original Comfort implementation (the one that had active YouTube embeds and games). 
+- Do NOT introduce new libraries.
+- Keep the same layout, spacing, and rounded buttons as the original Comfort page.
+- Change only the visible title to “Calm Studio”, and use this subtitle:
+  “Take a moment to relax and reset. Watch something uplifting, listen to something soothing, or just breathe.”
+
+- Ensure the three sections work exactly as before:
+  1) Watch & Smile  → embedded YouTube videos that play in-page
+  2) Soothing Sounds → ambient audio player or playlist (same data/embed)
+  3) Games          → same working mini-games section
+
+- Routing:
+  • New route path: /calm-studio
+  • Update the top navigation to link to /calm-studio with the label “Calm Studio”
+  • If /comfort still exists, redirect it to /calm-studio (client-side redirect is fine)
+
+- Keep the warm MoodDrop palette and typography consistent with the rest of the app.
+
+
+File edits (typical Vite + React setup — adjust if your structure differs):
+
+- client/src/pages/CalmStudio.tsx         → (copy of the old Comfort page code, with the new title/subtitle)
+- client/src/App.tsx or client/src/routes.tsx
+   • Add/ensure route:  <Route path="/calm-studio" element={<CalmStudio />} />
+   • If /comfort route exists, redirect it to /calm-studio.
+
+- client/src/components/... 
+   • Reuse the same components for Watch & Smile, Sounds, and Games that the Comfort page used.
+   • Do NOT replace the working YouTube and audio embeds — keep them as is.
+
+3) Save & Verify
+# Format & type-check (if applicable)
+npm run check || true
+
+# Commit the changes
+git add .
+git commit -m "Restore Comfort page as Calm Studio (same layout & functionality, new title & route)"
+
+# (Optional) push to GitHub to trigger Vercel deploy
+git push origin main || true
+
+
+Manual verification checklist:
+
+Open /calm-studio — page title reads Calm Studio and subtitle is updated.
+
+Watch & Smile: videos are embedded and play in-page.
+
+Soothing Sounds: audio player/playlist works.
+
+Games: the original mini-games load and work.
+
+Navbar link says Calm Studio and goes to /calm-studio.
+
+Visiting /comfort (if still reachable) smoothly redirects to /calm-studio.
