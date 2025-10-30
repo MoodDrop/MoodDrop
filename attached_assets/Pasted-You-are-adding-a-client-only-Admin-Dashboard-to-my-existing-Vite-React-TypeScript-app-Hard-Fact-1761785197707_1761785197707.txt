@@ -1,0 +1,298 @@
+You are adding a client-only Admin Dashboard to my existing Vite + React (TypeScript) app.
+Hard Facts (do not change)
+
+
+Build: Vite + React (TypeScript)
+
+
+Router: react-router-dom (no Next.js)
+
+
+Styling: TailwindCSS (warm gray / blush / cream palette)
+
+
+Data: localStorage only
+
+
+Drops key: mooddrop_messages
+
+
+Feature flags key: mooddrop_feature_flags
+
+
+
+
+Hosting: Vercel (auto-deploys from GitHub)
+
+
+I edit in Replit, then push → GitHub → Vercel
+
+
+Do NOT use (very important)
+
+
+❌ Next.js (/app, /pages, API routes, getServerSideProps, etc.)
+
+
+❌ Databases (Prisma / MongoDB / Supabase)
+
+
+❌ Node/Express server or API changes (must remain client-only)
+
+
+❌ Any auth beyond a simple owner-only client-side gate
+
+
+Goal
+Create a new route /admin for a private owner-only dashboard that:
+
+
+Reads localStorage:mooddrop_messages and shows:
+
+
+Total drops
+
+
+Top 3 moods
+
+
+Drops in last 7 days
+
+
+
+
+Renders a Recharts chart (BarChart or PieChart) of mood distribution
+
+
+Shows Recent 5 drops (date • mood • first 120 chars)
+
+
+Embeds Plausible public dashboard via iframe (use placeholder if env var missing)
+
+
+Adds Feature Toggles stored in localStorage:mooddrop_feature_flags:
+
+
+enableVoiceNotes (default true)
+
+
+showMoodGardenTab (default false — “Coming soon”)
+
+
+enableAffirmations (default true)
+
+
+
+
+Data tools: Export CSV, Import CSV (append), Clear All (with confirm)
+
+
+Owner-only soft gate: prompt for password; on success set mooddrop_admin_ok="true" in localStorage; on failure redirect to /
+
+
+Compare against import.meta.env.VITE_ADMIN_PASS
+
+
+
+
+Files to create (use EXACT paths)
+
+
+client/src/pages/AdminPage.tsx
+
+
+client/src/lib/featureFlags.ts
+
+
+client/src/components/Admin/Card.tsx
+
+
+client/src/components/Admin/FlagToggle.tsx
+
+
+(optional) client/src/components/Admin/MoodChart.tsx
+
+
+Route registration
+Add <Route path="/admin" element={<AdminPage />} /> to my existing React Router setup (e.g., client/src/main.tsx or my routes file). Do not change any other routes.
+Implementation details
+1) featureFlags.ts
+
+
+type FeatureFlags = { enableVoiceNotes: boolean; showMoodGardenTab: boolean; enableAffirmations: boolean }
+
+
+DEFAULT_FLAGS with the defaults above
+
+
+readFlags(): read + merge with defaults from mooddrop_feature_flags
+
+
+writeFlags(next): persist to localStorage
+
+
+setFlag(key, value): convenience updater
+
+
+2) Card.tsx
+
+
+Simple reusable card with title?, subtitle?, className?, children
+
+
+Tailwind: rounded-2xl, thin border, subtle shadow, bg-white/70, padding
+
+
+3) FlagToggle.tsx
+
+
+Row with label/description and a pill switch button
+
+
+A11y friendly; toggles boolean state passed via props
+
+
+4) MoodChart.tsx (optional but preferred)
+
+
+Recharts ResponsiveContainer + BarChart (or PieChart)
+
+
+XAxis, YAxis, CartesianGrid, Tooltip, single series
+
+
+Works with [{ name: string; value: number }]
+
+
+5) AdminPage.tsx
+At the very top, add the owner-only soft gate (this makes the page owner use only):
+useEffect(() => {
+  const ok = localStorage.getItem("mooddrop_admin_ok");
+  if (!ok) {
+    const pass = prompt("Admin access: enter password");
+    if (pass === import.meta.env.VITE_ADMIN_PASS) {
+      localStorage.setItem("mooddrop_admin_ok", "true");
+    } else {
+      window.location.href = "/";
+    }
+  }
+}, []);
+
+Then implement:
+
+
+Read localStorage:mooddrop_messages safely (array). Tolerate fields:
+
+
+mood: mood
+
+
+text: any of text | content | body
+
+
+time: any of timestamp | createdAt (ISO or epoch); fallback to 0 if missing
+
+
+
+
+Compute:
+
+
+totalDrops
+
+
+thisWeekCount = count where timestamp within last 7 days
+
+
+moodCounts map and top3Moods string
+
+
+chartData = {name, value} from moodCounts
+
+
+recent5 = last 5 by timestamp desc
+
+
+
+
+UI sections (in order):
+
+
+Header: “Admin Dashboard” + “Private overview for the owner”
+
+
+Stats cards: Total Drops, Top Moods, Drops (Last 7 Days)
+
+
+Chart: Mood Distribution (Recharts)
+
+
+Recent Drops: last 5 (date • mood • 120-char preview)
+
+
+Traffic Analytics: Plausible iframe using import.meta.env.VITE_PLAUSIBLE_PUBLIC_URL if present; else show a short instruction to add it later
+
+
+Feature Flags: three toggles wired to readFlags() / setFlag()
+
+
+Data Tools: Export CSV (columns date,mood,text), Import CSV (append), Clear All (confirm; set empty array to mooddrop_messages)
+
+
+Info: build mode + link “← Back to Home”
+
+
+
+
+Styling: Tailwind, light theme, clean grid; no dark mode required.
+
+
+Empty states: chart and recent list should render gracefully with 0 drops.
+
+
+Packages
+If Recharts is missing, add it:
+
+
+pnpm add recharts (or npm i recharts / yarn add recharts)
+
+
+Environment variables (Vercel)
+I will set these after pushing to GitHub:
+
+
+VITE_ADMIN_PASS="my-owner-only-password"  ← required for the soft gate
+
+
+VITE_PLAUSIBLE_PUBLIC_URL="https://plausible.io/share/yourdomain.com?auth=...&embed=true" ← optional
+
+
+Acceptance criteria
+
+
+Visiting /admin shows the password prompt. Correct password unlocks; wrong password redirects to /. This makes the page owner-only in practice.
+
+
+No Next.js files or server code added.
+
+
+All data stays in localStorage; Plausible iframe is optional and non-blocking.
+
+
+Existing routes/pages remain unchanged.
+
+
+Provide final file contents and confirm where the new route line was added.
+
+
+(Optional) seed data for testing
+If no drops exist, provide this commented snippet for my browser console:
+localStorage.setItem("mooddrop_messages", JSON.stringify([
+  { mood: "calm", text: "Deep breath and let it go", timestamp: Date.now()-86400000*1 },
+  { mood: "happy", text: "Small win today!", timestamp: Date.now()-86400000*2 },
+  { mood: "anxious", text: "Racing thoughts", timestamp: Date.now()-86400000*3 },
+  { mood: "grateful", text: "Called a friend", timestamp: Date.now()-86400000*5 },
+  { mood: "calm", text: "Walk outside helped", timestamp: Date.now()-86400000*7 },
+]));
+
+Please generate all files exactly at the paths above, add the /admin route, and show the final code so I can copy-paste into my project.

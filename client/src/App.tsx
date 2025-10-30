@@ -14,6 +14,7 @@ import Garden from "@/pages/garden";
 import MyDropsPage from "@/pages/MyDropsPage";
 import About from "@/pages/about";
 import Privacy from "@/pages/privacy";
+import AdminPage from "@/pages/AdminPage";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import Header from "@/components/header";
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/my-drops" component={MyDropsPage} />
       <Route path="/about" component={About} />
       <Route path="/privacy" component={Privacy} />
+      <Route path="/admin-owner" component={AdminPage} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route component={NotFound} />
