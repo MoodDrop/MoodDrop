@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { LogOut } from "lucide-react";
-import dropletIcon from "@assets/Droplet_1760186315979.png";
+import moodDropLogo from "@assets/MoodDrop Bubble_1761853048716.png";
 
 export default function Header() {
   const [location] = useLocation();
@@ -14,13 +14,12 @@ export default function Header() {
       <div className="flex flex-col items-center gap-3">
         <div className="flex items-center justify-between w-full">
           <Link href="/">
-            <div className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <div className="w-8 h-8 flex items-center justify-center">
-                <img src={dropletIcon} alt="Droplet" className="w-8 h-8" />
-              </div>
-              <span className="text-lg font-semibold text-warm-gray-700">
-                MoodDrop
-              </span>
+            <div className="flex items-center justify-center hover:opacity-80 transition-opacity">
+              <img 
+                src={moodDropLogo} 
+                alt="MoodDrop" 
+                className="h-12 w-auto object-contain"
+              />
             </div>
           </Link>
 
