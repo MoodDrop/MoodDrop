@@ -46,14 +46,16 @@ export default function WriteTab({
     setIsClicked(true);
     setTimeout(() => setIsClicked(false), 600); // pulse animation duration
 
-    const existing = JSON.parse(localStorage.getItem("moodDrops") || "[]");
+    const STORAGE_KEY = "mooddrop_messages";
+    const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     const newDrop = {
       id: Date.now(),
-      mood: selectedMood,
-      text: draftText.trim(),
-      date: new Date().toISOString(),
+      content: draftText.trim(),
+      emotion: selectedMood || "Unknown",
+      moodColor: mood?.color,
+      timestamp: new Date().toISOString(),
     };
-    localStorage.setItem("moodDrops", JSON.stringify([newDrop, ...existing]));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([newDrop, ...existing]));
     onTextChange("");
     handleAffirmation();
   };

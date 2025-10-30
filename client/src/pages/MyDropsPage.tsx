@@ -20,10 +20,30 @@ const STORAGE_KEY = "mooddrop_messages";
 
 function loadDrops(): SavedDrop[] {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return [];
+    // Try new key first
+    let stored = localStorage.getItem(STORAGE_KEY);
+    let items = stored ? JSON.parse(stored) : [];
     
-    const items = JSON.parse(stored);
+    // Migrate from old key if new key is empty
+    if (items.length === 0) {
+      const oldStored = localStorage.getItem("moodDrops");
+      if (oldStored) {
+        const oldItems = JSON.parse(oldStored);
+        // Migrate old format to new format
+        items = oldItems.map((x: any) => ({
+          id: x.id,
+          content: x.text || x.content || "",
+          emotion: x.mood || x.emotion || "Unknown",
+          moodColor: x.color || x.moodColor,
+          timestamp: x.date || x.timestamp || new Date().toISOString(),
+          audio: x.audio,
+        }));
+        // Save to new key and remove old key
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        localStorage.removeItem("moodDrops");
+      }
+    }
+    
     const drops = items.map((x: any, index: number) => ({
       id: Number(x.id ?? Date.now() + index),
       content: String(x.content ?? x.text ?? ""),
@@ -90,7 +110,7 @@ function VoiceRecorder({
   onSave, 
   onCancel 
 }: { 
-  onSave: (blobUrl: string, durationMs: number) => void;
+  onSave: (blob: Blob, durationMs: number) => void;
   onCancel: () => void;
 }) {
   const [isRecording, setIsRecording] = React.useState(false);
@@ -112,8 +132,7 @@ function VoiceRecorder({
 
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        const url = URL.createObjectURL(blob);
-        onSave(url, seconds * 1000);
+        onSave(blob, seconds * 1000);
         stream.getTracks().forEach(track => track.stop());
       };
 
@@ -273,7 +292,7 @@ export default function MyDropsPage() {
       });
     }
 
-    setTimeout(() => setDeletedDrop(null), 5000);
+    setTimeout(() => setDeletedDrop(null), 10000);
   };
 
   const handleUndo = () => {
@@ -298,13 +317,14 @@ export default function MyDropsPage() {
   };
 
   const handleExportCSV = () => {
-    const headers = ["id", "timestamp", "emotion", "content", "audio_blobUrl", "durationMs"];
+    const headers = ["id", "timestamp", "emotion", "content", "audio_blobUrl", "moodColor", "durationMs"];
     const rows = allDrops.map(d => [
       d.id,
       d.timestamp,
       d.emotion,
       `"${d.content.replace(/"/g, '""')}"`,
-      d.audio?.blobUrl || "",
+      d.audio?.blobUrl ? `"${d.audio.blobUrl.replace(/"/g, '""')}"` : "",
+      d.moodColor || "",
       d.audio?.durationMs || "",
     ]);
 
@@ -328,20 +348,85 @@ export default function MyDropsPage() {
     reader.onload = (evt) => {
       try {
         const text = evt.target?.result as string;
-        const lines = text.split("\n").slice(1);
         const imported: SavedDrop[] = [];
 
-        lines.forEach(line => {
-          if (!line.trim()) return;
-          const [id, timestamp, emotion, content, audioBlobUrl, durationMs] = line.split(",");
+        // Robust CSV parser that handles multi-line quoted fields
+        const parseCSV = (csvText: string): string[][] => {
+          const rows: string[][] = [];
+          let currentRow: string[] = [];
+          let currentField = "";
+          let inQuotes = false;
           
-          imported.push({
-            id: Number(id),
-            timestamp,
-            emotion,
-            content: content.replace(/^"|"$/g, "").replace(/""/g, '"'),
-            audio: audioBlobUrl ? { blobUrl: audioBlobUrl, durationMs: Number(durationMs) || undefined } : undefined,
-          });
+          for (let i = 0; i < csvText.length; i++) {
+            const char = csvText[i];
+            const nextChar = csvText[i + 1];
+            
+            if (char === '"') {
+              if (inQuotes && nextChar === '"') {
+                // Escaped quote
+                currentField += '"';
+                i++; // Skip next quote
+              } else {
+                // Toggle quote state
+                inQuotes = !inQuotes;
+              }
+            } else if (char === ',' && !inQuotes) {
+              // End of field
+              currentRow.push(currentField);
+              currentField = "";
+            } else if ((char === '\n' || char === '\r') && !inQuotes) {
+              // End of row (handle both \n and \r\n)
+              if (char === '\r' && nextChar === '\n') {
+                i++; // Skip \n after \r
+              }
+              if (currentField || currentRow.length > 0) {
+                currentRow.push(currentField);
+                if (currentRow.some(f => f.trim())) {
+                  rows.push(currentRow);
+                }
+                currentRow = [];
+                currentField = "";
+              }
+            } else {
+              currentField += char;
+            }
+          }
+          
+          // Handle last row
+          if (currentField || currentRow.length > 0) {
+            currentRow.push(currentField);
+            if (currentRow.some(f => f.trim())) {
+              rows.push(currentRow);
+            }
+          }
+          
+          return rows;
+        };
+
+        const rows = parseCSV(text);
+        
+        // Skip header row
+        const dataRows = rows.slice(1);
+
+        dataRows.forEach(fields => {
+          if (fields.length >= 4) {
+            // Handle both old 6-column and new 7-column formats
+            // Old: id,timestamp,emotion,content,audio_blobUrl,durationMs
+            // New: id,timestamp,emotion,content,audio_blobUrl,moodColor,durationMs
+            const isOldFormat = fields.length === 6;
+            
+            imported.push({
+              id: Number(fields[0]),
+              timestamp: fields[1],
+              emotion: fields[2],
+              content: fields[3],
+              moodColor: isOldFormat ? undefined : (fields[5] || undefined),
+              audio: fields[4] ? { 
+                blobUrl: fields[4], 
+                durationMs: Number(isOldFormat ? fields[5] : fields[6]) || undefined 
+              } : undefined,
+            });
+          }
         });
 
         const merged = [...allDrops];
@@ -392,22 +477,30 @@ export default function MyDropsPage() {
     }
   };
 
-  const handleVoiceNoteSaved = (dropId: number, blobUrl: string, durationMs: number) => {
-    const updated = allDrops.map(d => 
-      d.id === dropId 
-        ? { ...d, audio: { blobUrl, durationMs } }
-        : d
-    );
-    setAllDrops(updated);
-    setRecordingFor(null);
-
+  const handleVoiceNoteSaved = async (dropId: number, blob: Blob, durationMs: number) => {
     try {
+      // Convert blob to base64 for persistent storage
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+
+      const updated = allDrops.map(d => 
+        d.id === dropId 
+          ? { ...d, audio: { blobUrl: base64, durationMs } }
+          : d
+      );
+      setAllDrops(updated);
+      setRecordingFor(null);
+
       saveDrops(updated);
       toast({ title: "Voice note saved" });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to save voice note",
         variant: "destructive",
       });
     }
@@ -532,18 +625,20 @@ export default function MyDropsPage() {
         </div>
       )}
 
-      {/* Undo Banner */}
+      {/* Undo Banner - Fixed position for better visibility */}
       {deletedDrop && (
-        <div className="mb-6 p-4 bg-warm-gray-100 border border-warm-gray-200 rounded-xl flex items-center justify-between">
-          <p className="text-warm-gray-700 text-sm">Drop deleted</p>
-          <button
-            onClick={handleUndo}
-            className="px-4 py-2 bg-blush-300 text-white rounded-lg hover:bg-blush-400 transition-colors text-sm flex items-center gap-2"
-            data-testid="button-undo"
-          >
-            <Undo2 size={16} />
-            Undo
-          </button>
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-md w-full mx-4">
+          <div className="p-4 bg-warm-gray-800 border border-warm-gray-700 rounded-xl flex items-center justify-between shadow-lg">
+            <p className="text-white text-sm font-medium">Drop deleted</p>
+            <button
+              onClick={handleUndo}
+              className="px-4 py-2 bg-blush-300 text-white rounded-lg hover:bg-blush-400 transition-colors text-sm flex items-center gap-2 font-medium"
+              data-testid="button-undo"
+            >
+              <Undo2 size={16} />
+              Undo
+            </button>
+          </div>
         </div>
       )}
 
