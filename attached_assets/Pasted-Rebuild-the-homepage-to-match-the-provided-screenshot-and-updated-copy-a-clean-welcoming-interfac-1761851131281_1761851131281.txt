@@ -1,0 +1,74 @@
+Rebuild the homepage to match the provided screenshot and updated copy — a clean, welcoming interface that encourages users to choose their mood, write, or speak. Simplify the layout and remove unnecessary buttons (Import/Export CSV).
+
+🪶 Instructions for Replit
+Rebuild the MoodDrop homepage with the following exact updates and design:
+
+🌸 GENERAL SETUP
+--------------------------------
+• Keep the existing warm cream background and minimalist layout.
+• Do NOT add or modify frameworks — stay with Vite + React + TypeScript.
+• Remove all Import/Export CSV buttons globally (including MyDropsPage).
+• Maintain current typography, color palette, and mood circle colors.
+
+📄 HOMEPAGE LAYOUT
+--------------------------------
+Title: “Welcome to MoodDrop”
+
+Subtitle: 
+“A gentle space to release your thoughts, find calm, and grow through every mood.”
+
+Immediately below the subtitle, add a new line of text:
+“Release your thoughts through typing or voice notes, unwind with calming games and soothing videos.”
+
+Below that, keep the line:
+“Choose your mood to begin…”
+
+Then display the five mood dots (blue, green, yellow, gray, peach) as shown in the screenshot.
+
+Button:
+- Replace “Drop It Here” with **“💧 Drop It”**
+- Keep the button shape, size, and color identical to the screenshot.
+- Keep the subtext line under it:
+  “Let it out — this space is just for you.”
+
+Below that, keep or reintroduce:
+“Type or speak your thoughts — every drop helps you grow. Your words stay on your device —”
+
+And finally, retain the two small links at the bottom:
+“🌿 Open Calm Studio” | “💧 View My Drops”
+
+📄 FUNCTIONALITY
+--------------------------------
+- The “Drop It” button leads users to the writing/recording page (DropItPage.tsx).
+- The selected mood color should carry over to the writing interface.
+- Voice note recording must remain supported (via browser mic).
+- LocalStorage still stores:
+  • mood
+  • text or voice note
+  • timestamp
+- Remove all CSV import/export buttons in every route.
+
+📂 FILES TO UPDATE
+--------------------------------
+- client/src/pages/HomePage.tsx (main structure and text changes)
+- client/src/pages/DropItPage.tsx (ensure smooth transition)
+- client/src/pages/MyDropsPage.tsx (remove Import/Export CSV)
+- client/src/App.tsx (ensure routing to DropIt and ViewMyDrops is correct)
+
+🎨 STYLE NOTES
+--------------------------------
+- Keep rounded corners and soft shadows for buttons.
+- Keep droplet icon in **blue** to match MoodDrop’s brand palette.
+- Maintain generous white space for calm, breathable design.
+- No new animations required yet; just polish transitions if possible.
+
+✅ END RESULT
+--------------------------------
+Homepage visually matches the provided screenshot, but includes:
+- Updated subtitle copy:
+  “Release your thoughts through typing or voice notes, unwind with calming games and soothing videos.”
+- Button text changed to “💧 Drop It”
+- No Import/Export CSV buttons
+- Clean, minimal layout that flows naturally into Drop It and Calm Studio.
+
+Do not change routing, frameworks, or dependencies.
