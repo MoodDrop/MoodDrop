@@ -12,6 +12,7 @@ import ThankYou from "@/pages/thank-you";
 import CalmStudio from "@/pages/CalmStudio";
 import Garden from "@/pages/garden";
 import MyDropsPage from "@/pages/MyDropsPage";
+import DropItPage from "@/pages/DropItPage";
 import About from "@/pages/about";
 import Privacy from "@/pages/privacy";
 import AdminPage from "@/pages/AdminPage";
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/calm-studio" component={CalmStudio} />
       <Route path="/garden" component={Garden} />
       <Route path="/my-drops" component={MyDropsPage} />
+      <Route path="/drop-it" component={DropItPage} />
       <Route path="/about" component={About} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/admin" component={AdminPage} />
