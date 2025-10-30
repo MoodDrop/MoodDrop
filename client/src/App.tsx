@@ -11,6 +11,9 @@ import TakeABreath from "@/pages/take-a-breath";
 import ThankYou from "@/pages/thank-you";
 import Comfort from "@/pages/comfort";
 import CalmStudio from "@/pages/CalmStudio";
+import WatchPage from "@/pages/calm/WatchPage";
+import SoundsPage from "@/pages/calm/SoundsPage";
+import GamesPage from "@/pages/calm/GamesPage";
 import Garden from "@/pages/garden";
 import MyDropsPage from "@/pages/MyDropsPage";
 import About from "@/pages/about";
@@ -31,6 +34,9 @@ function Router() {
       <Route path="/thank-you" component={ThankYou} />
       <Route path="/comfort" component={Comfort} />
       <Route path="/calm-studio" component={CalmStudio} />
+      <Route path="/calm/watch" component={WatchPage} />
+      <Route path="/calm/sounds" component={SoundsPage} />
+      <Route path="/calm/games" component={GamesPage} />
       <Route path="/garden" component={Garden} />
       <Route path="/my-drops" component={MyDropsPage} />
       <Route path="/about" component={About} />
