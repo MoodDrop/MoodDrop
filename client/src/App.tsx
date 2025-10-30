@@ -10,6 +10,7 @@ import Dashboard from "@/pages/dashboard";
 import TakeABreath from "@/pages/take-a-breath";
 import ThankYou from "@/pages/thank-you";
 import Comfort from "@/pages/comfort";
+import CalmStudio from "@/pages/CalmStudio";
 import Garden from "@/pages/garden";
 import MyDropsPage from "@/pages/MyDropsPage";
 import About from "@/pages/about";
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/breathe" component={TakeABreath} />
       <Route path="/thank-you" component={ThankYou} />
       <Route path="/comfort" component={Comfort} />
+      <Route path="/calm-studio" component={CalmStudio} />
       <Route path="/garden" component={Garden} />
       <Route path="/my-drops" component={MyDropsPage} />
       <Route path="/about" component={About} />

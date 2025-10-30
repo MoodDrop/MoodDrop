@@ -38,7 +38,7 @@ export default function Home() {
           Welcome to MoodDrop
         </h2>
         <p className="text-warm-gray-600 leading-relaxed mb-8">
-          A gentle space to release your thoughts, find calm, and grow through every mood.
+          Your quiet corner to release, reflect, and grow through every mood.
         </p>
       </div>
 
@@ -150,18 +150,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Quick Access Button */}
-      <div className="flex justify-center mt-12">
-        <Link href="/comfort">
-          <button 
-            className="bg-cream-200 hover:bg-cream-300 text-warm-gray-700 font-medium px-8 py-4 rounded-xl transition-all shadow-md hover:shadow-lg"
-            data-testid="button-comfort"
-          >
-            <span className="mr-2">🤗</span>
-            Find Your Calm
-          </button>
-        </Link>
-      </div>
     </div>
   );
 }

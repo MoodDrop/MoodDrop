@@ -1,0 +1,137 @@
+Context (don’t change):
+
+App is a Vite + React + Tailwind SPA using wouter for routing.
+
+Local drops are stored only on the device under the key mooddrop_messages.
+
+Keep all existing functionality of the composer (mood picker, Reset, textarea, mic toggle if present, and Drop It saving behavior).
+
+Do not add Next.js or server changes. No DB.
+
+Keep /my-drops page and existing View My Drops behavior.
+
+Goal:
+Update the Home page to the new structure + tone and add a Calm Studio landing route (stub). Replace “Find Your Calm” in the top nav with “Calm Studio”. Do not show a View My Drops button at the top hero; keep the View My Drops button under the Drop It area (as it is now) but restyle to the new look.
+
+1) Update Navigation
+
+In the navbar component (where links are defined), rename “Find Your Calm” → “Calm Studio” and point it to route /calm-studio.
+
+Keep the rest of the nav items and routing unchanged.
+
+2) Home Page Layout & Copy
+
+Locate the Home page component (usually client/src/pages/Home.tsx or client/src/pages/index.tsx). Replace the hero area and reorganize sections as below. Keep existing Tailwind theme tokens you’ve been using (e.g., bg-cream-50, text-warm-gray-900, border-blush-100, etc).
+
+Hero (top section):
+
+Show the droplet lockup you already use (the light droplet tile).
+
+Replace headline & subcopy with:
+
+Headline:
+Welcome to MoodDrop
+
+Tagline:
+Your quiet corner to release, reflect, and grow through every mood.
+
+Remove any extra “View My Drops” button from the hero. No action buttons here.
+
+Mood Picker Row (unchanged behavior):
+
+Keep the 6 mood circles, same order, same colors, same selection behavior/preview line (the small “Grounded · …” line).
+
+Drop Composer Section:
+
+Keep the two tabs Let It Flow and Take a Moment (if present) with same behavior.
+
+Keep the mood chip with Reset on the right.
+
+Keep the textarea & mic button exactly as they work now.
+
+Primary button: Rename label to “Drop It Here” and prepend the droplet icon. Keep the same Tailwind colors (large, rounded, warm peach background).
+
+Under the button, keep the reassurance line:
+Your words stay on your device — private, safe, and yours.
+
+CTAs under composer (centered):
+
+View My Drops — rounded, with the small droplet icon at the left (use the new nicer style — slightly elevated card/button look). Route: /my-drops.
+
+Calm Studio — sibling button, rounded, slightly elevated; icon: simple smile/zen face or sparkle; Route: /calm-studio.
+
+On mobile: stack; on tablet/desktop: sit side-by-side.
+
+Do not remove or change the localStorage key or how dropping/saving works.
+
+3) Add Calm Studio Route (Stub Only)
+
+Create client/src/pages/CalmStudio.tsx and register route /calm-studio with wouter.
+
+Page contents:
+
+Title: Calm Studio
+
+Subcopy: A small collection of soothing tools. More coming soon.
+
+A simple responsive grid of 4–5 cards (all “Coming soon” for now):
+
+Soundscapes (coming soon)
+
+Breathing (coming soon)
+
+Watch & Smile (coming soon)
+
+Affirmations (coming soon)
+
+(optional) Mini Games (coming soon)
+
+Each card = rounded, soft border, subtle shadow, icon, short one-line description, a small “Coming soon” pill. No functionality; they’re just placeholders.
+
+Do not change /my-drops. Do not surface a Mood Garden here.
+
+4) Styling Requirements
+
+Maintain your warm palette and existing Tailwind tokens: bg-cream-50, text-warm-gray-900/600, border-blush-100, etc.
+
+Buttons & cards use soft shadows, rounded-2xl, generous padding, and hover transitions.
+
+Fully responsive: mobile first; hero text centered; CTAs stack on mobile.
+
+5) Routing (wouter)
+
+Ensure routes exist: / → Home, /my-drops (existing), /calm-studio (new).
+
+Update any top-level router switch accordingly. Don’t touch other pages.
+
+6) Accessibility
+
+All buttons have aria-labels.
+
+Mood picker circles keep aria-pressed or role where relevant.
+
+The mic button (if present) has a clear label.
+
+7) Acceptance Criteria
+
+The homepage shows the new headline and tagline (exact text above).
+
+No “View My Drops” button appears in the hero.
+
+The “Drop It Here” button (with droplet icon) sits above the reassurance line, and below that are the two CTAs: View My Drops and Calm Studio.
+
+Nav shows Calm Studio instead of “Find Your Calm”, and /calm-studio loads a grid of “Coming soon” cards.
+
+/my-drops and saving drops keep working exactly as before (local only).
+
+No new frameworks or servers added.
+
+When finished, run locally and confirm:
+
+/ loads with the new layout & copy.
+
+Dropping still saves to localStorage.
+
+Buttons route correctly to /my-drops and /calm-studio.
+
+If you need to create or rename files, follow the existing folder pattern under client/src/pages/ and update the app router where routes are defined. Keep the rest of the codebase intact.

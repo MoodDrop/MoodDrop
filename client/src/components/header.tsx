@@ -61,14 +61,14 @@ export default function Header() {
             </button>
           </Link>
           <span className="text-warm-gray-400">•</span>
-          <Link href="/comfort">
+          <Link href="/calm-studio">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                location === "/comfort" ? "text-blush-400 font-medium" : "text-warm-gray-600 hover:text-blush-300"
+                location === "/calm-studio" ? "text-blush-400 font-medium" : "text-warm-gray-600 hover:text-blush-300"
               }`}
-              data-testid="nav-comfort"
+              data-testid="nav-calm-studio"
             >
-              Find Your Calm
+              Calm Studio
             </button>
           </Link>
           <span className="text-warm-gray-400">•</span>

@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Sparkles } from "lucide-react";
 import { moods, type MoodKey } from "@/lib/moods";
 import { getAffirmation } from "@/lib/affirmations";
+import dropletIcon from "@assets/Droplet_1760186315979.png";
 
 interface WriteTabProps {
   selectedMood: MoodKey | null;
@@ -110,17 +111,19 @@ export default function WriteTab({
           className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-warm-gray-400"
         />
 
-        {/* Always enabled Drop It button with pulse */}
+        {/* Always enabled Drop It Here button with pulse and droplet icon */}
         <button
           type="submit"
-          className={`mt-3 w-full rounded-xl py-3 text-white font-medium transition transform active:scale-[0.98]
+          className={`mt-3 w-full rounded-xl py-3 text-white font-medium transition transform active:scale-[0.98] flex items-center justify-center gap-2
             ${
               isClicked
                 ? "bg-[#E6C3B2] animate-[pulseGlow_0.6s_ease-in-out]"
                 : "bg-[#E6C3B2] hover:bg-[#dcb2a0]"
             }`}
+          data-testid="button-drop-it"
         >
-          Drop It
+          <img src={dropletIcon} alt="" className="w-5 h-5" />
+          Drop It Here
         </button>
 
         {/* reassurance line */}
@@ -136,14 +139,24 @@ export default function WriteTab({
         </div>
       )}
 
-      {/* View My Drops */}
-      <div className="mt-3 flex justify-center">
+      {/* Two CTAs: View My Drops + Calm Studio */}
+      <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
         <a
           href="/my-drops"
-          className="inline-flex items-center gap-2 rounded-2xl border border-blush-100 bg-cream-50 px-4 py-2 text-warm-gray-800 shadow-sm hover:bg-cream-100 transition"
+          className="inline-flex items-center gap-2 rounded-2xl border border-blush-100 bg-white/80 px-5 py-3 text-warm-gray-800 shadow-sm hover:shadow-md hover:bg-cream-50 transition-all"
+          data-testid="cta-view-my-drops"
         >
-          <span className="text-sky-500">💧</span>
+          <img src={dropletIcon} alt="" className="w-4 h-4" />
           <span className="font-medium">View My Drops</span>
+        </a>
+        
+        <a
+          href="/calm-studio"
+          className="inline-flex items-center gap-2 rounded-2xl border border-blush-100 bg-white/80 px-5 py-3 text-warm-gray-800 shadow-sm hover:shadow-md hover:bg-cream-50 transition-all"
+          data-testid="cta-calm-studio"
+        >
+          <Sparkles className="w-4 h-4" />
+          <span className="font-medium">Calm Studio</span>
         </a>
       </div>
 
