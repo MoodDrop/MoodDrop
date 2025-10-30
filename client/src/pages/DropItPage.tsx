@@ -68,23 +68,31 @@ export default function DropItPage() {
     e.preventDefault();
     if (!draftText.trim()) return;
 
-    const STORAGE_KEY = "mooddrop_messages";
-    const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    const newDrop = {
-      id: Date.now(),
-      content: draftText.trim(),
-      emotion: selectedMood || "Unknown",
-      moodColor: mood?.color,
-      timestamp: new Date().toISOString(),
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([newDrop, ...existing]));
-    setDraftText("");
-    handleAffirmation();
-    
-    // Redirect to my-drops after a moment
-    setTimeout(() => {
-      setLocation("/my-drops");
-    }, 2000);
+    try {
+      const STORAGE_KEY = "mooddrop_messages";
+      const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      const newDrop = {
+        id: Date.now(),
+        content: draftText.trim(),
+        emotion: selectedMood || "Unknown",
+        moodColor: mood?.color,
+        timestamp: new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([newDrop, ...existing]));
+      setDraftText("");
+      handleAffirmation();
+      
+      // Clear mood selection to prevent stale mood context
+      localStorage.removeItem("mooddrop_selected_mood");
+      
+      // Redirect to my-drops after a moment
+      setTimeout(() => {
+        setLocation("/my-drops");
+      }, 2000);
+    } catch (error) {
+      console.error("Error saving drop:", error);
+      alert("Failed to save your drop. Please try again.");
+    }
   };
 
   // Voice Tab Functions
@@ -167,30 +175,46 @@ export default function DropItPage() {
   const handleSubmitVoice = async () => {
     if (!audioBlob) return;
 
-    const STORAGE_KEY = "mooddrop_messages";
-    const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    
-    // Convert blob to base64 for localStorage
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64Audio = reader.result as string;
-      const newDrop = {
-        id: Date.now(),
-        content: "(Voice note)",
-        emotion: selectedMood || "Unknown",
-        moodColor: mood?.color,
-        timestamp: new Date().toISOString(),
-        audio: {
-          blobUrl: base64Audio,
-          durationMs: recordingTime * 1000,
-        },
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([newDrop, ...existing]));
+    try {
+      const STORAGE_KEY = "mooddrop_messages";
+      const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
       
-      // Redirect to my-drops
-      setLocation("/my-drops");
-    };
-    reader.readAsDataURL(audioBlob);
+      // Convert blob to base64 for localStorage
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        try {
+          const base64Audio = reader.result as string;
+          const newDrop = {
+            id: Date.now(),
+            content: "(Voice note)",
+            emotion: selectedMood || "Unknown",
+            moodColor: mood?.color,
+            timestamp: new Date().toISOString(),
+            audio: {
+              blobUrl: base64Audio,
+              durationMs: recordingTime * 1000,
+            },
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify([newDrop, ...existing]));
+          
+          // Clear mood selection to prevent stale mood context
+          localStorage.removeItem("mooddrop_selected_mood");
+          
+          // Redirect to my-drops
+          setLocation("/my-drops");
+        } catch (error) {
+          console.error("Error saving voice drop:", error);
+          alert("Failed to save your voice note. Please try again.");
+        }
+      };
+      reader.onerror = () => {
+        alert("Failed to process audio. Please try again.");
+      };
+      reader.readAsDataURL(audioBlob);
+    } catch (error) {
+      console.error("Error processing voice drop:", error);
+      alert("Failed to save your voice note. Please try again.");
+    }
   };
 
   const formatTime = (seconds: number) => {
