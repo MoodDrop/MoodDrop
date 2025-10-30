@@ -1,68 +1,107 @@
-import { Link, useLocation } from "wouter";
-import { PlayCircle, Music2, Gamepad2, ChevronLeft } from "lucide-react";
+import { Link } from "wouter";
+import { ArrowLeft } from "lucide-react";
+import ComfortCorner from "@/components/comfort-corner";
+import FindYourCalm from "@/components/find-your-calm";
 
 export default function CalmStudio() {
-  const [, navigate] = useLocation();
-
   return (
-    <main className="max-w-2xl mx-auto px-4 py-8">
-      {/* Back Button */}
-      <button
-        onClick={() => navigate("/")}
-        aria-label="Back to home"
-        className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream-50 border border-blush-100 hover:bg-cream-100 shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-blush-300 focus-visible:outline-none"
-        data-testid="button-back-home"
-      >
-        <ChevronLeft className="h-5 w-5 text-warm-gray-700" />
-      </button>
-
-      {/* Title & Subtitle */}
-      <h1 className="text-2xl sm:text-3xl font-semibold text-warm-gray-900">
-        Calm Studio
-      </h1>
-      <p className="mt-2 text-sm text-warm-gray-600">
-        Take a moment to relax and reset. Watch something uplifting, listen to something soothing, or just breathe.
-      </p>
-
-      {/* Three Pill Buttons */}
-      <div className="mt-6 flex flex-col sm:flex-row gap-3">
-        <Link 
-          href="/calm/watch"
-          className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-cream-50 border border-blush-100 hover:bg-cream-100 shadow-sm transition-all text-warm-gray-700 focus-visible:ring-2 focus-visible:ring-blush-300 focus-visible:outline-none"
-          data-testid="link-watch-smile"
-        >
-          <PlayCircle className="h-5 w-5" />
-          <span>Watch &amp; Smile</span>
+    <div className="max-w-5xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-6">
+        <Link href="/">
+          <button
+            className="w-10 h-10 bg-blush-100 rounded-full flex items-center justify-center hover:bg-blush-200 transition-colors"
+            data-testid="button-back-home"
+          >
+            <ArrowLeft className="text-blush-600" size={18} />
+          </button>
         </Link>
-        <Link 
-          href="/calm/sounds"
-          className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-cream-50 border border-blush-100 hover:bg-cream-100 shadow-sm transition-all text-warm-gray-700 focus-visible:ring-2 focus-visible:ring-blush-300 focus-visible:outline-none"
-          data-testid="link-soothing-sounds"
-        >
-          <Music2 className="h-5 w-5" />
-          <span>Soothing Sounds</span>
-        </Link>
-        <Link 
-          href="/calm/games"
-          className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-cream-50 border border-blush-100 hover:bg-cream-100 shadow-sm transition-all text-warm-gray-700 focus-visible:ring-2 focus-visible:ring-blush-300 focus-visible:outline-none"
-          data-testid="link-games"
-        >
-          <Gamepad2 className="h-5 w-5" />
-          <span>Games</span>
-        </Link>
-      </div>
-
-      {/* Optional Preview Block */}
-      <div className="mt-6 rounded-2xl border border-zinc-200/70 bg-white/80 p-5 shadow-sm">
-        <div className="flex items-center justify-center h-40 bg-gradient-to-br from-cream-50 to-blush-50 rounded-xl">
-          <p className="text-warm-gray-400 text-sm">Preview coming soon</p>
+        <div>
+          <h1 className="text-2xl font-semibold text-warm-gray-700">
+            Calm Studio
+          </h1>
+          <p className="text-warm-gray-600 text-sm">
+            Take a moment to relax and reset. Watch something uplifting, listen to something soothing, or just breathe.
+          </p>
         </div>
       </div>
 
-      {/* Helper Text */}
-      <p className="mt-6 text-center text-sm text-warm-gray-500">
-        Choose an activity above to begin your journey to calm
-      </p>
-    </main>
+      {/* Find Your Calm Section - Tabs */}
+      <FindYourCalm />
+
+      {/* Comfort Corner */}
+      <ComfortCorner />
+
+      {/* Additional Wellbeing Tips */}
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-blush-100 mb-6">
+        <h3 className="text-lg font-semibold text-warm-gray-700 mb-4 flex items-center gap-2">
+          🌿 Daily Wellbeing Tips
+        </h3>
+        <div className="grid gap-4">
+          <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+            <h4 className="font-medium text-green-800 mb-2">
+              🌅 Morning Routine
+            </h4>
+            <p className="text-green-700 text-sm">
+              Start your day with intention. Take 5 minutes to breathe, stretch,
+              or set a positive intention for the day ahead.
+            </p>
+          </div>
+          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 className="font-medium text-blue-800 mb-2">💧 Stay Hydrated</h4>
+            <p className="text-blue-700 text-sm">
+              Drink water regularly throughout the day. Dehydration can affect
+              your mood and energy levels.
+            </p>
+          </div>
+          <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+            <h4 className="font-medium text-purple-800 mb-2">
+              😴 Quality Sleep
+            </h4>
+            <p className="text-purple-700 text-sm">
+              Aim for 7-9 hours of sleep. Create a bedtime routine that helps
+              you wind down and relax.
+            </p>
+          </div>
+          <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+            <h4 className="font-medium text-orange-800 mb-2">
+              🤗 Connect with Others
+            </h4>
+            <p className="text-orange-700 text-sm">
+              Reach out to friends, family, or support groups. Human connection
+              is vital for mental health.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Professional Help Reminder */}
+      <div className="bg-gradient-to-r from-blush-100 to-cream-100 rounded-2xl p-6 border border-blush-200">
+        <h3 className="text-lg font-semibold text-warm-gray-700 mb-3 flex items-center gap-2">
+          🩺 Professional Support
+        </h3>
+        <p className="text-warm-gray-600 text-sm leading-relaxed mb-4">
+          While MoodDrop provides a safe space for expression and these
+          resources offer comfort, they are not substitutes for professional
+          mental health care. If you're experiencing persistent difficulties,
+          please consider reaching out to a qualified mental health
+          professional.
+        </p>
+        <div className="bg-white rounded-lg p-4 border border-blush-200">
+          <h4 className="font-medium text-warm-gray-700 mb-2">
+            Ways to Find Professional Help:
+          </h4>
+          <ul className="text-warm-gray-600 text-sm space-y-1">
+            <li>• Contact your primary care physician for referrals</li>
+            <li>• Use online directories like Psychology Today</li>
+            <li>• Check with your insurance provider for covered therapists</li>
+            <li>
+              • Contact local mental health centers or community organizations
+            </li>
+            <li>• Ask trusted friends or family for recommendations</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   );
 }
