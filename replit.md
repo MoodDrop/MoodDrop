@@ -1,12 +1,21 @@
 # MoodDrop - Emotional Wellness & Growth Platform
 
 ## Overview
-MoodDrop is a fully anonymous emotional wellness platform designed as a safe space for users to express emotions via text or voice. No sign-up or authentication required—users can immediately select from 6 color-coded moods, express feelings through "Let It Flow" (Write) or "Take a Moment" (Voice) tabs, practice guided breathing exercises, and access comfort resources and interactive games. The platform features a mobile-first design with calming animations, accessibility-first interactions, and client-side storage. Its core purpose is to foster emotional wellness and personal growth through immediate, anonymous support.
+MoodDrop is a fully anonymous emotional wellness platform designed as a safe space for users to express emotions via text or voice. No sign-up or authentication required—users select from 5 color-coded moods (Calm, Grounded, Joyful, Tender, Overwhelmed), click "💧 Drop It" to access a dedicated journaling page with Write or Voice tabs, practice guided breathing exercises, and access comfort resources and interactive games. The platform features a mobile-first design with calming animations, accessibility-first interactions, and localStorage-only storage. Its core purpose is to foster emotional wellness and personal growth through immediate, anonymous support.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+### Homepage Redesign & CSV Removal (October 30, 2025)
+- **Simplified User Flow**: Homepage now features 5 mood circles (reduced from 6, removed Frustrated) → "💧 Drop It" button → dedicated /drop-it page for journaling
+- **Mood Selection**: 5 color-coded moods: Calm (blue #A6C8FF), Grounded (green #A4C3A2), Joyful (yellow #FBE694), Tender (peach #F6C1B4), Overwhelmed (gray #C9C7D2)
+- **DropItPage**: New dedicated page for journaling with two tabs: "Write" (text input with affirmation) and "Voice" (60s audio recording). Mood stored in localStorage, cleared after successful submission
+- **Improved Error Handling**: Added try/catch blocks for localStorage operations, user-friendly error messages, FileReader error handling
+- **CSV Removal**: Removed all CSV import/export functionality from MyDropsPage. Updated privacy footnote to: "Private to this device. Your drops stay on your device only — fully anonymous."
+- **State Management**: Mood selection persisted via localStorage ("mooddrop_selected_mood"), automatically cleared after drop submission to prevent stale context
+- **Enhanced UX**: Back button navigation, mood display on drop page, smooth tab transitions, automatic redirect after submission
+
 ### Take a Breath Breathing Exercise & Anonymous Mode (October 2025)
 - **Fully Anonymous Platform**: Removed all authentication requirements—no sign-up, login, or account needed. Admin routes preserved but hidden from navigation
 - **Take a Breath Page**: Replaced "Drop What You're Doing" with guided breathing exercises featuring three scientifically-backed presets:
@@ -21,16 +30,6 @@ Preferred communication style: Simple, everyday language.
 - **Unlocked Games**: Removed "(Sign up)" text from locked games (Color Drift, Zen Garden) in Find Your Calm—they simply show lock icon
 - **Routes Updated**: `/release` and `/breathe` both navigate to breathing exercise. Header navigation renamed to "Take a Breath"
 
-### Homepage Mood Circles & Tab Integration (October 2025)
-- **Horizontal Mood Circles**: Added 6 color-coded mood circles (28px/24px) displayed horizontally above tabs with header "What type of mood are you feeling today?" Each mood has unique color (#A6C8FF Calm, #A4C3A2 Grounded, #FBE694 Joyful, #F6C1B4 Tender, #C9C7D2 Overwhelmed, #E98A7A Frustrated)
-- **Animated Hint Text**: "✨ Choose a mood to begin…" appears below section title with gentle pulse animation (4s ease-in-out, opacity 0.6→1.0→0.6). Automatically fades out when mood is selected
-- **Mood Circle Glow Animation**: Each mood circle has rhythmic box-shadow pulse animation (4s infinite) suggesting interactivity. Animation pauses on hover/click for better UX
-- **Tab-Based Interface**: Homepage features two tabs - "Let It Flow" (Write) and "Take a Moment" (Voice). Mood selection integrates with both tabs showing mood name and meaning
-- **Interactive Tooltips**: Hover/selection shows mood name + meaning. Full keyboard accessibility with ARIA labels and auto-focus on textarea when composer opens
-- **Write It Out Composer Visibility**: Composer hidden by default on page load, reveals with smooth fade/slide animation (200ms) when mood selected. Text preserved across mood changes and cleared only on successful submission or explicit clear action
-- **Voice Recording Panel**: Full-featured voice note recording with Record/Stop/Play/Delete controls, 60-second timer (MM:SS format), auto-stop at maximum duration, local audio storage via MediaRecorder API, and spacebar keyboard shortcut for Record/Stop toggle
-- **Memory Match Game**: 8-pair memory game without timer - users can play at their own pace with move and match counters. Includes reset functionality and win celebration
-- **Preserved Layout**: Maintained original hero header, tagline, and overall homepage aesthetic
 
 ### Previous Updates
 - **Release Page Affirmation Fix**: Resolved critical bug where affirmation failed to display after message submission. Fixed by using React Query's `onSuccess` callback pattern instead of async/await for reliable state updates
@@ -48,7 +47,9 @@ Preferred communication style: Simple, everyday language.
 - **Build Tool**: Vite
 - **UI/UX**: Mobile-first responsive design, accessibility-focused (semantic HTML, ARIA labels), toast notifications, progressive enhancement, calming tab transitions, animated Mood Garden elements, and a floating petal footer animation.
 - **Key Pages**:
-    - **Homepage with Mood Circles**: Horizontal row of 6 color-coded mood circles with pulsing glow animation and tooltips. Animated hint text guides users to select a mood. Composer hidden by default, reveals with fade/slide animation on mood selection. Tab-based interface with "Let It Flow" (Write) and "Take a Moment" (Voice). Write tab supports text input with affirmation feedback. Voice tab features complete recording panel with 60s timer, playback, and local storage. Draft text preserved across mood changes, cleared only on submission.
+    - **Homepage**: 5 color-coded mood circles (Calm, Grounded, Joyful, Tender, Overwhelmed) with pulsing glow animation. Select a mood to enable "💧 Drop It" button. Mood stored in localStorage and routes to /drop-it page.
+    - **DropItPage**: Dedicated journaling page with two tabs - "Write" (text input with affirmation feedback, auto-redirect to /my-drops) and "Voice" (60s audio recording with Record/Stop/Play/Delete controls). Mood displayed at top, back button for navigation. Clears mood selection after successful submission.
+    - **MyDropsPage**: Displays all drops from localStorage with search, filtering, delete with undo. No CSV import/export. Privacy footnote emphasizes device-only, anonymous storage.
     - **Message System**: Emotion tagging, text input, voice notes with local recording and playback, affirmation feedback, favorites.
     - **Mood Garden**: Visual representation of emotional journey using color-coded Droplets, Flowers, and Trees with growth animations.
     - **Engagement Features**: Daily streak tracking, 30-day Mood Calendar (GitHub-style), Insights Dashboard (emotion distribution, activity summary), and a Favorites system.
