@@ -11,9 +11,6 @@ import TakeABreath from "@/pages/take-a-breath";
 import ThankYou from "@/pages/thank-you";
 import Comfort from "@/pages/comfort";
 import CalmStudio from "@/pages/CalmStudio";
-import WatchPage from "@/pages/calm/WatchPage";
-import SoundsPage from "@/pages/calm/SoundsPage";
-import GamesPage from "@/pages/calm/GamesPage";
 import Garden from "@/pages/garden";
 import MyDropsPage from "@/pages/MyDropsPage";
 import About from "@/pages/about";
@@ -23,6 +20,7 @@ import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import Redirect from "@/components/Redirect";
 
 function Router() {
   return (
@@ -31,12 +29,10 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/release" component={TakeABreath} />
       <Route path="/breathe" component={TakeABreath} />
-      <Route path="/thank-you" component={ThankYou} />
-      <Route path="/comfort" component={Comfort} />
+      <Route path="/comfort">
+        <Redirect to="/calm-studio" />
+      </Route>
       <Route path="/calm-studio" component={CalmStudio} />
-      <Route path="/calm/watch" component={WatchPage} />
-      <Route path="/calm/sounds" component={SoundsPage} />
-      <Route path="/calm/games" component={GamesPage} />
       <Route path="/garden" component={Garden} />
       <Route path="/my-drops" component={MyDropsPage} />
       <Route path="/about" component={About} />
@@ -51,7 +47,7 @@ function Router() {
 
 function AppContent() {
   const [location] = useLocation();
-  const isFullWidthPage = location === '/garden' || location === '/dashboard';
+  const isFullWidthPage = location === '/garden' || location === '/dashboard' || location === '/calm-studio' || location === '/comfort';
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blush-50 via-cream-50 to-blush-100">
