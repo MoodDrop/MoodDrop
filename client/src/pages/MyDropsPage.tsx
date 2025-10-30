@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link } from "wouter";
-import { ArrowLeft, Trash2, Undo2, Search, Download, Upload, X, Mic, Square, Play, Pause } from "lucide-react";
+import { ArrowLeft, Trash2, Undo2, Search, X, Mic, Square, Play, Pause } from "lucide-react";
 import { getMoodColor, MOODS_ARRAY } from "@/lib/moods";
 import { useToast } from "@/hooks/use-toast";
 
@@ -316,151 +316,6 @@ export default function MyDropsPage() {
     }
   };
 
-  const handleExportCSV = () => {
-    const headers = ["id", "timestamp", "emotion", "content", "audio_blobUrl", "moodColor", "durationMs"];
-    const rows = allDrops.map(d => [
-      d.id,
-      d.timestamp,
-      d.emotion,
-      `"${d.content.replace(/"/g, '""')}"`,
-      d.audio?.blobUrl ? `"${d.audio.blobUrl.replace(/"/g, '""')}"` : "",
-      d.moodColor || "",
-      d.audio?.durationMs || "",
-    ]);
-
-    const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `mooddrop-export-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-
-    toast({ title: "Exported successfully" });
-  };
-
-  const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      try {
-        const text = evt.target?.result as string;
-        const imported: SavedDrop[] = [];
-
-        // Robust CSV parser that handles multi-line quoted fields
-        const parseCSV = (csvText: string): string[][] => {
-          const rows: string[][] = [];
-          let currentRow: string[] = [];
-          let currentField = "";
-          let inQuotes = false;
-          
-          for (let i = 0; i < csvText.length; i++) {
-            const char = csvText[i];
-            const nextChar = csvText[i + 1];
-            
-            if (char === '"') {
-              if (inQuotes && nextChar === '"') {
-                // Escaped quote
-                currentField += '"';
-                i++; // Skip next quote
-              } else {
-                // Toggle quote state
-                inQuotes = !inQuotes;
-              }
-            } else if (char === ',' && !inQuotes) {
-              // End of field
-              currentRow.push(currentField);
-              currentField = "";
-            } else if ((char === '\n' || char === '\r') && !inQuotes) {
-              // End of row (handle both \n and \r\n)
-              if (char === '\r' && nextChar === '\n') {
-                i++; // Skip \n after \r
-              }
-              if (currentField || currentRow.length > 0) {
-                currentRow.push(currentField);
-                if (currentRow.some(f => f.trim())) {
-                  rows.push(currentRow);
-                }
-                currentRow = [];
-                currentField = "";
-              }
-            } else {
-              currentField += char;
-            }
-          }
-          
-          // Handle last row
-          if (currentField || currentRow.length > 0) {
-            currentRow.push(currentField);
-            if (currentRow.some(f => f.trim())) {
-              rows.push(currentRow);
-            }
-          }
-          
-          return rows;
-        };
-
-        const rows = parseCSV(text);
-        
-        // Skip header row
-        const dataRows = rows.slice(1);
-
-        dataRows.forEach(fields => {
-          if (fields.length >= 4) {
-            // Handle both old 6-column and new 7-column formats
-            // Old: id,timestamp,emotion,content,audio_blobUrl,durationMs
-            // New: id,timestamp,emotion,content,audio_blobUrl,moodColor,durationMs
-            const isOldFormat = fields.length === 6;
-            
-            imported.push({
-              id: Number(fields[0]),
-              timestamp: fields[1],
-              emotion: fields[2],
-              content: fields[3],
-              moodColor: isOldFormat ? undefined : (fields[5] || undefined),
-              audio: fields[4] ? { 
-                blobUrl: fields[4], 
-                durationMs: Number(isOldFormat ? fields[5] : fields[6]) || undefined 
-              } : undefined,
-            });
-          }
-        });
-
-        const merged = [...allDrops];
-        imported.forEach(imp => {
-          const existing = merged.findIndex(d => d.id === imp.id);
-          if (existing >= 0) {
-            if (new Date(imp.timestamp) > new Date(merged[existing].timestamp)) {
-              merged[existing] = imp;
-            }
-          } else {
-            merged.push(imp);
-          }
-        });
-
-        merged.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-        setAllDrops(merged);
-        saveDrops(merged);
-
-        toast({
-          title: "Imported successfully",
-          description: `${imported.length} drops imported`,
-        });
-      } catch (error) {
-        toast({
-          title: "Import failed",
-          description: "Invalid CSV format",
-          variant: "destructive",
-        });
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = "";
-  };
-
   const handleClearAll = () => {
     if (!confirm("Are you sure you want to delete all drops? This cannot be undone.")) return;
 
@@ -594,27 +449,6 @@ export default function MyDropsPage() {
             </select>
 
             <button
-              onClick={handleExportCSV}
-              className="px-3 py-2 bg-warm-gray-100 text-warm-gray-700 rounded-lg hover:bg-warm-gray-200 transition-colors text-sm flex items-center gap-2"
-              data-testid="button-export-csv"
-            >
-              <Download size={16} />
-              Export CSV
-            </button>
-
-            <label className="px-3 py-2 bg-warm-gray-100 text-warm-gray-700 rounded-lg hover:bg-warm-gray-200 transition-colors text-sm flex items-center gap-2 cursor-pointer">
-              <Upload size={16} />
-              Import CSV
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleImportCSV}
-                className="hidden"
-                data-testid="input-import-csv"
-              />
-            </label>
-
-            <button
               onClick={handleClearAll}
               className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm"
               data-testid="button-clear-all"
@@ -733,7 +567,7 @@ export default function MyDropsPage() {
 
       {/* Privacy Footnote */}
       <div className="mt-8 p-4 bg-warm-gray-50 rounded-xl text-sm text-warm-gray-600 text-center">
-        Private to this device. Clearing browser storage will remove your drops. Export a CSV to back up.
+        Private to this device. Your drops stay on your device only — fully anonymous.
       </div>
 
       {/* Voice Recorder Modal */}
