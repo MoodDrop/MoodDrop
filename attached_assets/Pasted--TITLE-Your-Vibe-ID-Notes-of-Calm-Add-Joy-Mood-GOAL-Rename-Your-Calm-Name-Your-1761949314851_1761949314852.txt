@@ -1,0 +1,118 @@
+📘 TITLE
+
+Your Vibe ID + Notes of Calm + Add “Joy” Mood
+
+🧠 GOAL
+
+Rename Your Calm Name → Your Vibe ID across the app (with seamless key migration).
+
+Add anonymous “Notes of Calm” (comments) to each community drop (localStorage only).
+
+Add Joy to your mood selector (alongside Calm, Tender, Grounded, Reflective, Hopeful, Crash Out).
+
+✅ ACCEPTANCE CRITERIA
+
+All UI says Your Vibe ID; identity persists locally and works everywhere (Drops + Notes).
+
+Existing users’ identity migrates from md_calmName → md_vibeId automatically on first load.
+
+Each drop shows “💌 Leave a Note” + “💬 N Notes”; notes are anonymous, persist locally, newest-first, with a 3s cooldown and 500-char limit.
+
+Joy mood appears, is selectable, saves with the post, and displays in feeds; mobile layout stays tidy.
+
+🔑 LOCAL STORAGE KEYS
+
+Identity: md_vibeId (migrate from md_calmName if present)
+
+Drops: md_drops
+
+Notes: md_notes
+
+Rate limits: md_lastPostAt, md_lastNoteAt
+
+🧩 DATA SHAPES (reference only)
+
+Drop: { id, name: md_vibeId, text, mood?, reactions, createdAt }
+
+Note: { id, dropId, name: md_vibeId, text, createdAt }
+
+📁 FILES TO EDIT / ADD
+
+Edit
+
+client/src/lib/community/storage.ts (identity read/write + migration)
+
+client/src/pages/CommunityPage.tsx (header copy, identity usage)
+
+client/src/components/community/DropComposer.tsx (identity helper text, mood list includes Joy)
+
+client/src/components/community/DropCard.tsx (add Notes UI toggles and count; render notes section)
+
+Add
+
+client/src/types/note.ts (Note shape)
+
+client/src/lib/community/noteStorage.ts (read/write notes + lastNoteAt helpers)
+
+client/src/components/community/NoteComposer.tsx (textarea, counter, send button, cooldown logic hook-up)
+
+client/src/components/community/NoteList.tsx (renders notes for a given drop)
+
+(If you keep moods centralized, also add/edit client/src/lib/constants/moods.ts to include Joy.)
+
+🛠️ IMPLEMENTATION STEPS (no code)
+A) Rename identity to Your Vibe ID (with migration)
+
+On app init (Community page load is fine):
+
+If md_vibeId is missing and md_calmName exists → set md_vibeId = md_calmName.
+
+Update all identity reads/writes to use md_vibeId.
+
+Update UI copy everywhere:
+
+“Posting as Your Vibe ID: {VIBE_ID}”
+
+“Refresh Vibe ID 🌀”
+
+Notes: “Note will post as Your Vibe ID”
+
+Keep the same random-name generator; only the label changes.
+
+B) Add Notes of Calm (anonymous comments, local-only)
+
+Create Note type and localStorage helpers (readNotes, writeNotes, get/set md_lastNoteAt).
+
+Add NoteComposer: compact textarea (limit 240), remaining counter, “Send Note 💌”; block empty; 3s cooldown.
+
+Add NoteList: filter by dropId, newest-first; show Vibe ID + time + text (preserve whitespace).
+
+In DropCard:
+
+Show “💌 Leave a Note” (toggle composer) and “💬 {count} Notes” (toggle list).
+
+On send: append to local state + persist; update count; clear input.
+
+Styling: match your card style; add a subtle divider above notes section.
+
+C) Add Joy to mood selector
+
+Add Joy to the same place you define Calm/Tender/Grounded/Reflective/Hopeful/Crash Out.
+
+Ensure Joy is selectable, saved with the drop, and rendered in feed cards.
+
+Mobile: confirm the grid wraps cleanly with the extra mood.
+
+🧪 QA CHECKLIST
+
+ Old installs keep their identity (migrated to md_vibeId); new installs generate a fresh Vibe ID.
+
+ Drops + Notes always use the same Vibe ID.
+
+ “💌 Leave a Note” opens input; “💬 N Notes” shows/hides list; counts update instantly.
+
+ Notes persist on reload, attach to the correct drop, enforce 3s cooldown and 240-char limit.
+
+ Joy mood appears, saves, and displays; layout still clean on mobile.
+
+ No “Calm Name” wording remains.

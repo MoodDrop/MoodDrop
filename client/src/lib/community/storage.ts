@@ -1,28 +1,41 @@
 import type { Drop } from "@/types/community";
 import { generateCalmName } from "./calmName";
 
-const CALM_NAME_KEY = "md_calmName";
+const VIBE_ID_KEY = "md_vibeId";
+const OLD_CALM_NAME_KEY = "md_calmName";
 const DROPS_KEY = "md_drops";
 const LAST_POST_KEY = "md_lastPostAt";
 const MAX_DROPS = 500;
 
-export function getCalmName(): string {
+export function getVibeId(): string {
   try {
-    const existing = localStorage.getItem(CALM_NAME_KEY);
+    // Check for new key first
+    let existing = localStorage.getItem(VIBE_ID_KEY);
+    
+    // Migration: if md_vibeId doesn't exist but md_calmName does, migrate it
+    if (!existing) {
+      const oldName = localStorage.getItem(OLD_CALM_NAME_KEY);
+      if (oldName) {
+        localStorage.setItem(VIBE_ID_KEY, oldName);
+        existing = oldName;
+      }
+    }
+    
     if (existing) return existing;
     
+    // Generate new if neither exists
     const newName = generateCalmName();
-    localStorage.setItem(CALM_NAME_KEY, newName);
+    localStorage.setItem(VIBE_ID_KEY, newName);
     return newName;
   } catch {
     return generateCalmName();
   }
 }
 
-export function refreshCalmName(): string {
+export function refreshVibeId(): string {
   try {
     const newName = generateCalmName();
-    localStorage.setItem(CALM_NAME_KEY, newName);
+    localStorage.setItem(VIBE_ID_KEY, newName);
     return newName;
   } catch {
     return generateCalmName();

@@ -61,7 +61,7 @@ export default function DropComposer({
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Posting as */}
       <p className="text-sm text-warm-gray-600">
-        Posting as{" "}
+        Posting as Your Vibe ID:{" "}
         <span className="font-medium text-warm-gray-700">{calmName}</span>
       </p>
 
