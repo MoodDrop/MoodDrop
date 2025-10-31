@@ -1,11 +1,13 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { LogOut } from "lucide-react";
+import { readFlags } from "@/lib/featureFlags";
 import moodDropLogo from "@assets/MoodDrop Bubble_1761853048716.png";
 
 export default function Header() {
   const [location] = useLocation();
   const { isAuthenticated, user } = useAuth();
+  const flags = readFlags();
 
   return (
     <header 
@@ -70,6 +72,21 @@ export default function Header() {
               Calm Studio
             </button>
           </Link>
+          {flags.communityEnabled && (
+            <>
+              <span className="text-warm-gray-400">•</span>
+              <Link href="/community">
+                <button
+                  className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
+                    location === "/community" ? "text-blush-400 font-medium" : "text-warm-gray-600 hover:text-blush-300"
+                  }`}
+                  data-testid="nav-community"
+                >
+                  The Collective Drop
+                </button>
+              </Link>
+            </>
+          )}
           <span className="text-warm-gray-400">•</span>
           <Link href="/about">
             <button

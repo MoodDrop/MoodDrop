@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { readFlags } from "@/lib/featureFlags";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
@@ -13,6 +14,7 @@ import CalmStudio from "@/pages/CalmStudio";
 import Garden from "@/pages/garden";
 import MyDropsPage from "@/pages/MyDropsPage";
 import DropItPage from "@/pages/DropItPage";
+import CommunityPage from "@/pages/CommunityPage";
 import About from "@/pages/about";
 import Privacy from "@/pages/privacy";
 import AdminPage from "@/pages/AdminPage";
@@ -22,6 +24,8 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 
 function Router() {
+  const flags = readFlags();
+  
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -33,6 +37,7 @@ function Router() {
       <Route path="/garden" component={Garden} />
       <Route path="/my-drops" component={MyDropsPage} />
       <Route path="/drop-it" component={DropItPage} />
+      {flags.communityEnabled && <Route path="/community" component={CommunityPage} />}
       <Route path="/about" component={About} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/admin" component={AdminPage} />
