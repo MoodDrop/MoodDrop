@@ -69,7 +69,7 @@ export default function DropComposer({
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Share what's on your heart..."
+        placeholder="What's your vibe today..."
         maxLength={MAX_CHARS}
         rows={4}
         disabled={disabled}
