@@ -16,6 +16,8 @@ const MOOD_OPTIONS = [
   { emoji: "💨", label: "Crash Out" },
 ];
 
+const MAX_CHARS = 500;
+
 export default function DropComposer({ calmName, onPost, disabled = false }: DropComposerProps) {
   const [text, setText] = useState("");
   const [selectedMood, setSelectedMood] = useState<string | undefined>();
@@ -34,10 +36,10 @@ export default function DropComposer({ calmName, onPost, disabled = false }: Dro
       return;
     }
 
-    if (trimmed.length > 240) {
+    if (trimmed.length > MAX_CHARS) {
       toast({
         title: "Too long",
-        description: "Please keep your drop under 240 characters.",
+        description: `Please keep your drop under ${MAX_CHARS} characters.`,
         variant: "destructive",
       });
       return;
@@ -48,7 +50,7 @@ export default function DropComposer({ calmName, onPost, disabled = false }: Dro
     setSelectedMood(undefined);
   };
 
-  const remainingChars = 240 - text.length;
+  const remainingChars = MAX_CHARS - text.length;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -62,7 +64,7 @@ export default function DropComposer({ calmName, onPost, disabled = false }: Dro
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Share what's on your heart..."
-        maxLength={240}
+        maxLength={MAX_CHARS}
         rows={4}
         disabled={disabled}
         className="w-full px-4 py-3 rounded-xl border border-warm-gray-300 focus:border-blush-400 focus:ring-2 focus:ring-blush-200 outline-none resize-none disabled:bg-warm-gray-50 disabled:cursor-not-allowed"
@@ -71,7 +73,7 @@ export default function DropComposer({ calmName, onPost, disabled = false }: Dro
 
       {/* Character count */}
       <div className="flex justify-between items-center">
-        <p className={`text-sm ${remainingChars < 20 ? "text-orange-500" : "text-warm-gray-500"}`}>
+        <p className={`text-sm ${remainingChars < 50 ? "text-orange-500" : "text-warm-gray-500"}`}>
           {remainingChars} characters remaining
         </p>
       </div>
