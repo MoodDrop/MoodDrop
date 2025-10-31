@@ -4,12 +4,14 @@ export type FeatureFlags = {
   enableVoiceNotes: boolean;
   showMoodGardenTab: boolean;
   enableAffirmations: boolean;
+  communityEnabled: boolean;
 };
 
 export const DEFAULT_FLAGS: FeatureFlags = {
   enableVoiceNotes: true,
   showMoodGardenTab: false,
   enableAffirmations: true,
+  communityEnabled: true,
 };
 
 export function readFlags(): FeatureFlags {

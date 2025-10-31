@@ -1,0 +1,159 @@
+📘 TITLE
+
+Add The Collective Drop (Interactive Community Page)
+
+🧠 GOAL
+
+Create an anonymous, local-only community page where users can post short “drops” and react with empathy — all stored in localStorage (no backend).
+
+🔧 TECH CONTEXT
+
+Vite + React (TypeScript), TailwindCSS
+
+React Router DOM (client-only)
+
+Storage: localStorage only
+
+No Next.js / Prisma / Supabase
+
+Repo: client/ app; deploy via GitHub → Vercel
+
+✅ ACCEPTANCE CRITERIA
+
+New route /community visible in the nav as “The Collective Drop”.
+
+First visit generates and shows a Calm Name (e.g., QuietBloom42) and persists after refresh.
+
+Users can submit a drop (<= 240 chars) with an optional mood emoji and see it appear instantly at the top of the feed.
+
+Drops (and reaction counters) persist across page reloads (via localStorage).
+
+Cooldown between posts (≥ 5 seconds).
+
+Empty state shows “Be the first to share a drop today 💧”.
+
+Feature flag can hide the page globally.
+
+🧭 SCOPE / CONSTRAINTS
+
+Client-side only; no auth, DB, or network calls.
+
+Keep styling in Tailwind; calm, minimal UI.
+
+Limit feed to most recent ~500 drops to keep storage small.
+
+Keep code in TypeScript and match current project structure.
+
+📁 FILES TO ADD (exact paths)
+client/src/pages/CommunityPage.tsx
+client/src/components/community/DropComposer.tsx
+client/src/components/community/DropFeed.tsx
+client/src/components/community/DropCard.tsx
+client/src/lib/community/calmName.ts
+client/src/lib/community/storage.ts
+client/src/lib/community/rateLimit.ts
+client/src/types/community.ts
+
+🔑 LOCALSTORAGE KEYS
+
+md_calmName – current device’s Calm Name
+
+md_drops – array of drops (newest first)
+
+md_lastPostAt – timestamp for cooldown
+
+🧩 DATA SHAPES
+
+Drop:
+
+{
+  id: string,
+  name: string,          // Calm Name
+  text: string,          // 1–240 chars
+  mood?: string,         // emoji like "💧"
+  reactions: { calm: number, feel: number },
+  createdAt: number      // Date.now()
+}
+
+🛠️ IMPLEMENTATION STEPS
+
+Feature Flag
+
+client/src/lib/featureFlags.ts → export const communityEnabled = true;
+
+Route + Nav
+
+In your Router (e.g., client/src/App.tsx):
+communityEnabled && <Route path="/community" element={<CommunityPage />} />
+
+Add nav link “The Collective Drop” → /community (guarded by flag).
+
+Page Shell (CommunityPage.tsx)
+
+Header: title + tagline (“Anonymously express, reflect, and uplift.”).
+
+Show Calm Name with a “Refresh name” action.
+
+Read existing drops from md_drops on mount; render DropFeed (or empty state).
+
+Provide onPost(newDrop) to composer:
+
+Enforce cooldown via md_lastPostAt.
+
+Prepend new drop; persist to md_drops.
+
+Composer (DropComposer.tsx)
+
+Textarea (max 240), mood selector (e.g., 💧 🌷 🌿 🌙 ✨), button “Share Drop 💧”.
+
+On submit: trim + validate → call parent onPost.
+
+If cooldown blocks, show soft alert/toast.
+
+Feed + Card
+
+DropFeed maps drops → DropCard.
+
+DropCard shows mood, calm name, timestamp, text, and two buttons:
+
+Send Calm 💧 (increment reactions.calm)
+
+I Feel This 🌷 (increment reactions.feel)
+
+Persist updated reactions to md_drops.
+
+Helpers
+
+calmName.ts → random friendly name generator (Adjective+Noun+2 digits).
+
+storage.ts → get/set calm name, read/write drops, get/set last post time.
+
+rateLimit.ts → canPost(now, last, 5000).
+
+Styling
+
+Max width 640–720px; rounded-2xl cards; subtle borders; generous spacing.
+
+Microcopy under composer: “Be kind. No advice needed — just presence.”
+
+Footer of page optional: “Always anonymous. Always kind.”
+
+🧪 QA CHECKLIST (MANUAL)
+
+ Navigate to /community from the header/nav.
+
+ Calm Name appears and persists after reload.
+
+ Can submit a drop; it appears instantly at top.
+
+ After reload, drop is still present.
+
+ Reactions increment and persist after reload.
+
+ Posting twice quickly triggers cooldown message.
+
+ Character limit enforced (can’t exceed 240).
+
+ Mobile: textarea and buttons are easy to tap (≥44px).
+
+ Toggle feature flag false → link/route hidden.
