@@ -1,0 +1,120 @@
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+
+interface DropComposerProps {
+  calmName: string;
+  onPost: (text: string, mood?: string) => void;
+  disabled?: boolean;
+}
+
+const MOOD_OPTIONS = [
+  { emoji: "💧", label: "Calm" },
+  { emoji: "🌷", label: "Tender" },
+  { emoji: "🌿", label: "Grounded" },
+  { emoji: "🌙", label: "Reflective" },
+  { emoji: "✨", label: "Hopeful" },
+];
+
+export default function DropComposer({ calmName, onPost, disabled = false }: DropComposerProps) {
+  const [text, setText] = useState("");
+  const [selectedMood, setSelectedMood] = useState<string | undefined>();
+  const { toast } = useToast();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const trimmed = text.trim();
+    if (!trimmed) {
+      toast({
+        title: "Empty drop",
+        description: "Please write something before sharing.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (trimmed.length > 240) {
+      toast({
+        title: "Too long",
+        description: "Please keep your drop under 240 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    onPost(trimmed, selectedMood);
+    setText("");
+    setSelectedMood(undefined);
+  };
+
+  const remainingChars = 240 - text.length;
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Posting as */}
+      <p className="text-sm text-warm-gray-600">
+        Posting as <span className="font-medium text-warm-gray-700">{calmName}</span>
+      </p>
+
+      {/* Textarea */}
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Share what's on your heart..."
+        maxLength={240}
+        rows={4}
+        disabled={disabled}
+        className="w-full px-4 py-3 rounded-xl border border-warm-gray-300 focus:border-blush-400 focus:ring-2 focus:ring-blush-200 outline-none resize-none disabled:bg-warm-gray-50 disabled:cursor-not-allowed"
+        data-testid="input-drop-text"
+      />
+
+      {/* Character count */}
+      <div className="flex justify-between items-center">
+        <p className={`text-sm ${remainingChars < 20 ? "text-orange-500" : "text-warm-gray-500"}`}>
+          {remainingChars} characters remaining
+        </p>
+      </div>
+
+      {/* Mood selector */}
+      <div>
+        <label className="text-sm text-warm-gray-600 mb-2 block">
+          Choose a mood (optional)
+        </label>
+        <div className="flex gap-2 flex-wrap">
+          {MOOD_OPTIONS.map((mood) => (
+            <button
+              key={mood.emoji}
+              type="button"
+              onClick={() => setSelectedMood(selectedMood === mood.emoji ? undefined : mood.emoji)}
+              className={`px-4 py-2 rounded-full border-2 transition-all min-h-[44px] ${
+                selectedMood === mood.emoji
+                  ? "border-blush-400 bg-blush-50"
+                  : "border-warm-gray-200 hover:border-warm-gray-300"
+              }`}
+              disabled={disabled}
+              data-testid={`mood-${mood.label.toLowerCase()}`}
+            >
+              <span className="text-xl mr-1">{mood.emoji}</span>
+              <span className="text-sm">{mood.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Submit button */}
+      <div className="space-y-2">
+        <button
+          type="submit"
+          disabled={disabled || !text.trim()}
+          className="w-full py-3 rounded-xl bg-blush-400 hover:bg-blush-500 text-white font-medium shadow-sm hover:shadow-md transition-all disabled:bg-warm-gray-300 disabled:cursor-not-allowed min-h-[44px]"
+          data-testid="button-share-drop"
+        >
+          Share Drop 💧
+        </button>
+        <p className="text-xs text-center text-warm-gray-500">
+          Be kind. No advice needed — just presence.
+        </p>
+      </div>
+    </form>
+  );
+}
