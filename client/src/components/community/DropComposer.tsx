@@ -14,11 +14,16 @@ const MOOD_OPTIONS = [
   { emoji: "🌙", label: "Reflective" },
   { emoji: "✨", label: "Hopeful" },
   { emoji: "💨", label: "Crash Out" },
+  { emoji: "😊", label: "Joy" },
 ];
 
 const MAX_CHARS = 500;
 
-export default function DropComposer({ calmName, onPost, disabled = false }: DropComposerProps) {
+export default function DropComposer({
+  calmName,
+  onPost,
+  disabled = false,
+}: DropComposerProps) {
   const [text, setText] = useState("");
   const [selectedMood, setSelectedMood] = useState<string | undefined>();
   const { toast } = useToast();
@@ -56,7 +61,8 @@ export default function DropComposer({ calmName, onPost, disabled = false }: Dro
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Posting as */}
       <p className="text-sm text-warm-gray-600">
-        Posting as <span className="font-medium text-warm-gray-700">{calmName}</span>
+        Posting as{" "}
+        <span className="font-medium text-warm-gray-700">{calmName}</span>
       </p>
 
       {/* Textarea */}
@@ -73,7 +79,9 @@ export default function DropComposer({ calmName, onPost, disabled = false }: Dro
 
       {/* Character count */}
       <div className="flex justify-between items-center">
-        <p className={`text-sm ${remainingChars < 50 ? "text-orange-500" : "text-warm-gray-500"}`}>
+        <p
+          className={`text-sm ${remainingChars < 50 ? "text-orange-500" : "text-warm-gray-500"}`}
+        >
           {remainingChars} characters remaining
         </p>
       </div>
@@ -88,7 +96,11 @@ export default function DropComposer({ calmName, onPost, disabled = false }: Dro
             <button
               key={mood.emoji}
               type="button"
-              onClick={() => setSelectedMood(selectedMood === mood.emoji ? undefined : mood.emoji)}
+              onClick={() =>
+                setSelectedMood(
+                  selectedMood === mood.emoji ? undefined : mood.emoji,
+                )
+              }
               className={`px-4 py-2 rounded-full border-2 transition-all min-h-[44px] ${
                 selectedMood === mood.emoji
                   ? "border-blush-400 bg-blush-50"
