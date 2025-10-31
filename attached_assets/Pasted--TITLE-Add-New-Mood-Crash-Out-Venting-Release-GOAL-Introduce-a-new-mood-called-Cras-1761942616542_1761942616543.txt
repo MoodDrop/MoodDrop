@@ -1,0 +1,68 @@
+📘 TITLE
+
+Add New Mood: Crash Out 💨 (Venting & Release)
+
+🧠 GOAL
+
+Introduce a new mood called “Crash Out” using the 💨 emoji to symbolize venting, emotional release, or that moment of letting go.
+It should fit seamlessly with existing moods in both design and function.
+
+✅ ACCEPTANCE CRITERIA
+
+“Crash Out 💨” appears as an option in the mood selector.
+
+Selecting “Crash Out 💨” highlights it with a soft blue tone.
+
+Mood value saves with each drop (localStorage).
+
+Feels cohesive with Calm / Reflective / Tender styles.
+
+No layout or spacing issues on mobile view.
+
+📁 FILES TO EDIT
+
+client/src/components/DropComposer.tsx (or DropIt.tsx — whichever has the mood array)
+
+If moods are centralized: client/src/lib/constants/moods.ts
+
+🧩 IMPLEMENTATION
+
+1️⃣ Locate your existing moods array in the composer or constants file.
+
+2️⃣ Add the new mood:
+
+const moods = [
+  { emoji: "💧", label: "Calm", color: "bg-blue-100 text-blue-700" },
+  { emoji: "🌷", label: "Tender", color: "bg-pink-100 text-pink-700" },
+  { emoji: "🌿", label: "Grounded", color: "bg-green-100 text-green-700" },
+  { emoji: "🌙", label: "Reflective", color: "bg-amber-100 text-amber-700" },
+  { emoji: "✨", label: "Hopeful", color: "bg-yellow-100 text-yellow-700" },
+
+  // 💨 NEW MOOD
+  { emoji: "💨", label: "Crash Out", color: "bg-blue-100 text-blue-700" },
+];
+
+
+💡 Tip: If your composer displays these moods dynamically (like grid buttons or dropdown), this new one will auto-appear with the same style.
+
+🎨 DESIGN NOTES
+
+Mood meaning: release, venting, exhale.
+Emotion tone: tired but peaceful.
+Visual tone: soft blue background with navy text (gentle, airy vibe).
+
+This keeps “Crash Out 💨” visually aligned with “Calm 💧” while conveying a more expressive, venting emotion.
+
+🧪 QA CHECKLIST
+
+ “Crash Out 💨” displays with correct emoji and spacing.
+
+ Selected mood highlights with ring-2 ring-blue-200.
+
+ Saved mood persists in localStorage with post data.
+
+ Works across desktop and mobile layouts.
+
+ Feeds (Community, View My Drops) display the emoji properly.
+
+ No console errors (especially for mood type definitions).

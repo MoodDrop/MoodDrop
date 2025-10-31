@@ -13,6 +13,7 @@ const MOOD_OPTIONS = [
   { emoji: "🌿", label: "Grounded" },
   { emoji: "🌙", label: "Reflective" },
   { emoji: "✨", label: "Hopeful" },
+  { emoji: "💨", label: "Crash Out" },
 ];
 
 export default function DropComposer({ calmName, onPost, disabled = false }: DropComposerProps) {
