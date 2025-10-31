@@ -7,6 +7,16 @@ MoodDrop is a fully anonymous emotional wellness platform designed as a safe spa
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+### Notes of Calm & Vibe ID Migration (October 31, 2025)
+- **Joy Mood Addition**: Added "Joy 😊" as the 7th mood option in community drop composer (joining Calm, Tender, Grounded, Reflective, Hopeful, Crash Out)
+- **Vibe ID Terminology**: Migrated from "Calm Name" to "Vibe ID" across all community UI and storage (localStorage key: `md_calmName` → `md_vibeId` with automatic migration for existing users)
+- **Notes of Calm System**: Anonymous commenting on community drops with 500-character limit, 3-second cooldown, and localStorage persistence (`md_notes`, `md_lastNoteAt`)
+  - Components: NoteComposer (form for leaving notes), NoteList (displays notes for each drop)
+  - UI: "Leave a Note 💌" button, collapsible note composer, note count badge, time-stamped note display
+  - Rate Limiting: 3-second cooldown for notes (separate from 5-second drop cooldown) using configurable cooldown parameter in `canPost` and `getRemainingCooldown` functions
+- **Enhanced DropCard**: Added notes UI with toggle buttons for leaving notes and viewing notes, state management for composer/list visibility
+- **Cooldown System Improvements**: Updated rate limit utilities to support configurable cooldown durations (DROP_COOLDOWN_MS: 5000ms, NOTE_COOLDOWN_MS: 3000ms)
+
 ### Homepage Redesign & CSV Removal (October 30, 2025)
 - **Simplified User Flow**: Homepage now features 5 mood circles (reduced from 6, removed Frustrated) → "💧 Drop It" button → dedicated /drop-it page for journaling
 - **Mood Selection**: 5 color-coded moods: Calm (blue #A6C8FF), Grounded (green #A4C3A2), Joyful (yellow #FBE694), Tender (peach #F6C1B4), Overwhelmed (gray #C9C7D2)

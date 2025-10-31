@@ -20,7 +20,7 @@ import {
   getLastNoteAt, 
   setLastNoteAt 
 } from "@/lib/community/noteStorage";
-import { canPost, getRemainingCooldown } from "@/lib/community/rateLimit";
+import { canPost, getRemainingCooldown, NOTE_COOLDOWN_MS } from "@/lib/community/rateLimit";
 
 export default function CommunityPage() {
   const [vibeId, setVibeId] = useState<string>("");
@@ -104,8 +104,8 @@ export default function CommunityPage() {
     const now = Date.now();
     const lastNoteAt = getLastNoteAt();
 
-    if (!canPost(now, lastNoteAt)) {
-      const remaining = getRemainingCooldown(now, lastNoteAt);
+    if (!canPost(now, lastNoteAt, NOTE_COOLDOWN_MS)) {
+      const remaining = getRemainingCooldown(now, lastNoteAt, NOTE_COOLDOWN_MS);
       const seconds = Math.ceil(remaining / 1000);
       toast({
         title: "Please wait",
