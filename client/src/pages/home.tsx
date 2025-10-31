@@ -88,30 +88,20 @@ export default function Home() {
 
         {/* Drop It Button */}
         {selectedMood && (
-          <div className="mt-8 mb-6 animate-in fade-in slide-in-from-top-4 duration-200">
+          <div className="mt-6 mb-6 animate-in fade-in slide-in-from-top-4 duration-200">
             <button
               onClick={handleDropIt}
-              className="w-full max-w-xs mx-auto px-8 py-4 bg-blush-300 hover:bg-blush-400 text-white rounded-2xl font-medium shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              className="w-full max-w-md mx-auto px-8 py-3.5 bg-[#F6C1B4] hover:bg-[#f0b5a5] text-warm-gray-900 rounded-2xl font-semibold shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
               data-testid="button-drop-it"
             >
-              <span>💧</span>
+              <span className="text-lg">💧</span>
               <span>Drop It</span>
             </button>
-            <p className="mt-3 text-sm text-warm-gray-500">
+            <p className="mt-2 text-center text-sm text-warm-gray-500">
               Let it out — this space is just for you.
             </p>
           </div>
         )}
-      </div>
-
-      {/* Privacy & Description */}
-      <div className="text-center text-sm text-warm-gray-600 mb-8 space-y-2">
-        <p>
-          Type or speak your thoughts — every drop helps you grow.
-        </p>
-        <p className="text-xs text-warm-gray-500">
-          Your words stay on your device — no account needed, fully anonymous.
-        </p>
       </div>
 
       {/* Bottom Links */}

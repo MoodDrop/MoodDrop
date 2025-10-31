@@ -1,0 +1,87 @@
+Goal
+
+Update the homepage to the new layout:
+
+Keep the big droplet, title, and subtitle.
+
+Show the mood dots, and when a mood is selected, display its name + one-line description under the dots.
+
+Add a wide “💧 Drop It” button (rounded, warm-peach background) with the blue droplet icon on the left.
+
+Keep the small caption under the button: “Let it out — this space is just for you.”
+
+Remove the two lines of helper text under the mood dots (“Type or speak your thoughts…” and “Your words stay on your device…”).
+
+Files to edit (already in this project)
+
+client/src/pages/Home.tsx (or client/src/pages/index.tsx / client/src/pages/Landing.tsx if that’s where the hero lives)
+
+client/src/lib/moods.ts (only if mood name/description mapping is needed)
+
+Steps
+
+In the homepage component (Home/Landing), find the section below the mood dots.
+Delete the two helper paragraphs:
+
+Type or speak your thoughts — every drop helps you grow.
+
+Your words stay on your device — no account needed, fully anonymous.
+
+Right under the mood dots row, render the selected mood label and a soft description. Use this mapping (or import from @lib/moods if you already have it):
+
+const MOOD_INFO: Record<string, { label: string; blurb: string }> = {
+  calm:   { label: "Calm",     blurb: "Steady, quiet, relaxed." },
+  grounded:{ label: "Grounded", blurb: "Present, steady, grateful." },
+  sunny:  { label: "Sunny",    blurb: "Light, optimistic, bright." },
+  cloudy: { label: "Cloudy",   blurb: "Soft, thoughtful, inward." },
+  tender: { label: "Tender",   blurb: "Loving, affectionate, sensitive." },
+  warm:   { label: "Warm",     blurb: "Cozy, open, at ease." },
+};
+
+
+Render only when a mood is selected:
+
+{currentMood && (
+  <div className="mt-3 text-center">
+    <div className="font-semibold text-warm-gray-800">
+      {MOOD_INFO[currentMood]?.label ?? "Your Mood"}
+    </div>
+    <div className="text-sm text-warm-gray-600">
+      {MOOD_INFO[currentMood]?.blurb ?? ""}
+    </div>
+  </div>
+)}
+
+
+Add the wide “Drop It” button directly below that mood label:
+
+<div className="mt-5 flex justify-center">
+  <a
+    href="/write"
+    className="inline-flex items-center gap-2 rounded-2xl px-6 py-3 sm:px-7 sm:py-3.5 bg-peach-300/80 hover:bg-peach-300 text-warm-gray-900 shadow-sm transition"
+  >
+    <span className="text-sky-500 text-lg">💧</span>
+    <span className="font-semibold">Drop It</span>
+  </a>
+</div>
+
+<p className="mt-2 text-center text-sm text-warm-gray-500">
+  Let it out — this space is just for you.
+</p>
+
+
+Make sure the mood dots still set currentMood (no logic changes needed). Keep all existing keyboard/mouse handlers as-is.
+
+Do not change any other parts of the page (nav, hero droplet, title, subtitle remain the same).
+
+Acceptance checks
+
+The two helper lines under the mood dots are gone.
+
+After selecting a mood, you see its name (e.g., Tender) and the one-line description below the dots.
+
+A single wide “💧 Drop It” button appears, with the caption line under it.
+
+Spacing looks like your screenshot (title → subtitle → dots → mood text → button → caption).
+
+No console errors.
