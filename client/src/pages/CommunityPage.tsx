@@ -140,9 +140,8 @@ export default function CommunityPage() {
         <h1 className="text-3xl font-semibold text-warm-gray-800 mb-2">
           The Collective Drop
         </h1>
-        <p className="text-warm-gray-600">
-          Anonymously express, reflect, and uplift.
-        </p>
+        <p className="text-gray-600 text-center">A gentle community of shared vibes — where people express, connect, and uplift each other anonymously.</p>
+
       </div>
 
       {/* Vibe ID */}
