@@ -37,9 +37,10 @@ export default function Home() {
         
         <p className="text-center text-gray-600 max-w-xl mx-auto mt-3 px-4 leading-relaxed sm:text-base text-sm">
   A calm corner made for you — let it all out through words or voice, unwind with soothing moments, 
-  and connect with others in <span className="font-medium text-blush-600">The Collective Corner</span>. 
+  and connect with others in The Collective Corner. 
   Totally private, totally you.
 </p>
+
 
 
       </div>
