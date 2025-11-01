@@ -35,15 +35,12 @@ export default function Home() {
           Welcome to MoodDrop
         </h2>
         
-        <p className="text-warm-gray-600 leading-relaxed mb-3">
-          A gentle space to release your thoughts, find calm, and grow through every mood.
-        </p>
-        
         <p className="text-center text-gray-600 max-w-xl mx-auto mt-3 px-4 leading-relaxed sm:text-base text-sm">
   A calm corner made for you — let it all out through words or voice, unwind with soothing moments, 
   and connect with others in <span className="font-medium text-blush-600">The Collective Corner</span>. 
   Totally private, totally you.
 </p>
+
 
       </div>
 
