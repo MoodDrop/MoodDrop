@@ -1,13 +1,8 @@
-export interface Drop {
+export type DropRow = {
   id: string;
-  name: string;
+  vibe_id: string | null;
+  mood: string | null;
   text: string;
-  mood?: string;
-  reactions: {
-    calm: number;
-    feel: number;
-  };
-  createdAt: number;
-}
+  created_at: string;
+};
 
-export type ReactionType = 'calm' | 'feel';
