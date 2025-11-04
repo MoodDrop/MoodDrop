@@ -1,9 +1,10 @@
+import { supabase } from "@/lib/supabaseClient";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 interface DropComposerProps {
   calmName: string;
-  onPost: (text: string, mood?: string) => void;
+  onPost?: (text: string, mood?: string) => void;
   disabled?: boolean;
 }
 
@@ -28,10 +29,12 @@ export default function DropComposer({
   const [selectedMood, setSelectedMood] = useState<string | undefined>();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 🩵 Handle submit + send to Supabase
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const trimmed = text.trim();
+
     if (!trimmed) {
       toast({
         title: "Empty drop",
@@ -50,9 +53,40 @@ export default function DropComposer({
       return;
     }
 
-    onPost(trimmed, selectedMood);
-    setText("");
-    setSelectedMood(undefined);
+    try {
+      // Save to Supabase
+      const { data, error } = await supabase
+        .from("Drops")
+        .insert([
+          {
+            vibe_id: calmName, // Your Vibe ID
+            text: trimmed, // Drop text
+            mood: selectedMood ?? null, // Selected emoji or null
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Optional: keep local UI in sync
+      onPost?.(trimmed, selectedMood);
+
+      // Reset form
+      setText("");
+      setSelectedMood(undefined);
+
+      toast({
+        title: "Shared 💧",
+        description: "Your drop was posted to the community.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Couldn’t share",
+        description: err?.message || "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const remainingChars = MAX_CHARS - text.length;
@@ -80,7 +114,9 @@ export default function DropComposer({
       {/* Character count */}
       <div className="flex justify-between items-center">
         <p
-          className={`text-sm ${remainingChars < 50 ? "text-orange-500" : "text-warm-gray-500"}`}
+          className={`text-sm ${
+            remainingChars < 50 ? "text-orange-500" : "text-warm-gray-500"
+          }`}
         >
           {remainingChars} characters remaining
         </p>
@@ -98,7 +134,7 @@ export default function DropComposer({
               type="button"
               onClick={() =>
                 setSelectedMood(
-                  selectedMood === mood.emoji ? undefined : mood.emoji,
+                  selectedMood === mood.emoji ? undefined : mood.emoji
                 )
               }
               className={`px-4 py-2 rounded-full border-2 transition-all min-h-[44px] ${
@@ -127,9 +163,13 @@ export default function DropComposer({
           Share Drop 💧
         </button>
         <p className="text-xs text-center text-warm-gray-500">
-          Be kind. No advice needed — just presence.
+          “No right words needed — just honesty.”
         </p>
       </div>
     </form>
   );
 }
+
+
+
+      
