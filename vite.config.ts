@@ -1,17 +1,17 @@
-// ~/workspace/mooddrop/vite.config.ts
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
-import path from 'path'
+import { fileURLToPath } from 'url'
 
 export default defineConfig({
-  root: 'client',                         // our app lives in client/
-  plugins: [react(), tsconfigPaths()],    // resolve "@/..." from tsconfig paths
+  root: 'client',
+  plugins: [react(), tsconfigPaths()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'client/src'),
+      '@': fileURLToPath(new URL('./client/src', import.meta.url)),
+      '@assets': fileURLToPath(new URL('./attached_assets', import.meta.url)),
     },
   },
   server: { host: true, port: 5175, strictPort: false },
-  preview:{ host: true, port: 5175 },
+  preview: { host: true, port: 5175 },
 })
