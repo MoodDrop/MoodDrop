@@ -54,15 +54,15 @@ export default function DropComposer({
     }
 
     try {
-      // Save to Supabase
+      // Save to Supabase (use snake_case for database columns)
       const { data, error } = await supabase
         .from("drops")
         .insert([
           {
-            vibeId: vibeId,
+            vibe_id: vibeId,
             text: trimmed,
             mood: selectedMood ?? null,
-            replyTo: null,
+            reply_to: null,
           },
         ])
         .select()

@@ -110,16 +110,16 @@ export type FeaturedVideo = typeof featuredVideos.$inferSelect;
 // Drops table for The Collective Drop community feature
 export const drops = pgTable("drops", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  vibeId: varchar("vibe_id").notNull(),
+  vibe_id: varchar("vibe_id").notNull(),
   text: text("text").notNull(),
   mood: varchar("mood"),
-  replyTo: varchar("reply_to"), // null for top-level drops, references parent drop id for replies
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  reply_to: varchar("reply_to"), // null for top-level drops, references parent drop id for replies
+  created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const insertDropSchema = createInsertSchema(drops).omit({
   id: true,
-  createdAt: true,
+  created_at: true,
 });
 
 export type InsertDrop = z.infer<typeof insertDropSchema>;

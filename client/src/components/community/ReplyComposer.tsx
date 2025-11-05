@@ -50,10 +50,10 @@ export default function ReplyComposer({
         .from("drops")
         .insert([
           {
-            vibeId: vibeId,
+            vibe_id: vibeId,
             text: trimmed,
             mood: null,
-            replyTo: parentId,
+            reply_to: parentId,
           },
         ]);
 

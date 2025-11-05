@@ -7,6 +7,22 @@ MoodDrop is a fully anonymous emotional wellness platform designed as a safe spa
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+### The Collective Drop Rebuild with Supabase (November 5, 2025)
+- **Full Supabase Integration**: Rebuilt The Collective Drop to use Supabase for real-time cross-device syncing of posts and replies
+- **Database Schema**: Created `drops` table with columns: id (UUID), vibe_id, text, mood, reply_to (for threading), created_at
+- **Owner Badge System**: Reserved "Charae 💧" Vibe ID with pink droplet badge that appears beside owner's name (generated via image tool)
+- **Reply System**: "Reply Vibes" feature with 240-character limit (vs 500 for main drops), nested display under parent drops
+- **Vibe ID Protection**: Updated calmName.ts generator to prevent random generation of "Charae 💧" reserved owner ID
+- **Snake_case Mapping**: Proper column name mapping between Supabase (snake_case) and UI (camelCase)
+- **Components**: 
+  - CommunityPage: Main page with drop loading/posting logic
+  - DropComposer: Posts to Supabase with 7 mood options (Calm, Tender, Grounded, Reflective, Hopeful, Crash Out, Joy)
+  - ReplyComposer: Handles replies with shorter character limit
+  - DropCard: Displays drops with owner badge, reply button, and nested replies section
+  - DropFeed: Maps drops to cards
+- **Real-time Sync**: All drops and replies sync across devices via Supabase
+- **Environment Variables**: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY configured
+
 ### Notes of Calm & Vibe ID Migration (October 31, 2025)
 - **Joy Mood Addition**: Added "Joy 😊" as the 7th mood option in community drop composer (joining Calm, Tender, Grounded, Reflective, Hopeful, Crash Out)
 - **Vibe ID Terminology**: Migrated from "Calm Name" to "Vibe ID" across all community UI and storage (localStorage key: `md_calmName` → `md_vibeId` with automatic migration for existing users)

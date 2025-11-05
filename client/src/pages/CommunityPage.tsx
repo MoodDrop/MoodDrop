@@ -19,7 +19,7 @@ export default function CommunityPage() {
       const { data, error } = await supabase
         .from("drops")
         .select("*")
-        .order("createdAt", { ascending: false });
+        .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Error loading drops:", error);
@@ -31,14 +31,14 @@ export default function CommunityPage() {
         return;
       }
 
-      // Map database rows to UI type with nested replies
+      // Map database rows (snake_case) to UI type (camelCase) with nested replies
       const allDrops: Drop[] = (data ?? []).map((row: any) => ({
         id: row.id,
-        vibeId: row.vibeId,
+        vibeId: row.vibe_id,
         text: row.text,
         mood: row.mood,
-        replyTo: row.replyTo,
-        createdAt: new Date(row.createdAt).getTime(),
+        replyTo: row.reply_to,
+        createdAt: new Date(row.created_at).getTime(),
         replies: [],
       }));
 
