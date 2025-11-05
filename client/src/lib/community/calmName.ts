@@ -10,9 +10,24 @@ const nouns = [
   "Sky", "Star", "Stone", "Sun", "Wave", "Wind"
 ];
 
+// Reserved owner Vibe ID - never generate this
+const RESERVED_OWNER_ID = "Charae 💧";
+
 export function generateCalmName(): string {
-  const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const noun = nouns[Math.floor(Math.random() * nouns.length)];
-  const number = Math.floor(Math.random() * 100);
-  return `${adjective}${noun}${number}`;
+  let attempt = 0;
+  let generated: string;
+  
+  // Keep generating until we get a name that's not the reserved owner ID
+  do {
+    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    const number = Math.floor(Math.random() * 100);
+    generated = `${adjective}${noun}${number}`;
+    attempt++;
+    
+    // Safety: prevent infinite loop (extremely unlikely but safe)
+    if (attempt > 10) break;
+  } while (generated === RESERVED_OWNER_ID);
+  
+  return generated;
 }
