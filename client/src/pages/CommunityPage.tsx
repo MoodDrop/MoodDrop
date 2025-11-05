@@ -3,56 +3,59 @@ import { RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DropComposer from "@/components/community/DropComposer";
 import DropFeed from "@/components/community/DropFeed";
-import type { Drop, ReactionType } from "@/types/community";
-
-// keep your vibe-id helpers ONLY
+import type { Drop } from "@/types/community";
 import { getVibeId, refreshVibeId } from "@/lib/community/storage";
-
-// ✅ Supabase
 import { supabase } from "@/lib/supabaseClient";
 
 export default function CommunityPage() {
   const [vibeId, setVibeId] = useState("");
   const [drops, setDrops] = useState<Drop[]>([]);
-  const [isPosting, setIsPosting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // ---- Fetch from Supabase (not localStorage) ----
+  // Load drops from Supabase
   const loadDrops = async () => {
-    const { data, error } = await supabase
-      .from("Drops") // table name (capital D)
-      .select("*")
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("drops")
+        .select("*")
+        .order("createdAt", { ascending: false });
 
-    console.log("Supabase feed:", {
-      error,
-      count: data?.length,
-      sample: data?.[0],
-    });
+      if (error) {
+        console.error("Error loading drops:", error);
+        toast({
+          title: "Couldn't load drops",
+          description: "Please try again in a moment.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (error) {
-      console.error(error);
-      toast({
-        title: "Couldn't load feed",
-        description: "Please try again in a moment.",
-        variant: "destructive",
+      // Map database rows to UI type with nested replies
+      const allDrops: Drop[] = (data ?? []).map((row: any) => ({
+        id: row.id,
+        vibeId: row.vibeId,
+        text: row.text,
+        mood: row.mood,
+        replyTo: row.replyTo,
+        createdAt: new Date(row.createdAt).getTime(),
+        replies: [],
+      }));
+
+      // Nest replies under their parent drops
+      const topLevelDrops = allDrops.filter(d => !d.replyTo);
+      const replyDrops = allDrops.filter(d => d.replyTo);
+      
+      topLevelDrops.forEach(drop => {
+        drop.replies = replyDrops.filter(r => r.replyTo === drop.id);
       });
-      return;
+
+      setDrops(topLevelDrops);
+    } catch (err) {
+      console.error("Error in loadDrops:", err);
+    } finally {
+      setIsLoading(false);
     }
-
-    // map DB rows -> UI type
-    const mapped: Drop[] = (data ?? []).map((row: any) => ({
-      id: row.id, // uuid in DB
-      name: row.vibe_id ?? "Anon",
-      text: row.text ?? "",
-      mood: row.mood ?? undefined,
-      reactions: { calm: 0, feel: 0 }, // (phase 2 we’ll store these)
-      createdAt: row.created_at
-        ? new Date(row.created_at).getTime()
-        : Date.now(),
-    }));
-
-    setDrops(mapped);
   };
 
   useEffect(() => {
@@ -63,46 +66,23 @@ export default function CommunityPage() {
   const handleRefreshVibeId = () => {
     const next = refreshVibeId();
     setVibeId(next);
-    toast({ title: "Vibe ID refreshed", description: `You are now ${next}` });
+    toast({ 
+      title: "Vibe ID refreshed", 
+      description: `You are now ${next}` 
+    });
   };
 
-  // This keeps the UI snappy after composer inserts to Supabase.
-  // (Composer still calls onPost(text, mood) after a successful insert.)
-  const handlePost = (text: string, mood?: string) => {
-    setIsPosting(true);
-
-    // add an optimistic item (will be replaced when we refetch)
-    const now = Date.now();
-    const optimistic: Drop = {
-      id: `tmp-${now}`,
-      name: vibeId,
-      text,
-      mood,
-      reactions: { calm: 0, feel: 0 },
-      createdAt: now,
-    };
-    setDrops((d) => [optimistic, ...d]);
-
-    // fetch fresh list from Supabase
-    loadDrops().finally(() => setIsPosting(false));
+  const handlePost = async (text: string, mood?: string) => {
+    await loadDrops();
   };
 
-  // Reactions still local for now (phase 2 we’ll store in Supabase)
-  const handleReact = (dropId: string, type: ReactionType) => {
-    setDrops((prev) =>
-      prev.map((d) =>
-        d.id === dropId
-          ? {
-              ...d,
-              reactions: { ...d.reactions, [type]: d.reactions[type] + 1 },
-            }
-          : d,
-      ),
-    );
+  const handleReply = async (parentId: string, text: string) => {
+    await loadDrops();
   };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
+      {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-semibold text-warm-gray-800 mb-2">
           The Collective Drop
@@ -124,36 +104,26 @@ export default function CommunityPage() {
           </div>
           <button
             onClick={handleRefreshVibeId}
-            className="p-2 hover:bg-blue-100 rounded-lg transition-colors"
-            title="Refresh Vibe ID"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
             data-testid="button-refresh-vibe-id"
           >
-            <RefreshCw className="w-5 h-5 text-blue-600" />
+            <RefreshCw className="w-4 h-4" />
+            <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {/* Composer */}
-      <div className="mb-8 p-6 bg-white rounded-2xl border border-warm-gray-200 shadow-sm">
-        <DropComposer
-          calmName={vibeId}
-          onPost={handlePost}
-          disabled={isPosting}
-        />
-      </div>
+      <DropComposer vibeId={vibeId} onPost={handlePost} />
 
       {/* Feed */}
-      <DropFeed
-        drops={drops}
-        vibeId={vibeId}
-        notes={[]}
-        onReact={handleReact}
-        onNotePost={() => {}}
-      />
-
-      <div className="mt-12 text-center text-sm text-warm-gray-500">
-        <p>Always anonymous. Always kind.</p>
-      </div>
+      {isLoading ? (
+        <div className="text-center py-12 text-gray-500">
+          Loading drops...
+        </div>
+      ) : (
+        <DropFeed drops={drops} currentVibeId={vibeId} onReply={handleReply} />
+      )}
     </div>
   );
 }

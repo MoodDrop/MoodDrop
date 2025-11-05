@@ -1,16 +1,13 @@
-import type { Drop, ReactionType } from "@/types/community";
-import type { Note } from "@/types/note";
+import type { Drop } from "@/types/community";
 import DropCard from "./DropCard";
 
 interface DropFeedProps {
   drops: Drop[];
-  vibeId: string;
-  notes: Note[];
-  onReact: (dropId: string, reactionType: ReactionType) => void;
-  onNotePost: (dropId: string, text: string) => void;
+  currentVibeId: string;
+  onReply: (parentId: string, text: string) => void;
 }
 
-export default function DropFeed({ drops, vibeId, notes, onReact, onNotePost }: DropFeedProps) {
+export default function DropFeed({ drops, currentVibeId, onReply }: DropFeedProps) {
   if (drops.length === 0) {
     return (
       <div className="text-center py-16" data-testid="empty-state">
@@ -24,19 +21,14 @@ export default function DropFeed({ drops, vibeId, notes, onReact, onNotePost }: 
 
   return (
     <div className="space-y-4" data-testid="drop-feed">
-      {drops.map((drop) => {
-        const dropNotes = notes.filter(note => note.dropId === drop.id);
-        return (
-          <DropCard 
-            key={drop.id} 
-            drop={drop} 
-            vibeId={vibeId}
-            notes={dropNotes}
-            onReact={onReact}
-            onNotePost={onNotePost}
-          />
-        );
-      })}
+      {drops.map((drop) => (
+        <DropCard 
+          key={drop.id} 
+          drop={drop} 
+          currentVibeId={currentVibeId}
+          onReply={onReply}
+        />
+      ))}
     </div>
   );
 }

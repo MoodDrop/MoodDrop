@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 interface DropComposerProps {
-  calmName: string;
+  vibeId: string;
   onPost?: (text: string, mood?: string) => void;
   disabled?: boolean;
 }
@@ -21,7 +21,7 @@ const MOOD_OPTIONS = [
 const MAX_CHARS = 500;
 
 export default function DropComposer({
-  calmName,
+  vibeId,
   onPost,
   disabled = false,
 }: DropComposerProps) {
@@ -56,12 +56,13 @@ export default function DropComposer({
     try {
       // Save to Supabase
       const { data, error } = await supabase
-        .from("Drops")
+        .from("drops")
         .insert([
           {
-            vibe_id: calmName, // Your Vibe ID
-            text: trimmed, // Drop text
-            mood: selectedMood ?? null, // Selected emoji or null
+            vibeId: vibeId,
+            text: trimmed,
+            mood: selectedMood ?? null,
+            replyTo: null,
           },
         ])
         .select()
@@ -96,7 +97,7 @@ export default function DropComposer({
       {/* Posting as */}
       <p className="text-sm text-warm-gray-600">
         Posting as Your Vibe ID:{" "}
-        <span className="font-medium text-warm-gray-700">{calmName}</span>
+        <span className="font-medium text-warm-gray-700">{vibeId}</span>
       </p>
 
       {/* Textarea */}
