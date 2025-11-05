@@ -1,8 +1,13 @@
-export type DropRow = {
+// Type for drops from Supabase
+export type Drop = {
   id: string;
-  vibe_id: string | null;
-  mood: string | null;
+  vibeId: string;
   text: string;
-  created_at: string;
+  mood?: string;
+  replyTo?: string;
+  createdAt: number; // timestamp in ms
+  replies?: Drop[]; // nested replies for UI
 };
+
+export type ReactionType = "calm" | "feel";
 
