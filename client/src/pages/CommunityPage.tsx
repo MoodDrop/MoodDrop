@@ -1,147 +1,116 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DropComposer from "@/components/community/DropComposer";
 import DropFeed from "@/components/community/DropFeed";
 import type { Drop, ReactionType } from "@/types/community";
-import type { Note } from "@/types/note";
-import { 
-  getVibeId, 
-  refreshVibeId, 
-  getDrops, 
-  addDrop, 
-  updateDrop,
-  getLastPostAt,
-  setLastPostAt
-} from "@/lib/community/storage";
-import { 
-  getNotes, 
-  addNote, 
-  getLastNoteAt, 
-  setLastNoteAt 
-} from "@/lib/community/noteStorage";
-import { canPost, getRemainingCooldown, NOTE_COOLDOWN_MS } from "@/lib/community/rateLimit";
+
+// keep your vibe-id helpers ONLY
+import { getVibeId, refreshVibeId } from "@/lib/community/storage";
+
+// ✅ Supabase
+import { supabase } from "@/lib/supabaseClient";
 
 export default function CommunityPage() {
-  const [vibeId, setVibeId] = useState<string>("");
+  const [vibeId, setVibeId] = useState("");
   const [drops, setDrops] = useState<Drop[]>([]);
-  const [notes, setNotes] = useState<Note[]>([]);
   const [isPosting, setIsPosting] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Load vibe ID, drops, and notes on mount
-    setVibeId(getVibeId());
-    setDrops(getDrops());
-    setNotes(getNotes());
-  }, []);
+  // ---- Fetch from Supabase (not localStorage) ----
+  const loadDrops = async () => {
+    const { data, error } = await supabase
+      .from("Drops") // table name (capital D)
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  const handleRefreshVibeId = () => {
-    const newId = refreshVibeId();
-    setVibeId(newId);
-    toast({
-      title: "Vibe ID refreshed",
-      description: `You are now ${newId}`,
+    console.log("Supabase feed:", {
+      error,
+      count: data?.length,
+      sample: data?.[0],
     });
-  };
 
-  const handlePost = (text: string, mood?: string) => {
-    const now = Date.now();
-    const lastPostAt = getLastPostAt();
-
-    if (!canPost(now, lastPostAt)) {
-      const remaining = getRemainingCooldown(now, lastPostAt);
-      const seconds = Math.ceil(remaining / 1000);
+    if (error) {
+      console.error(error);
       toast({
-        title: "Please wait",
-        description: `You can post again in ${seconds} second${seconds !== 1 ? 's' : ''}.`,
+        title: "Couldn't load feed",
+        description: "Please try again in a moment.",
         variant: "destructive",
       });
       return;
     }
 
+    // map DB rows -> UI type
+    const mapped: Drop[] = (data ?? []).map((row: any) => ({
+      id: row.id, // uuid in DB
+      name: row.vibe_id ?? "Anon",
+      text: row.text ?? "",
+      mood: row.mood ?? undefined,
+      reactions: { calm: 0, feel: 0 }, // (phase 2 we’ll store these)
+      createdAt: row.created_at
+        ? new Date(row.created_at).getTime()
+        : Date.now(),
+    }));
+
+    setDrops(mapped);
+  };
+
+  useEffect(() => {
+    setVibeId(getVibeId());
+    loadDrops();
+  }, []);
+
+  const handleRefreshVibeId = () => {
+    const next = refreshVibeId();
+    setVibeId(next);
+    toast({ title: "Vibe ID refreshed", description: `You are now ${next}` });
+  };
+
+  // This keeps the UI snappy after composer inserts to Supabase.
+  // (Composer still calls onPost(text, mood) after a successful insert.)
+  const handlePost = (text: string, mood?: string) => {
     setIsPosting(true);
 
-    const newDrop: Drop = {
-      id: `${now}-${Math.random().toString(36).substr(2, 9)}`,
+    // add an optimistic item (will be replaced when we refetch)
+    const now = Date.now();
+    const optimistic: Drop = {
+      id: `tmp-${now}`,
       name: vibeId,
       text,
       mood,
       reactions: { calm: 0, feel: 0 },
       createdAt: now,
     };
+    setDrops((d) => [optimistic, ...d]);
 
-    // Add to state and localStorage
-    addDrop(newDrop);
-    setDrops([newDrop, ...drops]);
-    setLastPostAt(now);
-
-    toast({
-      title: "Drop shared",
-      description: "Your drop has been added to the collective.",
-    });
-
-    setIsPosting(false);
+    // fetch fresh list from Supabase
+    loadDrops().finally(() => setIsPosting(false));
   };
 
-  const handleReact = (dropId: string, reactionType: ReactionType) => {
-    const drop = drops.find(d => d.id === dropId);
-    if (!drop) return;
-
-    const updatedDrop: Drop = {
-      ...drop,
-      reactions: {
-        ...drop.reactions,
-        [reactionType]: drop.reactions[reactionType] + 1,
-      },
-    };
-
-    updateDrop(updatedDrop);
-    setDrops(drops.map(d => d.id === dropId ? updatedDrop : d));
-  };
-
-  const handleNotePost = (dropId: string, text: string) => {
-    const now = Date.now();
-    const lastNoteAt = getLastNoteAt();
-
-    if (!canPost(now, lastNoteAt, NOTE_COOLDOWN_MS)) {
-      const remaining = getRemainingCooldown(now, lastNoteAt, NOTE_COOLDOWN_MS);
-      const seconds = Math.ceil(remaining / 1000);
-      toast({
-        title: "Please wait",
-        description: `You can post another note in ${seconds} second${seconds !== 1 ? 's' : ''}.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const newNote: Note = {
-      id: `${now}-${Math.random().toString(36).substr(2, 9)}`,
-      dropId,
-      name: vibeId,
-      text,
-      createdAt: now,
-    };
-
-    addNote(newNote);
-    setNotes([newNote, ...notes]);
-    setLastNoteAt(now);
-
-    toast({
-      title: "Note added",
-      description: "Your note of calm has been shared.",
-    });
+  // Reactions still local for now (phase 2 we’ll store in Supabase)
+  const handleReact = (dropId: string, type: ReactionType) => {
+    setDrops((prev) =>
+      prev.map((d) =>
+        d.id === dropId
+          ? {
+              ...d,
+              reactions: { ...d.reactions, [type]: d.reactions[type] + 1 },
+            }
+          : d,
+      ),
+    );
   };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-semibold text-warm-gray-800 mb-2">
           The Collective Drop
         </h1>
-        <p className="text-gray-600 text-center">A gentle community of shared vibes — where people express, connect, and uplift each other anonymously.</p>
-
+        <p className="text-gray-600">
+          A gentle community of shared vibes — where people express, connect,
+          and uplift each other anonymously.
+        </p>
       </div>
 
       {/* Vibe ID */}
@@ -166,7 +135,7 @@ export default function CommunityPage() {
 
       {/* Composer */}
       <div className="mb-8 p-6 bg-white rounded-2xl border border-warm-gray-200 shadow-sm">
-        <DropComposer 
+        <DropComposer
           calmName={vibeId}
           onPost={handlePost}
           disabled={isPosting}
@@ -174,15 +143,14 @@ export default function CommunityPage() {
       </div>
 
       {/* Feed */}
-      <DropFeed 
-        drops={drops} 
+      <DropFeed
+        drops={drops}
         vibeId={vibeId}
-        notes={notes}
+        notes={[]}
         onReact={handleReact}
-        onNotePost={handleNotePost}
+        onNotePost={() => {}}
       />
 
-      {/* Footer */}
       <div className="mt-12 text-center text-sm text-warm-gray-500">
         <p>Always anonymous. Always kind.</p>
       </div>

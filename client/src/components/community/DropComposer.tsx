@@ -134,7 +134,7 @@ export default function DropComposer({
               type="button"
               onClick={() =>
                 setSelectedMood(
-                  selectedMood === mood.emoji ? undefined : mood.emoji
+                  selectedMood === mood.emoji ? undefined : mood.emoji,
                 )
               }
               className={`px-4 py-2 rounded-full border-2 transition-all min-h-[44px] ${
@@ -169,7 +169,3 @@ export default function DropComposer({
     </form>
   );
 }
-
-
-
-      
