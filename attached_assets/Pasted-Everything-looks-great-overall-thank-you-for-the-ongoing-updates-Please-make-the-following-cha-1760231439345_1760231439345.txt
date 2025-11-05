@@ -1,0 +1,90 @@
+Everything looks great overall — thank you for the ongoing updates.
+
+Please make the following changes and cleanups related to the video sections in Need Comfort:
+
+Technical details:
+
+Use a centered layout for the video.
+
+Apply soft rounded corners (border-radius: 16px) and a faint shadow (box-shadow: 0 4px 12px rgba(0,0,0,0.1)).
+
+Keep the background clean and softly blended with MoodDrop’s color palette.
+
+Add a short fade-in or slide-up animation when the video loads.
+
+Future flexibility:
+
+Leave room to easily add more Story Time videos later (e.g., in a scrollable list or grid).
+
+Make sure the Story Time tab continues to flow smoothly with the rest of the “Need Comfort” section navigation.
+
+Place this wording somewhere when you click on Watch & Smile
+ “Follow and support these amazing creators for more heartfelt, funny, and relatable storytimes that remind us we’re all human.” 
+
+Implementation details:
+
+Embed the video using a responsive iframe that works seamlessly on mobile and desktop.
+
+Keep the design consistent with MoodDrop’s soft, minimalist aesthetic — blush, cream, and nude tones with subtle shadows and rounded corners.
+
+Caption and text content:
+
+1️⃣ Story Time Tab:
+
+Remove the unavailable video currently showing.
+
+Add this new video:
+🎥 URL: https://youtu.be/AdO-QzGxZW0?si=TfeT8-Yr9GnrClvq
+
+Caption:
+“Money Made Me Do It” Creator YO DJ Star
+
+Video Details:
+
+Keep layout centered and responsive with rounded corners and soft blush tones.
+
+Include a short supportive line beneath:
+“Follow and support these amazing creators for more heartfelt, funny, and relatable storytimes.”
+
+Add a small sparkle or heart icon next to “creators” for warmth.
+
+2️⃣ Funny Tab:
+
+Keep only one video:
+🎬 URL: https://youtube.com/shorts/LpLM6rxijSc?si=GkzffVEeE5AJdgmD
+
+Caption:
+Teachers dressed as students day. Creator RomanasKatun
+
+Ensure it’s embedded in the same responsive format as the Story Time video.
+
+3️⃣ Uplifting Tab:
+
+Keep only one video:
+🌞 URL: https://youtube.com/shorts/ZwcaFhdjRY4?si=9kiMxR_XQXmOGSUV
+
+Caption:
+“The Power of Hope” Creator: motivationalresource
+
+Maintain the same minimal and rounded video style as the others.
+
+4️⃣ General Video Design Guidelines:
+
+Each category (Story Time, Funny, Uplifting) should show only one video for now.
+
+Center each video with rounded corners (border-radius: 16px) and a light shadow.
+
+Use consistent sizing and spacing across all categories.
+
+Keep captions simple, warm, and easy to read in MoodDrop’s blush/cream palette.
+
+Maintain responsiveness and soft transitions for mobile and desktop.
+
+5️⃣ Final Notes:
+
+Ensure tabs still navigate smoothly.
+
+Verify that no “unavailable” or blank videos appear.
+
+Keep performance optimized for loading speed.
+

@@ -1,0 +1,86 @@
+1) Keep Homepage Layout
+
+Keep the homepage hero, header, and tagline exactly as they are.
+
+Do not alter the layout or spacing of the existing “Let It Flow” and “Take a Moment” tabs.
+
+2) Add Mood Selector Row
+
+Add a short header line centered above the mood circles that says:
+
+“What type of mood are you feeling today?”
+
+Use soft, neutral typography consistent with MoodDrop’s existing text style.
+
+Slightly smaller than the main heading, e.g. font-size: 1rem (medium weight).
+
+Mood Circles Design
+
+Add six medium horizontal circles centered under the phrase.
+
+Each circle represents a mood and includes the following details:
+
+Mood	Color	Meaning
+Calm	#A6C8FF	Peaceful, centered, emotionally balanced
+Grounded	#A4C3A2	Stable, reflective, grateful
+Joyful	#FBE694	Happy, excited, hopeful
+Tender	#F6C1B4	Loving, affectionate, sensitive
+Overwhelmed	#C9C7D2	Tired, unsure, emotionally heavy
+Frustrated	#E98A7A	Irritated, tense, needing release
+Circle Style
+
+Size: 28px (desktop) / 24px (mobile).
+
+Alignment: horizontal and centered.
+
+Slight glow on hover/focus (box-shadow: 0 0 12px rgba(0,0,0,0.05)), smooth transition.
+
+Equal spacing (8–12px).
+
+Tooltip or label on hover with the mood name + short meaning.
+
+Keyboard accessible with aria-label per circle.
+
+Behavior
+
+When a user clicks a circle:
+
+If Let It Flow is active → show the Write panel + display mood name & meaning above the textarea.
+
+If Take a Moment is active → show the Voice Note option with the selected mood noted.
+
+Add a small Reset Mood button beside the meaning that clears the selection and hides the label (without deleting text).
+
+3) Matching Game Timer
+
+Add a 20-second countdown timer at the top-right corner of the matching game.
+
+Timer starts automatically when the game begins.
+
+On timeout:
+
+Show a message:
+
+“⏳ Time’s up — want to try again?”
+
+Include a soft “Restart” button.
+
+Optional gentle chime sound (no harsh tones).
+
+Timer resets cleanly each new round.
+
+4) Keep All Other Features
+
+Do not change any other homepage elements, animations, or sections.
+
+Maintain the current aesthetic: soft blush and cream tones, subtle shadows, and minimal, airy spacing.
+
+✅ Done Criteria
+
+The homepage keeps its current clean layout.
+
+The text “What type of mood are you feeling today?” appears centered above six glowing mood circles.
+
+Selecting a mood triggers the correct action, showing the mood’s meaning and maintaining reset functionality.
+
+Matching game runs with a working 20s timer, ending gently with a restart option.
