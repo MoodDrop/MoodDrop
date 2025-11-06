@@ -83,27 +83,34 @@ export default function CommunityPage() {
 
   const handleReaction = async (dropId: string) => {
     try {
-      // Increment reaction count in Supabase
-      const { error } = await supabase.rpc('increment_reactions', { drop_id: dropId });
-      
-      if (error) {
-        console.error("Error incrementing reaction:", error);
-        // Try alternative method if RPC doesn't exist
-        const drop = drops.find(d => d.id === dropId);
-        if (drop) {
-          const { error: updateError } = await supabase
-            .from("drops")
-            .update({ reactions: drop.reactions + 1 })
-            .eq("id", dropId);
-          
-          if (updateError) throw updateError;
-        }
+      // First, get the current reaction count
+      const { data: currentDrop, error: fetchError } = await supabase
+        .from("drops")
+        .select("reactions")
+        .eq("id", dropId)
+        .single();
+
+      if (fetchError) {
+        console.error("Error fetching drop:", fetchError);
+        throw fetchError;
+      }
+
+      // Increment the reaction count
+      const newCount = (currentDrop?.reactions || 0) + 1;
+      const { error: updateError } = await supabase
+        .from("drops")
+        .update({ reactions: newCount })
+        .eq("id", dropId);
+
+      if (updateError) {
+        console.error("Error updating reaction:", updateError);
+        throw updateError;
       }
       
-      // Update local state optimistically
+      // Update local state
       setDrops(prev => prev.map(drop => 
         drop.id === dropId 
-          ? { ...drop, reactions: drop.reactions + 1 }
+          ? { ...drop, reactions: newCount }
           : drop
       ));
       
