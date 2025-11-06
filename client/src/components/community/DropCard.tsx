@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Flower } from "lucide-react";
 import type { Drop } from "@/types/community";
 import ReplyComposer from "./ReplyComposer";
 import ownerBadge from "@assets/generated_images/Pink_droplet_owner_badge_2824ccfc.png";
@@ -9,6 +9,7 @@ interface DropCardProps {
   drop: Drop;
   currentVibeId: string;
   onReply: (parentId: string, text: string) => void;
+  onReaction: (dropId: string) => void;
   isNested?: boolean;
 }
 
@@ -18,6 +19,7 @@ export default function DropCard({
   drop, 
   currentVibeId, 
   onReply,
+  onReaction,
   isNested = false 
 }: DropCardProps) {
   const [showReplyComposer, setShowReplyComposer] = useState(false);
@@ -63,17 +65,33 @@ export default function DropCard({
           {drop.text}
         </p>
 
-        {/* Reply Button */}
+        {/* Dual-Action Buttons */}
         {!isNested && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* I feel this button */}
+            <button
+              onClick={() => onReaction(drop.id)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cream-50 hover:bg-cream-100 text-warm-gray-700 text-sm transition-colors border border-warm-gray-200"
+              data-testid={`button-feel-this-${drop.id}`}
+            >
+              <Flower className="w-4 h-4 text-pink-500" />
+              <span>I feel this</span>
+              <span className="ml-1 text-xs font-medium text-pink-600">
+                {drop.reactions}
+              </span>
+            </button>
+
+            {/* Send Love button */}
             <button
               onClick={() => setShowReplyComposer(!showReplyComposer)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-600 text-sm transition-colors"
-              data-testid={`button-reply-${drop.id}`}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cream-50 hover:bg-cream-100 text-warm-gray-700 text-sm transition-colors border border-warm-gray-200"
+              data-testid={`button-send-love-${drop.id}`}
             >
-              <MessageCircle className="w-4 h-4" />
-              <span>Reply Vibe</span>
+              <MessageCircle className="w-4 h-4 text-purple-500" />
+              <span>Send Love</span>
             </button>
+
+            {/* Reply count */}
             {replyCount > 0 && (
               <span className="text-xs text-warm-gray-600">
                 {replyCount} {replyCount === 1 ? "reply" : "replies"}
@@ -108,6 +126,7 @@ export default function DropCard({
               drop={reply}
               currentVibeId={currentVibeId}
               onReply={onReply}
+              onReaction={onReaction}
               isNested={true}
             />
           ))}
