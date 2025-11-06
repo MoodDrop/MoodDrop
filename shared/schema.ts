@@ -114,6 +114,7 @@ export const drops = pgTable("drops", {
   text: text("text").notNull(),
   mood: varchar("mood"),
   reply_to: varchar("reply_to"), // null for top-level drops, references parent drop id for replies
+  reactions: integer("reactions").default(0).notNull(), // "I feel this" count
   created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
