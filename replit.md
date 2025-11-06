@@ -7,20 +7,23 @@ MoodDrop is a fully anonymous emotional wellness platform designed as a safe spa
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
-### The Collective Drop Rebuild with Supabase (November 5, 2025)
+### The Collective Drop Rebuild with Supabase (November 6, 2025)
 - **Full Supabase Integration**: Rebuilt The Collective Drop to use Supabase for real-time cross-device syncing of posts and replies
-- **Database Schema**: Created `drops` table with columns: id (UUID), vibe_id, text, mood, reply_to (for threading), created_at
+- **Database Schema**: Created `drops` table with columns: id (UUID), vibe_id, text, mood, reply_to (for threading), reactions (integer), created_at
 - **Owner Badge System**: Reserved "Charae 💧" Vibe ID with pink droplet badge that appears beside owner's name (generated via image tool)
-- **Reply System**: "Reply Vibes" feature with 240-character limit (vs 500 for main drops), nested display under parent drops
+- **Dual-Action Buttons**: Text-only buttons with consistent cream styling
+  - "I feel this" - Increments reaction count (always visible, shows number)
+  - "Drop a Note" - Opens reply composer for 500-character replies
+- **Reply System**: "Reply Vibes" feature with 500-character limit, nested display under parent drops
 - **Vibe ID Protection**: Updated calmName.ts generator to prevent random generation of "Charae 💧" reserved owner ID
 - **Snake_case Mapping**: Proper column name mapping between Supabase (snake_case) and UI (camelCase)
 - **Components**: 
-  - CommunityPage: Main page with drop loading/posting logic
+  - CommunityPage: Main page with drop loading/posting logic, reaction handler
   - DropComposer: Posts to Supabase with 7 mood options (Calm, Tender, Grounded, Reflective, Hopeful, Crash Out, Joy)
-  - ReplyComposer: Handles replies with shorter character limit
-  - DropCard: Displays drops with owner badge, reply button, and nested replies section
-  - DropFeed: Maps drops to cards
-- **Real-time Sync**: All drops and replies sync across devices via Supabase
+  - ReplyComposer: Handles replies with 500-character limit
+  - DropCard: Displays drops with owner badge, dual-action buttons (text-only), and nested replies section
+  - DropFeed: Maps drops to cards, passes reaction handler
+- **Real-time Sync**: All drops, replies, and reactions sync across devices via Supabase
 - **Environment Variables**: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY configured
 
 ### Notes of Calm & Vibe ID Migration (October 31, 2025)

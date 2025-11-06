@@ -9,7 +9,7 @@ interface ReplyComposerProps {
   onCancel: () => void;
 }
 
-const MAX_CHARS = 240; // Shorter limit for replies
+const MAX_CHARS = 500; // Reply character limit
 
 export default function ReplyComposer({
   parentId,
