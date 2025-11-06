@@ -5,9 +5,10 @@ interface DropFeedProps {
   drops: Drop[];
   currentVibeId: string;
   onReply: (parentId: string, text: string) => void;
+  onReaction: (dropId: string) => void;
 }
 
-export default function DropFeed({ drops, currentVibeId, onReply }: DropFeedProps) {
+export default function DropFeed({ drops, currentVibeId, onReply, onReaction }: DropFeedProps) {
   if (drops.length === 0) {
     return (
       <div className="text-center py-16" data-testid="empty-state">
@@ -27,6 +28,7 @@ export default function DropFeed({ drops, currentVibeId, onReply }: DropFeedProp
           drop={drop} 
           currentVibeId={currentVibeId}
           onReply={onReply}
+          onReaction={onReaction}
         />
       ))}
     </div>

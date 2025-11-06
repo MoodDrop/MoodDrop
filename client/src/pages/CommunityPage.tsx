@@ -38,6 +38,7 @@ export default function CommunityPage() {
         text: row.text,
         mood: row.mood,
         replyTo: row.reply_to,
+        reactions: row.reactions || 0,
         createdAt: new Date(row.created_at).getTime(),
         replies: [],
       }));
@@ -78,6 +79,46 @@ export default function CommunityPage() {
 
   const handleReply = async (parentId: string, text: string) => {
     await loadDrops();
+  };
+
+  const handleReaction = async (dropId: string) => {
+    try {
+      // Increment reaction count in Supabase
+      const { error } = await supabase.rpc('increment_reactions', { drop_id: dropId });
+      
+      if (error) {
+        console.error("Error incrementing reaction:", error);
+        // Try alternative method if RPC doesn't exist
+        const drop = drops.find(d => d.id === dropId);
+        if (drop) {
+          const { error: updateError } = await supabase
+            .from("drops")
+            .update({ reactions: drop.reactions + 1 })
+            .eq("id", dropId);
+          
+          if (updateError) throw updateError;
+        }
+      }
+      
+      // Update local state optimistically
+      setDrops(prev => prev.map(drop => 
+        drop.id === dropId 
+          ? { ...drop, reactions: drop.reactions + 1 }
+          : drop
+      ));
+      
+      toast({
+        title: "🌸",
+        description: "You feel this vibe",
+      });
+    } catch (err) {
+      console.error("Error in handleReaction:", err);
+      toast({
+        title: "Couldn't react",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -122,7 +163,12 @@ export default function CommunityPage() {
           Loading drops...
         </div>
       ) : (
-        <DropFeed drops={drops} currentVibeId={vibeId} onReply={handleReply} />
+        <DropFeed 
+          drops={drops} 
+          currentVibeId={vibeId} 
+          onReply={handleReply}
+          onReaction={handleReaction}
+        />
       )}
     </div>
   );
