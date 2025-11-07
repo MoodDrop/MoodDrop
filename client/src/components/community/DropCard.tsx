@@ -76,18 +76,22 @@ export default function DropCard({
         {/* Dual-Action Buttons */}
         {!isNested && (
           <div className="flex items-center gap-3 flex-wrap">
-            <span>I feel this (v2)</span>
-            <button
-              onClick={() => onReaction(drop.id)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cream-50 hover:bg-cream-100 text-warm-gray-700 text-sm transition-colors border border-warm-gray-200"
-              data-testid={`button-feel-this-${drop.id}`}
-            >
-              <Flower className="w-4 h-4 text-pink-400" />
-              <span>I feel this</span>
-              <span className="ml-1 text-xs font-medium text-pink-600">
-                {drop.reactions}
-              </span>
-            </button>
+            {false && (
+              <>
+                <span>I feel this (v2)</span>
+                <button
+                  onClick={() => onReaction(drop.id)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cream-50 hover:bg-cream-100 text-warm-gray-700 text-sm transition-colors border border-warm-gray-200"
+                  data-testid={`button-feel-this-${drop.id}`}
+                >
+                  <Flower className="w-4 h-4 text-pink-400" />
+                  <span>I feel this</span>
+                  <span className="ml-1 text-xs font-medium text-pink-600">
+                    {drop.reactions}
+                  </span>
+                </button>
+              </>
+            )}
 
             {/* Drop a Note button */}
             <button
