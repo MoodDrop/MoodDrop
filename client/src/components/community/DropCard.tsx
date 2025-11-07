@@ -15,12 +15,12 @@ interface DropCardProps {
 
 const OWNER_VIBE_ID = "Charae 💧";
 
-export default function DropCard({ 
-  drop, 
-  currentVibeId, 
+export default function DropCard({
+  drop,
+  currentVibeId,
   onReply,
   onReaction,
-  isNested = false 
+  isNested = false,
 }: DropCardProps) {
   const [showReplyComposer, setShowReplyComposer] = useState(false);
   const timeAgo = formatDistanceToNow(drop.createdAt, { addSuffix: true });
@@ -28,7 +28,9 @@ export default function DropCard({
   const replyCount = drop.replies?.length ?? 0;
 
   return (
-    <div className={`rounded-2xl border border-warm-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow ${isNested ? 'ml-8' : ''}`}>
+    <div
+      className={`rounded-2xl border border-warm-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow ${isNested ? "ml-8" : ""}`}
+    >
       <div className="p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center gap-2 mb-3">
@@ -39,8 +41,8 @@ export default function DropCard({
           )}
           <div className="flex-1">
             <div className="flex items-center gap-1.5">
-              <p 
-                className="font-medium text-warm-gray-800" 
+              <p
+                className="font-medium text-warm-gray-800"
                 data-testid={`drop-name-${drop.id}`}
               >
                 {drop.vibeId}
@@ -54,21 +56,27 @@ export default function DropCard({
                 />
               )}
             </div>
-            <p className="text-xs text-warm-gray-500" data-testid={`drop-time-${drop.id}`}>
+            <p
+              className="text-xs text-warm-gray-500"
+              data-testid={`drop-time-${drop.id}`}
+            >
               {timeAgo}
             </p>
           </div>
         </div>
 
         {/* Message */}
-        <p className="text-warm-gray-800 leading-relaxed mb-4" data-testid={`drop-text-${drop.id}`}>
+        <p
+          className="text-warm-gray-800 leading-relaxed mb-4"
+          data-testid={`drop-text-${drop.id}`}
+        >
           {drop.text}
         </p>
 
         {/* Dual-Action Buttons */}
         {!isNested && (
           <div className="flex items-center gap-3 flex-wrap">
-            {/* I feel this button */}
+            <span>I feel this (v2)</span>
             <button
               onClick={() => onReaction(drop.id)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cream-50 hover:bg-cream-100 text-warm-gray-700 text-sm transition-colors border border-warm-gray-200"
