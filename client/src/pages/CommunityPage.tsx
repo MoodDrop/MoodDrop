@@ -17,8 +17,11 @@ export default function CommunityPage() {
   const loadDrops = async () => {
     try {
       const { data, error } = await supabase
-        .from("drops")
-        .select("*")
+        .from("Drops")
+        .select(
+          "id, text as content, mood, created_at, vibe_id, reply_to, visible, reactions",
+        )
+        .eq("visible", true)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -31,11 +34,11 @@ export default function CommunityPage() {
         return;
       }
 
-      // Map database rows (snake_case) to UI type (camelCase) with nested replies
+      // Map database rows to UI type
       const allDrops: Drop[] = (data ?? []).map((row: any) => ({
         id: row.id,
         vibeId: row.vibe_id,
-        text: row.text,
+        text: row.content,
         mood: row.mood,
         replyTo: row.reply_to,
         reactions: row.reactions || 0,
@@ -43,12 +46,12 @@ export default function CommunityPage() {
         replies: [],
       }));
 
-      // Nest replies under their parent drops
-      const topLevelDrops = allDrops.filter(d => !d.replyTo);
-      const replyDrops = allDrops.filter(d => d.replyTo);
-      
-      topLevelDrops.forEach(drop => {
-        drop.replies = replyDrops.filter(r => r.replyTo === drop.id);
+      // Nest replies
+      const topLevelDrops = allDrops.filter((d) => !d.replyTo);
+      const replyDrops = allDrops.filter((d) => d.replyTo);
+
+      topLevelDrops.forEach((drop) => {
+        drop.replies = replyDrops.filter((r) => r.replyTo === drop.id);
       });
 
       setDrops(topLevelDrops);
@@ -67,9 +70,9 @@ export default function CommunityPage() {
   const handleRefreshVibeId = () => {
     const next = refreshVibeId();
     setVibeId(next);
-    toast({ 
-      title: "Vibe ID refreshed", 
-      description: `You are now ${next}` 
+    toast({
+      title: "Vibe ID refreshed",
+      description: `You are now ${next}`,
     });
   };
 
@@ -83,37 +86,28 @@ export default function CommunityPage() {
 
   const handleReaction = async (dropId: string) => {
     try {
-      // First, get the current reaction count
       const { data: currentDrop, error: fetchError } = await supabase
-        .from("drops")
+        .from("Drops")
         .select("reactions")
         .eq("id", dropId)
         .single();
 
-      if (fetchError) {
-        console.error("Error fetching drop:", fetchError);
-        throw fetchError;
-      }
+      if (fetchError) throw fetchError;
 
-      // Increment the reaction count
       const newCount = (currentDrop?.reactions || 0) + 1;
       const { error: updateError } = await supabase
-        .from("drops")
+        .from("Drops")
         .update({ reactions: newCount })
         .eq("id", dropId);
 
-      if (updateError) {
-        console.error("Error updating reaction:", updateError);
-        throw updateError;
-      }
-      
-      // Update local state
-      setDrops(prev => prev.map(drop => 
-        drop.id === dropId 
-          ? { ...drop, reactions: newCount }
-          : drop
-      ));
-      
+      if (updateError) throw updateError;
+
+      setDrops((prev) =>
+        prev.map((drop) =>
+          drop.id === dropId ? { ...drop, reactions: newCount } : drop,
+        ),
+      );
+
       toast({
         title: "🌸",
         description: "You feel this vibe",
@@ -166,13 +160,11 @@ export default function CommunityPage() {
 
       {/* Feed */}
       {isLoading ? (
-        <div className="text-center py-12 text-gray-500">
-          Loading drops...
-        </div>
+        <div className="text-center py-12 text-gray-500">Loading drops...</div>
       ) : (
-        <DropFeed 
-          drops={drops} 
-          currentVibeId={vibeId} 
+        <DropFeed
+          drops={drops}
+          currentVibeId={vibeId}
           onReply={handleReply}
           onReaction={handleReaction}
         />
