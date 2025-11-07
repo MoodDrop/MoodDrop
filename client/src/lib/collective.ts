@@ -7,58 +7,38 @@ export type CollectivePost = {
   mood: string | null;
   color: string | null;
   created_at: string;
-  feel_count: number;
+  feel_count: number; // defaults to 0 in DB
 };
 
-export type CollectiveComment = {
-  id: string;
-  post_id: string;
-  body: string;
-  created_at: string;
-};
-
-// Load posts (feed)
-export async function listCollectivePosts(
-  limit = 50,
-): Promise<CollectivePost[]> {
+/**
+ * Load posts for the Collective Drop feed.
+ * Only returns visible posts, newest first.
+ */
+export async function listCollectivePosts(): Promise<CollectivePost[]> {
   const { data, error } = await supabase
     .from("collective_posts")
     .select("id, content, mood, color, created_at, feel_count")
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    .eq("visible", true) // if you added the 'visible' column; remove this line if not
+    .order("created_at", { ascending: false });
+
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as CollectivePost[];
 }
 
-// “I feel this” reaction
+/**
+ * Add a 'feel' reaction to a post.
+ * Triggers the feel_count increment via the DB trigger.
+ */
 export async function reactFeel(postId: string, anonFingerprint?: string) {
-  const payload: Record<string, any> = { post_id: postId, kind: "feel" };
-  if (anonFingerprint) payload.anon_fingerprint = anonFingerprint;
-  const { error } = await supabase.from("collective_reactions").insert(payload);
-  if (error) throw error;
-}
+  const { error } = await supabase
+    .from("collective_reactions")
+    .insert([
+      {
+        post_id: postId,
+        kind: "feel",
+        anon_fingerprint: anonFingerprint ?? null,
+      },
+    ]);
 
-// List comments for a post
-export async function listComments(
-  postId: string,
-): Promise<CollectiveComment[]> {
-  const { data, error } = await supabase
-    .from("collective_comments")
-    .select("id, post_id, body, created_at")
-    .eq("post_id", postId)
-    .order("created_at", { ascending: true });
-  if (error) throw error;
-  return data ?? [];
-}
-
-// Add a comment (“Drop a Note”)
-export async function addComment(
-  postId: string,
-  body: string,
-  anonFingerprint?: string,
-) {
-  const payload: Record<string, any> = { post_id: postId, body };
-  if (anonFingerprint) payload.anon_fingerprint = anonFingerprint;
-  const { error } = await supabase.from("collective_comments").insert(payload);
   if (error) throw error;
 }
