@@ -11,7 +11,7 @@ import {
   isOwnerMode,
   getPostVibeId,
   OWNER_VIBE_ID,
-} from "@/lib/community/ownerMode";
+} from "../lib/community/ownerMode";
 
 export default function CommunityPage() {
   const [vibeId, setVibeId] = useState("");
