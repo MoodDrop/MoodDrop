@@ -5,31 +5,30 @@ import DropComposer from "@/components/community/DropComposer";
 import DropFeed from "@/components/community/DropFeed";
 import type { Drop } from "@/types/community";
 import { getVibeId, refreshVibeId } from "@/lib/community/storage";
-import { supabase } from "../lib/supabaseClient"; // ← relative path for Vite
+import { supabase } from "@/lib/supabaseClient";
 
 export default function CommunityPage() {
-  console.log("[MoodDrop] CommunityPage mounted"); // 🔹 A
-
   const [vibeId, setVibeId] = useState("");
   const [drops, setDrops] = useState<Drop[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  console.log("[MoodDrop] CommunityPage mounted");
+
   // Load drops from Supabase
   const loadDrops = async () => {
-    console.log("[MoodDrop] loadDrops() starting"); // 🔹 B
+    console.log("[MoodDrop] loadDrops() called — fetching from Supabase...");
     try {
       const { data, error } = await supabase
         .from("Drops")
-        // ✅ Correct alias form (not "text as content")
         .select(
-          "id, content:text, mood, created_at, vibe_id, reply_to, visible, reactions",
+          "id, text as content, mood, created_at, vibe_id, reply_to, visible, reactions",
         )
         .eq("visible", true)
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("[MoodDrop] loadDrops() error:", error);
+        console.error("[MoodDrop] ❌ Supabase error:", error);
         toast({
           title: "Couldn't load drops",
           description: "Please try again in a moment.",
@@ -38,58 +37,74 @@ export default function CommunityPage() {
         return;
       }
 
-      console.log("[MoodDrop] drops OK:", data); // 🔹 C
+      console.log(
+        `[MoodDrop] ✅ Drops loaded successfully (${data?.length || 0} items)`,
+      );
 
+      // Map database rows to UI type
       const allDrops: Drop[] = (data ?? []).map((row: any) => ({
         id: row.id,
         vibeId: row.vibe_id,
         text: row.content,
         mood: row.mood,
         replyTo: row.reply_to,
-        reactions: row.reactions ?? 0,
+        reactions: row.reactions || 0,
         createdAt: new Date(row.created_at).getTime(),
         replies: [],
       }));
 
+      // Nest replies
       const topLevelDrops = allDrops.filter((d) => !d.replyTo);
       const replyDrops = allDrops.filter((d) => d.replyTo);
+
       topLevelDrops.forEach((drop) => {
         drop.replies = replyDrops.filter((r) => r.replyTo === drop.id);
       });
 
       setDrops(topLevelDrops);
     } catch (err) {
-      console.error("[MoodDrop] Error in loadDrops:", err);
+      console.error("[MoodDrop] ❌ loadDrops() failed:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    setVibeId(getVibeId());
+    const savedVibe = getVibeId();
+    console.log("[MoodDrop] Current Vibe ID:", savedVibe);
+    setVibeId(savedVibe);
     loadDrops();
   }, []);
 
   const handleRefreshVibeId = () => {
     const next = refreshVibeId();
+    console.log("[MoodDrop] 🔄 Vibe ID refreshed:", next);
     setVibeId(next);
-    toast({ title: "Vibe ID refreshed", description: `You are now ${next}` });
+    toast({
+      title: "Vibe ID refreshed",
+      description: `You are now ${next}`,
+    });
   };
 
-  const handlePost = async () => {
+  const handlePost = async (text: string, mood?: string) => {
+    console.log("[MoodDrop] 📝 New drop posted:", { text, mood });
     await loadDrops();
   };
-  const handleReply = async () => {
+
+  const handleReply = async (parentId: string, text: string) => {
+    console.log("[MoodDrop] 💬 Reply added to:", parentId, "text:", text);
     await loadDrops();
   };
 
   const handleReaction = async (dropId: string) => {
+    console.log("[MoodDrop] ❤️ Reacting to drop:", dropId);
     try {
       const { data: currentDrop, error: fetchError } = await supabase
         .from("Drops")
         .select("reactions")
         .eq("id", dropId)
         .single();
+
       if (fetchError) throw fetchError;
 
       const newCount = (currentDrop?.reactions || 0) + 1;
@@ -97,6 +112,7 @@ export default function CommunityPage() {
         .from("Drops")
         .update({ reactions: newCount })
         .eq("id", dropId);
+
       if (updateError) throw updateError;
 
       setDrops((prev) =>
@@ -104,9 +120,15 @@ export default function CommunityPage() {
           drop.id === dropId ? { ...drop, reactions: newCount } : drop,
         ),
       );
-      toast({ title: "🌸", description: "You feel this vibe" });
+
+      toast({
+        title: "🌸",
+        description: "You feel this vibe",
+      });
+
+      console.log("[MoodDrop] ✅ Reaction updated successfully");
     } catch (err) {
-      console.error("[MoodDrop] Error in handleReaction:", err);
+      console.error("[MoodDrop] ❌ handleReaction failed:", err);
       toast({
         title: "Couldn't react",
         description: "Please try again.",
@@ -117,6 +139,7 @@ export default function CommunityPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
+      {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-semibold text-warm-gray-800 mb-2">
           The Collective Drop
@@ -127,6 +150,7 @@ export default function CommunityPage() {
         </p>
       </div>
 
+      {/* Vibe ID */}
       <div className="mb-8 p-4 bg-blue-50 rounded-xl border border-blue-100">
         <div className="flex items-center justify-between">
           <div>
@@ -146,8 +170,10 @@ export default function CommunityPage() {
         </div>
       </div>
 
+      {/* Composer */}
       <DropComposer vibeId={vibeId} onPost={handlePost} />
 
+      {/* Feed */}
       {isLoading ? (
         <div className="text-center py-12 text-gray-500">Loading drops...</div>
       ) : (
