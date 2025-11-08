@@ -5,7 +5,7 @@ import DropComposer from "@/components/community/DropComposer";
 import DropFeed from "@/components/community/DropFeed";
 import type { Drop } from "@/types/community";
 import { getVibeId, refreshVibeId } from "@/lib/community/storage";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "../lib/supabaseClient";
 
 export default function CommunityPage() {
   const [vibeId, setVibeId] = useState("");
