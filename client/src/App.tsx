@@ -23,9 +23,12 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 
+console.log("[MoodDrop] App.tsx mounted");
+
 function Router() {
   const flags = readFlags();
-  
+  console.log("[MoodDrop] Router initialized — feature flags:", flags);
+
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -37,7 +40,15 @@ function Router() {
       <Route path="/garden" component={Garden} />
       <Route path="/my-drops" component={MyDropsPage} />
       <Route path="/drop-it" component={DropItPage} />
-      {flags.communityEnabled && <Route path="/community" component={CommunityPage} />}
+      {flags.communityEnabled && (
+        <Route
+          path="/community"
+          component={CommunityPage}
+          onEnter={() =>
+            console.log("[MoodDrop] ✅ Rendering CommunityPage route")
+          }
+        />
+      )}
       <Route path="/about" component={About} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/admin" component={AdminPage} />
@@ -50,12 +61,18 @@ function Router() {
 
 function AppContent() {
   const [location] = useLocation();
-  const isFullWidthPage = location === '/garden' || location === '/dashboard' || location === '/calm-studio' || location === '/comfort';
-  
+  console.log("[MoodDrop] Current route:", location);
+
+  const isFullWidthPage =
+    location === "/garden" ||
+    location === "/dashboard" ||
+    location === "/calm-studio" ||
+    location === "/comfort";
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blush-50 via-cream-50 to-blush-100">
       <Header />
-      <main className={isFullWidthPage ? '' : 'max-w-lg mx-auto px-6 py-8'}>
+      <main className={isFullWidthPage ? "" : "max-w-lg mx-auto px-6 py-8"}>
         <Router />
       </main>
       <Footer />
@@ -64,6 +81,7 @@ function AppContent() {
 }
 
 function App() {
+  console.log("[MoodDrop] App() rendering...");
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
