@@ -5,7 +5,13 @@ import DropComposer from "@/components/community/DropComposer";
 import DropFeed from "@/components/community/DropFeed";
 import type { Drop } from "@/types/community";
 import { getVibeId, refreshVibeId } from "@/lib/community/storage";
-import { supabase } from "../lib/supabaseClient"; // ✅ Fixed relative import for Vite
+import { supabase } from "../lib/supabaseClient";
+import {
+  enableOwnerModeFromURL,
+  isOwnerMode,
+  getPostVibeId,
+  OWNER_VIBE_ID,
+} from "@/lib/community/ownerMode";
 
 export default function CommunityPage() {
   const [vibeId, setVibeId] = useState("");
@@ -13,11 +19,10 @@ export default function CommunityPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // 🩵 Load drops from Supabase
   const loadDrops = async () => {
     console.log("[MoodDrop] loadDrops() called — fetching from Supabase...");
     try {
-      const { data, error, status } = await supabase
+      const { data, error } = await supabase
         .from("Drops")
         .select(
           "id, text, mood, created_at, vibe_id, reply_to, visible, reactions",
@@ -26,33 +31,16 @@ export default function CommunityPage() {
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error(
-          "[MoodDrop] ❌ Supabase error:",
-          error,
-          "Status:",
-          status,
-        );
+        console.error("Supabase error:", error);
         toast({
           title: "Couldn't load drops",
-          description: error.message || "Please try again in a moment.",
+          description: "Please try again in a moment.",
           variant: "destructive",
         });
         return;
       }
 
-      if (!data || !Array.isArray(data)) {
-        console.warn(
-          "[MoodDrop] ⚠ No data returned or unexpected format:",
-          data,
-        );
-        setDrops([]);
-        return;
-      }
-
-      console.log(`[MoodDrop] ✅ Loaded ${data.length} drops from Supabase`);
-
-      // Transform data
-      const allDrops: Drop[] = data.map((row: any) => ({
+      const allDrops: Drop[] = (data ?? []).map((row: any) => ({
         id: row.id,
         vibeId: row.vibe_id,
         text: row.text,
@@ -63,7 +51,6 @@ export default function CommunityPage() {
         replies: [],
       }));
 
-      // Nest replies
       const topLevelDrops = allDrops.filter((d) => !d.replyTo);
       const replyDrops = allDrops.filter((d) => d.replyTo);
       topLevelDrops.forEach((drop) => {
@@ -72,84 +59,52 @@ export default function CommunityPage() {
 
       setDrops(topLevelDrops);
     } catch (err) {
-      console.error("[MoodDrop] ❌ loadDrops() failed:", err);
-      toast({
-        title: "Unexpected error",
-        description:
-          err instanceof Error
-            ? err.message
-            : "Please check your Supabase connection.",
-        variant: "destructive",
-      });
+      console.error("loadDrops() failed:", err);
     } finally {
       setIsLoading(false);
-      console.log("[MoodDrop] loadDrops() finished");
     }
   };
 
   useEffect(() => {
+    enableOwnerModeFromURL();
     setVibeId(getVibeId());
     loadDrops();
   }, []);
 
+  const ownerActive = isOwnerMode();
+  const postVibeId = getPostVibeId(vibeId);
+
   const handleRefreshVibeId = () => {
     const next = refreshVibeId();
     setVibeId(next);
-    toast({
-      title: "Vibe ID refreshed",
-      description: `You are now ${next}`,
-    });
+    toast({ title: "Vibe ID refreshed", description: `You are now ${next}` });
   };
 
-  const handlePost = async (text: string, mood?: string) => {
-    await loadDrops();
-  };
-
-  const handleReply = async (parentId: string, text: string) => {
-    await loadDrops();
-  };
-
+  const handlePost = async () => await loadDrops();
+  const handleReply = async () => await loadDrops();
   const handleReaction = async (dropId: string) => {
     try {
-      const { data: currentDrop, error: fetchError } = await supabase
+      const { data: currentDrop, error } = await supabase
         .from("Drops")
         .select("reactions")
         .eq("id", dropId)
         .single();
-
-      if (fetchError) throw fetchError;
-
+      if (error) throw error;
       const newCount = (currentDrop?.reactions || 0) + 1;
-      const { error: updateError } = await supabase
+      await supabase
         .from("Drops")
         .update({ reactions: newCount })
         .eq("id", dropId);
-
-      if (updateError) throw updateError;
-
       setDrops((prev) =>
-        prev.map((drop) =>
-          drop.id === dropId ? { ...drop, reactions: newCount } : drop,
-        ),
+        prev.map((d) => (d.id === dropId ? { ...d, reactions: newCount } : d)),
       );
-
-      toast({
-        title: "🌸",
-        description: "You feel this vibe",
-      });
     } catch (err) {
-      console.error("[MoodDrop] ❌ handleReaction() failed:", err);
-      toast({
-        title: "Couldn't react",
-        description: "Please try again.",
-        variant: "destructive",
-      });
+      console.error("Reaction error:", err);
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-semibold text-warm-gray-800 mb-2">
           The Collective Drop
@@ -160,19 +115,24 @@ export default function CommunityPage() {
         </p>
       </div>
 
-      {/* Vibe ID */}
+      {ownerActive && (
+        <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-blue-800">
+          Replying as <strong>{OWNER_VIBE_ID}</strong>. Add{" "}
+          <code>?owner=0</code> to the URL to turn off.
+        </div>
+      )}
+
       <div className="mb-8 p-4 bg-blue-50 rounded-xl border border-blue-100">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-blue-600 mb-1">Your Vibe ID</p>
             <p className="font-medium text-blue-800" data-testid="text-vibe-id">
-              {vibeId}
+              {postVibeId}
             </p>
           </div>
           <button
             onClick={handleRefreshVibeId}
             className="flex items-center gap-2 px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
-            data-testid="button-refresh-vibe-id"
           >
             <RefreshCw className="w-4 h-4" />
             <span>Refresh</span>
@@ -180,16 +140,14 @@ export default function CommunityPage() {
         </div>
       </div>
 
-      {/* Composer */}
-      <DropComposer vibeId={vibeId} onPost={handlePost} />
+      <DropComposer vibeId={postVibeId} onPost={handlePost} />
 
-      {/* Feed */}
       {isLoading ? (
         <div className="text-center py-12 text-gray-500">Loading drops...</div>
       ) : (
         <DropFeed
           drops={drops}
-          currentVibeId={vibeId}
+          currentVibeId={postVibeId}
           onReply={handleReply}
           onReaction={handleReaction}
         />
