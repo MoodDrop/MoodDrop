@@ -5,10 +5,10 @@ import DropComposer from "@/components/community/DropComposer";
 import DropFeed from "@/components/community/DropFeed";
 import type { Drop } from "@/types/community";
 import { getVibeId, refreshVibeId } from "@/lib/community/storage";
-import { supabase } from "../lib/supabaseClient"; // ✅ ensure correct relative path
+import { supabase } from "../lib/supabaseClient"; // ← relative path for Vite
 
 export default function CommunityPage() {
-  console.log("[MoodDrop] CommunityPage mounted"); // 🔹 Log A
+  console.log("[MoodDrop] CommunityPage mounted"); // 🔹 A
 
   const [vibeId, setVibeId] = useState("");
   const [drops, setDrops] = useState<Drop[]>([]);
@@ -17,12 +17,13 @@ export default function CommunityPage() {
 
   // Load drops from Supabase
   const loadDrops = async () => {
-    console.log("[MoodDrop] loadDrops() starting"); // 🔹 Log B
+    console.log("[MoodDrop] loadDrops() starting"); // 🔹 B
     try {
       const { data, error } = await supabase
         .from("Drops")
+        // ✅ Correct alias form (not "text as content")
         .select(
-          "id, text as content, mood, created_at, vibe_id, reply_to, visible, reactions",
+          "id, content:text, mood, created_at, vibe_id, reply_to, visible, reactions",
         )
         .eq("visible", true)
         .order("created_at", { ascending: false });
@@ -37,24 +38,21 @@ export default function CommunityPage() {
         return;
       }
 
-      console.log("[MoodDrop] drops OK:", data); // 🔹 Log C
+      console.log("[MoodDrop] drops OK:", data); // 🔹 C
 
-      // Map database rows to UI type
       const allDrops: Drop[] = (data ?? []).map((row: any) => ({
         id: row.id,
         vibeId: row.vibe_id,
         text: row.content,
         mood: row.mood,
         replyTo: row.reply_to,
-        reactions: row.reactions || 0,
+        reactions: row.reactions ?? 0,
         createdAt: new Date(row.created_at).getTime(),
         replies: [],
       }));
 
-      // Nest replies
       const topLevelDrops = allDrops.filter((d) => !d.replyTo);
       const replyDrops = allDrops.filter((d) => d.replyTo);
-
       topLevelDrops.forEach((drop) => {
         drop.replies = replyDrops.filter((r) => r.replyTo === drop.id);
       });
@@ -75,17 +73,13 @@ export default function CommunityPage() {
   const handleRefreshVibeId = () => {
     const next = refreshVibeId();
     setVibeId(next);
-    toast({
-      title: "Vibe ID refreshed",
-      description: `You are now ${next}`,
-    });
+    toast({ title: "Vibe ID refreshed", description: `You are now ${next}` });
   };
 
-  const handlePost = async (text: string, mood?: string) => {
+  const handlePost = async () => {
     await loadDrops();
   };
-
-  const handleReply = async (parentId: string, text: string) => {
+  const handleReply = async () => {
     await loadDrops();
   };
 
@@ -96,7 +90,6 @@ export default function CommunityPage() {
         .select("reactions")
         .eq("id", dropId)
         .single();
-
       if (fetchError) throw fetchError;
 
       const newCount = (currentDrop?.reactions || 0) + 1;
@@ -104,7 +97,6 @@ export default function CommunityPage() {
         .from("Drops")
         .update({ reactions: newCount })
         .eq("id", dropId);
-
       if (updateError) throw updateError;
 
       setDrops((prev) =>
@@ -112,11 +104,7 @@ export default function CommunityPage() {
           drop.id === dropId ? { ...drop, reactions: newCount } : drop,
         ),
       );
-
-      toast({
-        title: "🌸",
-        description: "You feel this vibe",
-      });
+      toast({ title: "🌸", description: "You feel this vibe" });
     } catch (err) {
       console.error("[MoodDrop] Error in handleReaction:", err);
       toast({
@@ -129,7 +117,6 @@ export default function CommunityPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-semibold text-warm-gray-800 mb-2">
           The Collective Drop
@@ -140,7 +127,6 @@ export default function CommunityPage() {
         </p>
       </div>
 
-      {/* Vibe ID */}
       <div className="mb-8 p-4 bg-blue-50 rounded-xl border border-blue-100">
         <div className="flex items-center justify-between">
           <div>
@@ -160,10 +146,8 @@ export default function CommunityPage() {
         </div>
       </div>
 
-      {/* Composer */}
       <DropComposer vibeId={vibeId} onPost={handlePost} />
 
-      {/* Feed */}
       {isLoading ? (
         <div className="text-center py-12 text-gray-500">Loading drops...</div>
       ) : (
