@@ -5,9 +5,11 @@ import DropComposer from "@/components/community/DropComposer";
 import DropFeed from "@/components/community/DropFeed";
 import type { Drop } from "@/types/community";
 import { getVibeId, refreshVibeId } from "@/lib/community/storage";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../lib/supabaseClient"; // ✅ ensure correct relative path
 
 export default function CommunityPage() {
+  console.log("[MoodDrop] CommunityPage mounted"); // 🔹 Log A
+
   const [vibeId, setVibeId] = useState("");
   const [drops, setDrops] = useState<Drop[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -15,18 +17,18 @@ export default function CommunityPage() {
 
   // Load drops from Supabase
   const loadDrops = async () => {
+    console.log("[MoodDrop] loadDrops() starting"); // 🔹 Log B
     try {
       const { data, error } = await supabase
         .from("Drops")
-        // ✅ alias syntax: alias:column (NOT "text as content")
         .select(
-          "id, content:text, mood, created_at, vibe_id, reply_to, visible, reactions",
+          "id, text as content, mood, created_at, vibe_id, reply_to, visible, reactions",
         )
         .eq("visible", true)
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("Error loading drops:", error);
+        console.error("[MoodDrop] loadDrops() error:", error);
         toast({
           title: "Couldn't load drops",
           description: "Please try again in a moment.",
@@ -35,21 +37,21 @@ export default function CommunityPage() {
         return;
       }
 
-      console.log("[MoodDrop] drops OK:", data);
+      console.log("[MoodDrop] drops OK:", data); // 🔹 Log C
 
       // Map database rows to UI type
       const allDrops: Drop[] = (data ?? []).map((row: any) => ({
         id: row.id,
         vibeId: row.vibe_id,
-        text: row.content, // ← now populated via content:text
+        text: row.content,
         mood: row.mood,
         replyTo: row.reply_to,
-        reactions: row.reactions ?? 0, // keep if your type expects it
+        reactions: row.reactions || 0,
         createdAt: new Date(row.created_at).getTime(),
         replies: [],
       }));
 
-      // Nest replies (if any are included as top-level rows)
+      // Nest replies
       const topLevelDrops = allDrops.filter((d) => !d.replyTo);
       const replyDrops = allDrops.filter((d) => d.replyTo);
 
@@ -59,7 +61,7 @@ export default function CommunityPage() {
 
       setDrops(topLevelDrops);
     } catch (err) {
-      console.error("Error in loadDrops:", err);
+      console.error("[MoodDrop] Error in loadDrops:", err);
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +89,6 @@ export default function CommunityPage() {
     await loadDrops();
   };
 
-  // You said we'll revisit reactions later — leaving this as-is so UI doesn't break
   const handleReaction = async (dropId: string) => {
     try {
       const { data: currentDrop, error: fetchError } = await supabase
@@ -117,7 +118,7 @@ export default function CommunityPage() {
         description: "You feel this vibe",
       });
     } catch (err) {
-      console.error("Error in handleReaction:", err);
+      console.error("[MoodDrop] Error in handleReaction:", err);
       toast({
         title: "Couldn't react",
         description: "Please try again.",
