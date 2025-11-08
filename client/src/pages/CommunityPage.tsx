@@ -18,8 +18,9 @@ export default function CommunityPage() {
     try {
       const { data, error } = await supabase
         .from("Drops")
+        // ✅ alias syntax: alias:column (NOT "text as content")
         .select(
-          "id, text as content, mood, created_at, vibe_id, reply_to, visible, reactions",
+          "id, content:text, mood, created_at, vibe_id, reply_to, visible, reactions",
         )
         .eq("visible", true)
         .order("created_at", { ascending: false });
@@ -34,19 +35,21 @@ export default function CommunityPage() {
         return;
       }
 
+      console.log("[MoodDrop] drops OK:", data);
+
       // Map database rows to UI type
       const allDrops: Drop[] = (data ?? []).map((row: any) => ({
         id: row.id,
         vibeId: row.vibe_id,
-        text: row.content,
+        text: row.content, // ← now populated via content:text
         mood: row.mood,
         replyTo: row.reply_to,
-        reactions: row.reactions || 0,
+        reactions: row.reactions ?? 0, // keep if your type expects it
         createdAt: new Date(row.created_at).getTime(),
         replies: [],
       }));
 
-      // Nest replies
+      // Nest replies (if any are included as top-level rows)
       const topLevelDrops = allDrops.filter((d) => !d.replyTo);
       const replyDrops = allDrops.filter((d) => d.replyTo);
 
@@ -84,6 +87,7 @@ export default function CommunityPage() {
     await loadDrops();
   };
 
+  // You said we'll revisit reactions later — leaving this as-is so UI doesn't break
   const handleReaction = async (dropId: string) => {
     try {
       const { data: currentDrop, error: fetchError } = await supabase
