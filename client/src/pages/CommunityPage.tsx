@@ -19,11 +19,12 @@ export default function CommunityPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  // Load drops from the lowercase view `drops`
   const loadDrops = async () => {
     console.log("[MoodDrop] loadDrops() called — fetching from Supabase...");
     try {
       const { data, error } = await supabase
-        .from("Drops")
+        .from("drops")
         .select(
           "id, text, mood, created_at, vibe_id, reply_to, visible, reactions",
         )
@@ -82,19 +83,24 @@ export default function CommunityPage() {
 
   const handlePost = async () => await loadDrops();
   const handleReply = async () => await loadDrops();
+
   const handleReaction = async (dropId: string) => {
     try {
       const { data: currentDrop, error } = await supabase
-        .from("Drops")
+        .from("drops")
         .select("reactions")
         .eq("id", dropId)
         .single();
       if (error) throw error;
+
       const newCount = (currentDrop?.reactions || 0) + 1;
-      await supabase
-        .from("Drops")
+
+      const { error: updateError } = await supabase
+        .from("drops")
         .update({ reactions: newCount })
         .eq("id", dropId);
+      if (updateError) throw updateError;
+
       setDrops((prev) =>
         prev.map((d) => (d.id === dropId ? { ...d, reactions: newCount } : d)),
       );
