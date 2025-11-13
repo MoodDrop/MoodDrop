@@ -1,3 +1,5 @@
+// client/src/pages/CommunityPage.tsx
+
 import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -41,6 +43,7 @@ export default function CommunityPage() {
         return;
       }
 
+      // map rows to your Drop type
       const allDrops: Drop[] = (data ?? []).map((row: any) => ({
         id: row.id,
         vibeId: row.vibe_id,
@@ -52,6 +55,7 @@ export default function CommunityPage() {
         replies: [],
       }));
 
+      // nest replies under parents
       const topLevelDrops = allDrops.filter((d) => !d.replyTo);
       const replyDrops = allDrops.filter((d) => d.replyTo);
       topLevelDrops.forEach((drop) => {
@@ -81,9 +85,13 @@ export default function CommunityPage() {
     toast({ title: "Vibe ID refreshed", description: `You are now ${next}` });
   };
 
+  // after composer posts, reload feed
   const handlePost = async () => await loadDrops();
+
+  // when a reply is added (your DropComposer/onReply handler should call this)
   const handleReply = async () => await loadDrops();
 
+  // increment reactions (“I Feel This”)
   const handleReaction = async (dropId: string) => {
     try {
       const { data: currentDrop, error } = await supabase
@@ -101,12 +109,25 @@ export default function CommunityPage() {
         .eq("id", dropId);
       if (updateError) throw updateError;
 
+      // local optimistic update
       setDrops((prev) =>
         prev.map((d) => (d.id === dropId ? { ...d, reactions: newCount } : d)),
       );
     } catch (err) {
       console.error("Reaction error:", err);
     }
+  };
+
+  // NEW: wire DropCard onUpdated → update local list (no full reload)
+  const handleCardUpdated = (updated: Drop) => {
+    setDrops((prev) =>
+      prev.map((d) => (d.id === updated.id ? { ...d, ...updated } : d)),
+    );
+  };
+
+  // NEW: wire DropCard onDeleted → remove locally (no full reload)
+  const handleCardDeleted = (deletedId: string) => {
+    setDrops((prev) => prev.filter((d) => d.id !== deletedId));
   };
 
   return (
@@ -156,6 +177,9 @@ export default function CommunityPage() {
           currentVibeId={postVibeId}
           onReply={handleReply}
           onReaction={handleReaction}
+          // NEW: make list respond instantly to edits/deletes
+          onUpdated={handleCardUpdated}
+          onDeleted={handleCardDeleted}
         />
       )}
     </div>

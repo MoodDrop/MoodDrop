@@ -1,149 +1,307 @@
+// client/src/components/community/DropCard.tsx
+
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Flower, Mail } from "lucide-react";
 import type { Drop } from "@/types/community";
-import ReplyComposer from "./ReplyComposer";
-import ownerBadge from "@assets/generated_images/Pink_droplet_owner_badge_2824ccfc.png";
+import { supabase } from "@/lib/supabaseClient";
+import { canManageDrop } from "@/lib/ownership";
+import ownerDroplet from "@/assets/droplet.png"; // <- your PNG
 
-interface DropCardProps {
+type Props = {
   drop: Drop;
   currentVibeId: string;
-  onReply: (parentId: string, text: string) => void;
-  onReaction: (dropId: string) => void;
-  isNested?: boolean;
-}
-
-const OWNER_VIBE_ID = "Charae 💧";
+  onReply: (id: string, text: string) => void;
+  onReaction: (id: string) => void;
+  onUpdated?: (updated: Drop) => void;
+  onDeleted?: (deletedId: string) => void;
+};
 
 export default function DropCard({
   drop,
   currentVibeId,
   onReply,
   onReaction,
-  isNested = false,
-}: DropCardProps) {
-  const [showReplyComposer, setShowReplyComposer] = useState(false);
-  const timeAgo = formatDistanceToNow(drop.createdAt, { addSuffix: true });
-  const isOwner = drop.vibeId === OWNER_VIBE_ID;
-  const replyCount = drop.replies?.length ?? 0;
+  onUpdated,
+  onDeleted,
+}: Props) {
+  const manageable = canManageDrop({
+    currentVibeId,
+    dropVibeId: drop.vibeId,
+  });
+
+  const isOwnerReply = drop.vibeId === "Charae 💧";
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(drop.text);
+  const [isBusy, setIsBusy] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  const [replyOpen, setReplyOpen] = useState(false);
+  const [replyText, setReplyText] = useState("");
+
+  async function handleSaveEdit() {
+    const newText = editText.trim();
+    if (!newText) return;
+    setIsBusy(true);
+    try {
+      const { data, error } = await supabase
+        .from("drops")
+        .update({ text: newText })
+        .eq("id", drop.id)
+        .select()
+        .single();
+      if (error) throw error;
+
+      onUpdated?.({
+        ...drop,
+        text: data.text,
+      });
+
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Edit failed:", err);
+      alert("Could not save your change. Please try again.");
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  async function handleDelete() {
+    setIsBusy(true);
+    try {
+      const { error } = await supabase
+        .from("drops")
+        .update({ visible: false })
+        .eq("id", drop.id);
+      if (error) throw error;
+
+      onDeleted?.(drop.id);
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Could not delete this drop. Please try again.");
+    } finally {
+      setIsBusy(false);
+      setConfirmingDelete(false);
+    }
+  }
+
+  function handleSendReply() {
+    const text = replyText.trim();
+    if (!text) return;
+    onReply(drop.id, text);
+    setReplyText("");
+    setReplyOpen(false);
+  }
 
   return (
     <div
-      className={`rounded-2xl border border-warm-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow ${isNested ? "ml-8" : ""}`}
+      className="rounded-2xl p-4 mb-3"
+      style={{
+        background: "#fff7f8",
+        border: "1px solid #f6e8ea",
+        boxShadow: "0 2px 10px rgba(246, 232, 234, 0.6)",
+      }}
     >
-      <div className="p-4 sm:p-5">
-        {/* Header */}
-        <div className="flex items-center gap-2 mb-3">
-          {drop.mood && (
-            <span className="text-2xl" aria-label="mood">
-              {drop.mood}
-            </span>
-          )}
-          <div className="flex-1">
-            <div className="flex items-center gap-1.5">
-              <p
-                className="font-medium text-warm-gray-800"
-                data-testid={`drop-name-${drop.id}`}
-              >
-                {drop.vibeId}
-              </p>
-              {isOwner && (
-                <img
-                  src={ownerBadge}
-                  alt="Owner"
-                  className="w-4 h-4 opacity-90 hover:opacity-100 transition-opacity"
-                  data-testid="owner-badge"
-                />
-              )}
-            </div>
-            <p
-              className="text-xs text-warm-gray-500"
-              data-testid={`drop-time-${drop.id}`}
-            >
-              {timeAgo}
-            </p>
-          </div>
-        </div>
-
-        {/* Message */}
-        <p
-          className="text-warm-gray-800 leading-relaxed mb-4"
-          data-testid={`drop-text-${drop.id}`}
-        >
-          {drop.text}
-        </p>
-
-        {/* Dual-Action Buttons */}
-        {!isNested && (
-          <div className="flex items-center gap-3 flex-wrap">
-            {false && (
-              <>
-                <span>I feel this (v2)</span>
-                <button
-                  onClick={() => onReaction(drop.id)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cream-50 hover:bg-cream-100 text-warm-gray-700 text-sm transition-colors border border-warm-gray-200"
-                  data-testid={`button-feel-this-${drop.id}`}
-                >
-                  <Flower className="w-4 h-4 text-pink-400" />
-                  <span>I feel this</span>
-                  <span className="ml-1 text-xs font-medium text-pink-600">
-                    {drop.reactions}
-                  </span>
-                </button>
-              </>
-            )}
-
-            {/* Drop a Note button */}
-            <button
-              onClick={() => setShowReplyComposer(!showReplyComposer)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cream-50 hover:bg-cream-100 text-warm-gray-700 text-sm transition-colors border border-warm-gray-200"
-              data-testid={`button-drop-note-${drop.id}`}
-            >
-              <Mail className="w-4 h-4 text-warm-gray-600" />
-              <span>Drop a Note</span>
-            </button>
-
-            {/* Reply count */}
-            {replyCount > 0 && (
-              <span className="text-xs text-warm-gray-600">
-                {replyCount} {replyCount === 1 ? "reply" : "replies"}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Reply Composer */}
-        {showReplyComposer && (
-          <ReplyComposer
-            parentId={drop.id}
-            vibeId={currentVibeId}
-            onReply={(parentId, text) => {
-              onReply(parentId, text);
-              setShowReplyComposer(false);
-            }}
-            onCancel={() => setShowReplyComposer(false)}
+      {/* Vibe ID row */}
+      <div className="mb-1 text-sm text-[#4a3f41] font-semibold flex items-center gap-2">
+        {isOwnerReply && (
+          <img
+            src={ownerDroplet}
+            alt=""
+            className="w-4 h-4 rounded-full object-contain"
           />
         )}
+        <span>{drop.vibeId}</span>
       </div>
 
-      {/* Nested Replies */}
-      {!isNested && drop.replies && drop.replies.length > 0 && (
-        <div className="border-t border-warm-gray-100 bg-cream-50/30 p-4 space-y-3">
-          <p className="text-xs font-medium text-warm-gray-600 uppercase tracking-wide mb-2">
-            Reply Vibes
-          </p>
-          {drop.replies.map((reply) => (
-            <DropCard
-              key={reply.id}
-              drop={reply}
-              currentVibeId={currentVibeId}
-              onReply={onReply}
-              onReaction={onReaction}
-              isNested={true}
+      {/* Main body */}
+      <div className="flex flex-col gap-2">
+        {isEditing ? (
+          <div className="space-y-2">
+            <textarea
+              className="w-full rounded-xl p-3 outline-none border"
+              style={{ borderColor: "#f2d9de", background: "#fff" }}
+              rows={3}
+              maxLength={1000}
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              disabled={isBusy}
             />
-          ))}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSaveEdit}
+                disabled={isBusy}
+                className="px-3 py-1.5 rounded-full"
+                style={{
+                  background: "#f4cbd2",
+                  color: "#4a3f41",
+                  opacity: isBusy ? 0.6 : 1,
+                  boxShadow: "0 2px 6px rgba(246, 232, 234, 0.6)",
+                }}
+              >
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditText(drop.text);
+                }}
+                disabled={isBusy}
+                className="px-3 py-1.5 rounded-full"
+                style={{ background: "#f8eef0", color: "#6d5e61" }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="leading-relaxed text-[15px] text-[#4a3f41]">
+            {drop.text}
+          </p>
+        )}
+
+        {/* Time + actions row (matches mockup layout) */}
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm select-none">
+          <span className="text-[#8b7b7e]">
+            {formatDistanceToNow(new Date(drop.createdAt), { addSuffix: true })}
+          </span>
+
+          {/* Drop a Note = open reply composer */}
+          <button
+            type="button"
+            onClick={() => setReplyOpen((v) => !v)}
+            className="rounded-full px-4 py-1.5"
+            style={{
+              background: "#ffffff",
+              border: "1px solid #f2d9de",
+              boxShadow: "0 2px 6px rgba(246, 232, 234, 0.6)",
+              color: "#4a3f41",
+            }}
+          >
+            Drop a Note
+          </button>
+
+          {/* Feels with larger droplet */}
+          <button
+            type="button"
+            onClick={() => onReaction(drop.id)}
+            className="rounded-full px-4 py-1.5 flex items-center gap-1"
+            style={{
+              background: "#ffffff",
+              border: "1px solid #f2d9de",
+              boxShadow: "0 2px 6px rgba(246, 232, 234, 0.6)",
+              color: "#4a3f41",
+            }}
+            title="I feel this"
+          >
+            <span className="text-lg">💧</span>
+            <span>Feels {drop.reactions ?? 0}</span>
+          </button>
+
+          {/* Owner edit/delete */}
+          {manageable && !isEditing && (
+            <>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="px-4 py-1.5 rounded-full"
+                style={{
+                  background: "#fde7eb",
+                  color: "#4a3f41",
+                  boxShadow: "0 2px 6px rgba(246, 232, 234, 0.6)",
+                }}
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => setConfirmingDelete(true)}
+                className="px-4 py-1.5 rounded-full"
+                style={{
+                  background: "#f9d2d9",
+                  color: "#4a3f41",
+                  boxShadow: "0 2px 6px rgba(246, 232, 234, 0.6)",
+                }}
+              >
+                Delete
+              </button>
+            </>
+          )}
         </div>
-      )}
+
+        {/* Inline reply composer */}
+        {replyOpen && (
+          <div
+            className="mt-3 p-3 rounded-xl"
+            style={{ background: "#fff", border: "1px solid #f2d9de" }}
+          >
+            <textarea
+              className="w-full rounded-xl p-3 outline-none border"
+              style={{ borderColor: "#f2d9de", background: "#fff" }}
+              rows={3}
+              placeholder="Drop a note back…"
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              maxLength={1000}
+            />
+            <div className="mt-2 flex items-center justify-end gap-2">
+              <button
+                onClick={() => {
+                  setReplyOpen(false);
+                  setReplyText("");
+                }}
+                className="px-3 py-1.5 rounded-full"
+                style={{ background: "#f8eef0", color: "#6d5e61" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendReply}
+                className="px-3 py-1.5 rounded-full"
+                style={{
+                  background: "#f4cbd2",
+                  color: "#4a3f41",
+                  boxShadow: "0 2px 6px rgba(246, 232, 234, 0.6)",
+                }}
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Delete confirmation bar */}
+        {confirmingDelete && (
+          <div
+            className="mt-3 p-3 rounded-xl flex items-center justify-between"
+            style={{ background: "#fff", border: "1px solid #f2d9de" }}
+          >
+            <span className="text-sm text-[#4a3f41]">
+              Delete this drop? This can’t be undone.
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setConfirmingDelete(false)}
+                className="px-3 py-1.5 rounded-full"
+                style={{ background: "#f8eef0", color: "#6d5e61" }}
+                disabled={isBusy}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-3 py-1.5 rounded-full"
+                style={{
+                  background: "#f1aeb8",
+                  color: "#432f34",
+                  opacity: isBusy ? 0.6 : 1,
+                }}
+                disabled={isBusy}
+              >
+                Yes, delete
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,34 +1,45 @@
+// client/src/components/community/DropFeed.tsx
+
 import type { Drop } from "@/types/community";
 import DropCard from "./DropCard";
 
-interface DropFeedProps {
+type Props = {
   drops: Drop[];
   currentVibeId: string;
-  onReply: (parentId: string, text: string) => void;
-  onReaction: (dropId: string) => void;
-}
+  onReply: (id: string, text: string) => void;
+  onReaction: (id: string) => void;
+  // NEW: parent will pass these so the list updates instantly
+  onUpdated: (updated: Drop) => void;
+  onDeleted: (deletedId: string) => void;
+};
 
-export default function DropFeed({ drops, currentVibeId, onReply, onReaction }: DropFeedProps) {
-  if (drops.length === 0) {
+export default function DropFeed({
+  drops,
+  currentVibeId,
+  onReply,
+  onReaction,
+  onUpdated,
+  onDeleted,
+}: Props) {
+  if (!drops?.length) {
     return (
-      <div className="text-center py-16" data-testid="empty-state">
-        <p className="text-2xl mb-2">💧</p>
-        <p className="text-warm-gray-600">
-          Be the first to share a drop today 💧
-        </p>
+      <div className="text-center py-12 text-gray-500">
+        No drops yet. Be the first to share 💧
       </div>
     );
   }
 
   return (
-    <div className="space-y-4" data-testid="drop-feed">
+    <div className="space-y-4">
       {drops.map((drop) => (
-        <DropCard 
-          key={drop.id} 
-          drop={drop} 
+        <DropCard
+          key={drop.id}
+          drop={drop}
           currentVibeId={currentVibeId}
           onReply={onReply}
           onReaction={onReaction}
+          onUpdated={onUpdated}
+          onDeleted={onDeleted}
         />
       ))}
     </div>

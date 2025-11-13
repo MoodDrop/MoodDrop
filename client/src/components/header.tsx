@@ -1,8 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut } from "lucide-react";
 import { readFlags } from "@/lib/featureFlags";
-import moodDropLogo from "@assets/MoodDrop Bubble_1761853048716.png";
+import dropletIcon from "../assets/droplet.png"; // ✅ your PNG logo
 
 export default function Header() {
   const [location] = useLocation();
@@ -10,16 +9,16 @@ export default function Header() {
   const flags = readFlags();
 
   return (
-    <header 
+    <header
       className="px-6 py-4 border-b border-blush-200 bg-gradient-to-r from-blush-50 to-cream-100"
     >
       <div className="flex flex-col items-center gap-3">
         <div className="flex items-center justify-between w-full">
           <Link href="/">
             <div className="flex items-center justify-center hover:opacity-80 transition-opacity">
-              <img 
-                src={moodDropLogo} 
-                alt="MoodDrop" 
+              <img
+                src={dropletIcon}
+                alt="MoodDrop"
                 className="h-16 w-auto object-contain"
               />
             </div>
@@ -32,7 +31,9 @@ export default function Header() {
           <Link href="/">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                location === "/" ? "text-blush-400 font-medium" : "text-warm-gray-600 hover:text-blush-300"
+                location === "/"
+                  ? "text-blush-400 font-medium"
+                  : "text-warm-gray-600 hover:text-blush-300"
               }`}
               data-testid="nav-home"
             >
@@ -43,7 +44,9 @@ export default function Header() {
           <Link href="/release">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                location === "/release" || location === "/breathe" ? "text-blush-400 font-medium" : "text-warm-gray-600 hover:text-blush-300"
+                location === "/release" || location === "/breathe"
+                  ? "text-blush-400 font-medium"
+                  : "text-warm-gray-600 hover:text-blush-300"
               }`}
               data-testid="nav-breathe"
             >
@@ -54,7 +57,9 @@ export default function Header() {
           <Link href="/garden">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                location === "/garden" ? "text-blush-400 font-medium" : "text-warm-gray-600 hover:text-blush-300"
+                location === "/garden"
+                  ? "text-blush-400 font-medium"
+                  : "text-warm-gray-600 hover:text-blush-300"
               }`}
               data-testid="nav-garden"
             >
@@ -65,7 +70,9 @@ export default function Header() {
           <Link href="/calm-studio">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                location === "/calm-studio" ? "text-blush-400 font-medium" : "text-warm-gray-600 hover:text-blush-300"
+                location === "/calm-studio"
+                  ? "text-blush-400 font-medium"
+                  : "text-warm-gray-600 hover:text-blush-300"
               }`}
               data-testid="nav-calm-studio"
             >
@@ -78,7 +85,9 @@ export default function Header() {
               <Link href="/community">
                 <button
                   className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                    location === "/community" ? "text-blush-400 font-medium" : "text-warm-gray-600 hover:text-blush-300"
+                    location === "/community"
+                      ? "text-blush-400 font-medium"
+                      : "text-warm-gray-600 hover:text-blush-300"
                   }`}
                   data-testid="nav-community"
                 >
@@ -91,7 +100,9 @@ export default function Header() {
           <Link href="/about">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                location === "/about" ? "text-blush-400 font-medium" : "text-warm-gray-600 hover:text-blush-300"
+                location === "/about"
+                  ? "text-blush-400 font-medium"
+                  : "text-warm-gray-600 hover:text-blush-300"
               }`}
               data-testid="nav-about"
             >

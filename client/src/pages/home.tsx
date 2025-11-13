@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Sparkles } from "lucide-react";
-import dropletIcon from "@assets/Droplet_1760186315979.png";
+import dropletIcon from "../assets/droplet.png";
+
+
 import { moods, type MoodKey } from "@/lib/moods";
 
 export default function Home() {

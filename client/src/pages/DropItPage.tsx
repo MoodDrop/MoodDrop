@@ -3,7 +3,12 @@ import { Link, useLocation } from "wouter";
 import { ArrowLeft, PenLine, Mic, Square, Play, Trash2 } from "lucide-react";
 import { moods, type MoodKey } from "@/lib/moods";
 import { getAffirmation } from "@/lib/affirmations";
-import dropletIcon from "@assets/Droplet_1760186315979.png";
+// replace this
+// import dropletIcon from "../assets/droplet.png?url";
+
+// with this
+import dropletIcon from "../assets/droplet.png";
+
 
 type TabType = "write" | "voice";
 type RecordingState = "idle" | "recording" | "stopped";
