@@ -6,7 +6,11 @@ import { useToast } from "@/hooks/use-toast";
 import DropComposer from "@/components/community/DropComposer";
 import DropFeed from "@/components/community/DropFeed";
 import type { Drop } from "@/types/community";
-import { getVibeId, refreshVibeId } from "@/lib/community/storage";
+import {
+  getVibeId,
+  refreshVibeId,
+  setCustomVibeId,
+} from "@/lib/community/storage";
 import { supabase } from "../lib/supabaseClient";
 import {
   enableOwnerModeFromURL,
@@ -17,6 +21,7 @@ import {
 
 export default function CommunityPage() {
   const [vibeId, setVibeId] = useState("");
+  const [vibeInput, setVibeInput] = useState(""); // input field value
   const [drops, setDrops] = useState<Drop[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -72,7 +77,11 @@ export default function CommunityPage() {
 
   useEffect(() => {
     enableOwnerModeFromURL();
-    setVibeId(getVibeId());
+
+    const stored = getVibeId();
+    setVibeId(stored);
+    setVibeInput(stored);
+
     loadDrops();
   }, []);
 
@@ -82,13 +91,40 @@ export default function CommunityPage() {
   const handleRefreshVibeId = () => {
     const next = refreshVibeId();
     setVibeId(next);
-    toast({ title: "Vibe ID refreshed", description: `You are now ${next}` });
+    setVibeInput(next);
+    toast({
+      title: "Vibe ID refreshed",
+      description: `You are now ${next}`,
+    });
+  };
+
+  const handleSaveCustomVibeId = () => {
+    const trimmed = vibeInput.trim();
+
+    if (!trimmed) {
+      toast({
+        title: "Vibe ID can't be empty",
+        description: "Type something soft and unique to you.",
+        variant: "destructive",
+      });
+      setVibeInput(vibeId);
+      return;
+    }
+
+    // Optionally you could add more rules here (length, characters, etc.)
+    const saved = setCustomVibeId(trimmed);
+    setVibeId(saved);
+
+    toast({
+      title: "Vibe ID updated",
+      description: `You're now ${saved}`,
+    });
   };
 
   // after composer posts, reload feed
   const handlePost = async () => await loadDrops();
 
-  // when a reply is added (your DropComposer/onReply handler should call this)
+  // when a reply is added
   const handleReply = async () => await loadDrops();
 
   // increment reactions (“I Feel This”)
@@ -118,14 +154,14 @@ export default function CommunityPage() {
     }
   };
 
-  // NEW: wire DropCard onUpdated → update local list (no full reload)
+  // DropCard edit → update local list
   const handleCardUpdated = (updated: Drop) => {
     setDrops((prev) =>
       prev.map((d) => (d.id === updated.id ? { ...d, ...updated } : d)),
     );
   };
 
-  // NEW: wire DropCard onDeleted → remove locally (no full reload)
+  // DropCard delete → remove locally
   const handleCardDeleted = (deletedId: string) => {
     setDrops((prev) => prev.filter((d) => d.id !== deletedId));
   };
@@ -149,22 +185,45 @@ export default function CommunityPage() {
         </div>
       )}
 
-      <div className="mb-8 p-4 bg-blue-50 rounded-xl border border-blue-100">
+      <div className="mb-8 p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-3">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-blue-600 mb-1">Your Vibe ID</p>
-            <p className="font-medium text-blue-800" data-testid="text-vibe-id">
+            <p
+              className="font-medium text-blue-800"
+              data-testid="text-vibe-id"
+            >
               {postVibeId}
             </p>
           </div>
+
           <button
             onClick={handleRefreshVibeId}
             className="flex items-center gap-2 px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
-            <span>Refresh</span>
+            <span>Randomize</span>
           </button>
         </div>
+
+        {/* Only show the customizer when you're not in owner mode */}
+        {!ownerActive && (
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <input
+              className="flex-1 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200"
+              placeholder="Pick your Vibe ID (e.g., CalmDusk43)"
+              value={vibeInput}
+              onChange={(e) => setVibeInput(e.target.value)}
+              maxLength={40}
+            />
+            <button
+              onClick={handleSaveCustomVibeId}
+              className="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            >
+              Save Vibe ID
+            </button>
+          </div>
+        )}
       </div>
 
       <DropComposer vibeId={postVibeId} onPost={handlePost} />
@@ -177,7 +236,6 @@ export default function CommunityPage() {
           currentVibeId={postVibeId}
           onReply={handleReply}
           onReaction={handleReaction}
-          // NEW: make list respond instantly to edits/deletes
           onUpdated={handleCardUpdated}
           onDeleted={handleCardDeleted}
         />

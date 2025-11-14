@@ -1,94 +1,81 @@
-import type { Drop } from "@/types/community";
-import { generateCalmName } from "./calmName";
+// client/src/lib/community/storage.ts
 
-const VIBE_ID_KEY = "md_vibeId";
-const OLD_CALM_NAME_KEY = "md_calmName";
-const DROPS_KEY = "md_drops";
-const LAST_POST_KEY = "md_lastPostAt";
-const MAX_DROPS = 500;
+const VIBE_ID_KEY = "mooddrop_vibe_id";
 
+// Some soft default Vibe IDs, used when we need to generate one
+const FALLBACK_VIBES = [
+  "SoftGlow12",
+  "CalmDusk43",
+  "GentleBreeze19",
+  "QuietBloom07",
+  "StillWaters28",
+  "SunsetWhisper33",
+];
+
+function isBrowser() {
+  return typeof window !== "undefined";
+}
+
+function generateRandomVibeId(): string {
+  const pick =
+    FALLBACK_VIBES[Math.floor(Math.random() * FALLBACK_VIBES.length)];
+  return pick;
+}
+
+// Clean up what the user typed (no empty strings, trim spaces)
+function normalizeVibeId(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  return trimmed;
+}
+
+/**
+ * Get whatever Vibe ID is stored in localStorage,
+ * or null if there isn't one yet.
+ */
+export function readStoredVibeId(): string | null {
+  if (!isBrowser()) return null;
+  const raw = window.localStorage.getItem(VIBE_ID_KEY);
+  return normalizeVibeId(raw);
+}
+
+/**
+ * Save a Vibe ID to localStorage (used by both random + custom flows).
+ */
+export function saveVibeId(raw: string): string {
+  const norm = normalizeVibeId(raw);
+  const finalValue = norm ?? generateRandomVibeId();
+
+  if (isBrowser()) {
+    window.localStorage.setItem(VIBE_ID_KEY, finalValue);
+  }
+  return finalValue;
+}
+
+/**
+ * Main entry: get a Vibe ID for this browser.
+ * If none exists, we generate one and save it.
+ */
 export function getVibeId(): string {
-  try {
-    // Check for new key first
-    let existing = localStorage.getItem(VIBE_ID_KEY);
-    
-    // Migration: if md_vibeId doesn't exist but md_calmName does, migrate it
-    if (!existing) {
-      const oldName = localStorage.getItem(OLD_CALM_NAME_KEY);
-      if (oldName) {
-        localStorage.setItem(VIBE_ID_KEY, oldName);
-        existing = oldName;
-      }
-    }
-    
-    if (existing) return existing;
-    
-    // Generate new if neither exists
-    const newName = generateCalmName();
-    localStorage.setItem(VIBE_ID_KEY, newName);
-    return newName;
-  } catch {
-    return generateCalmName();
-  }
+  const existing = readStoredVibeId();
+  if (existing) return existing;
+
+  const generated = generateRandomVibeId();
+  return saveVibeId(generated);
 }
 
+/**
+ * Used when the user taps "Refresh" / "Randomize".
+ */
 export function refreshVibeId(): string {
-  try {
-    const newName = generateCalmName();
-    localStorage.setItem(VIBE_ID_KEY, newName);
-    return newName;
-  } catch {
-    return generateCalmName();
-  }
+  const next = generateRandomVibeId();
+  return saveVibeId(next);
 }
 
-export function getDrops(): Drop[] {
-  try {
-    const stored = localStorage.getItem(DROPS_KEY);
-    if (!stored) return [];
-    return JSON.parse(stored);
-  } catch {
-    return [];
-  }
-}
-
-export function saveDrops(drops: Drop[]): void {
-  try {
-    const limited = drops.slice(0, MAX_DROPS);
-    localStorage.setItem(DROPS_KEY, JSON.stringify(limited));
-  } catch (error) {
-    console.error("Failed to save drops:", error);
-  }
-}
-
-export function addDrop(drop: Drop): void {
-  const drops = getDrops();
-  drops.unshift(drop);
-  saveDrops(drops);
-}
-
-export function updateDrop(updatedDrop: Drop): void {
-  const drops = getDrops();
-  const index = drops.findIndex(d => d.id === updatedDrop.id);
-  if (index !== -1) {
-    drops[index] = updatedDrop;
-    saveDrops(drops);
-  }
-}
-
-export function getLastPostAt(): number | null {
-  try {
-    const stored = localStorage.getItem(LAST_POST_KEY);
-    return stored ? parseInt(stored, 10) : null;
-  } catch {
-    return null;
-  }
-}
-
-export function setLastPostAt(timestamp: number): void {
-  try {
-    localStorage.setItem(LAST_POST_KEY, timestamp.toString());
-  } catch (error) {
-    console.error("Failed to set last post time:", error);
-  }
+/**
+ * Used when the user types their own custom Vibe ID.
+ */
+export function setCustomVibeId(raw: string): string {
+  return saveVibeId(raw);
 }
