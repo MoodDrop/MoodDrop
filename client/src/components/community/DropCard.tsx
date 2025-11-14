@@ -5,7 +5,8 @@ import { formatDistanceToNow } from "date-fns";
 import type { Drop } from "@/types/community";
 import { supabase } from "@/lib/supabaseClient";
 import { canManageDrop } from "@/lib/ownership";
-import ownerDroplet from "@/assets/droplet.png"; // <- your PNG
+// your MoodDrop PNG droplet
+import ownerDroplet from "../../assets/droplet.png";
 
 type Props = {
   drop: Drop;
@@ -24,21 +25,25 @@ export default function DropCard({
   onUpdated,
   onDeleted,
 }: Props) {
+  // Can this user edit/delete? (author OR owner mode)
   const manageable = canManageDrop({
     currentVibeId,
     dropVibeId: drop.vibeId,
   });
 
-  const isOwnerReply = drop.vibeId === "Charae 💧";
+  const isOwnerDrop = drop.vibeId === "Charae 💧";
 
+  // Edit state
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(drop.text);
   const [isBusy, setIsBusy] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
+  // Reply composer state
   const [replyOpen, setReplyOpen] = useState(false);
   const [replyText, setReplyText] = useState("");
 
+  // ---- Edit handlers ----
   async function handleSaveEdit() {
     const newText = editText.trim();
     if (!newText) return;
@@ -52,6 +57,7 @@ export default function DropCard({
         .single();
       if (error) throw error;
 
+      // let parent update the list
       onUpdated?.({
         ...drop,
         text: data.text,
@@ -66,6 +72,7 @@ export default function DropCard({
     }
   }
 
+  // ---- Delete handler (soft delete: visible=false) ----
   async function handleDelete() {
     setIsBusy(true);
     try {
@@ -85,6 +92,7 @@ export default function DropCard({
     }
   }
 
+  // ---- Reply handler ----
   function handleSendReply() {
     const text = replyText.trim();
     if (!text) return;
@@ -104,7 +112,7 @@ export default function DropCard({
     >
       {/* Vibe ID row */}
       <div className="mb-1 text-sm text-[#4a3f41] font-semibold flex items-center gap-2">
-        {isOwnerReply && (
+        {isOwnerDrop && (
           <img
             src={ownerDroplet}
             alt=""
@@ -160,7 +168,7 @@ export default function DropCard({
           </p>
         )}
 
-        {/* Time + actions row (matches mockup layout) */}
+        {/* Time + actions row */}
         <div className="mt-2 flex flex-wrap items-center gap-3 text-sm select-none">
           <span className="text-[#8b7b7e]">
             {formatDistanceToNow(new Date(drop.createdAt), { addSuffix: true })}
@@ -181,7 +189,7 @@ export default function DropCard({
             Drop a Note
           </button>
 
-          {/* Feels with larger droplet */}
+          {/* Feels with bigger droplet */}
           <button
             type="button"
             onClick={() => onReaction(drop.id)}
@@ -198,7 +206,7 @@ export default function DropCard({
             <span>Feels {drop.reactions ?? 0}</span>
           </button>
 
-          {/* Owner edit/delete */}
+          {/* Edit/Delete only for author or owner */}
           {manageable && !isEditing && (
             <>
               <button
@@ -264,6 +272,50 @@ export default function DropCard({
               >
                 Send
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Existing replies: Reply Vibes */}
+        {drop.replies && drop.replies.length > 0 && (
+          <div
+            className="mt-4 pt-3 border-t"
+            style={{ borderColor: "#f6e8ea" }}
+          >
+            <div className="text-xs font-semibold text-[#8b7b7e] mb-2">
+              Reply Vibes
+            </div>
+
+            <div className="space-y-2">
+              {drop.replies.map((reply) => {
+                const isOwnerReply = reply.vibeId === "Charae 💧";
+                return (
+                  <div
+                    key={reply.id}
+                    className="rounded-2xl px-3 py-2"
+                    style={{ background: "#fff" }}
+                  >
+                    <div className="text-xs font-semibold text-[#4a3f41] mb-0.5 flex items-center gap-1">
+                      {isOwnerReply && (
+                        <img
+                          src={ownerDroplet}
+                          alt=""
+                          className="w-3.5 h-3.5 rounded-full object-contain"
+                        />
+                      )}
+                      <span>{reply.vibeId}</span>
+                    </div>
+                    <div className="text-[13px] text-[#4a3f41] leading-relaxed">
+                      {reply.text}
+                    </div>
+                    <div className="text-[11px] text-[#8b7b7e] mt-0.5">
+                      {formatDistanceToNow(new Date(reply.createdAt), {
+                        addSuffix: true,
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
