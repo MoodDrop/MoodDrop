@@ -10,7 +10,7 @@ interface DropComposerProps {
 
 const MOOD_OPTIONS = [
   { emoji: "💧", label: "Calm" },
-  { emoji: "🌷", label: "Tender" },
+
   { emoji: "🌿", label: "Grounded" },
   { emoji: "🌙", label: "Reflective" },
   { emoji: "✨", label: "Hopeful" },
@@ -18,7 +18,7 @@ const MOOD_OPTIONS = [
   { emoji: "😊", label: "Joy" },
 ];
 
-const MAX_CHARS = 500;
+const MAX_CHARS = Infinity;
 
 export default function DropComposer({
   vibeId,
@@ -44,14 +44,7 @@ export default function DropComposer({
       return;
     }
 
-    if (trimmed.length > MAX_CHARS) {
-      toast({
-        title: "Too long",
-        description: `Please keep your drop under ${MAX_CHARS} characters.`,
-        variant: "destructive",
-      });
-      return;
-    }
+    
 
     try {
       // Save to Supabase (use snake_case for database columns)
@@ -105,7 +98,7 @@ export default function DropComposer({
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="What's your vibe today..."
-        maxLength={MAX_CHARS}
+        maxLength={undefined}
         rows={4}
         disabled={disabled}
         className="w-full px-4 py-3 rounded-xl border border-warm-gray-300 focus:border-blush-400 focus:ring-2 focus:ring-blush-200 outline-none resize-none disabled:bg-warm-gray-50 disabled:cursor-not-allowed"
@@ -114,13 +107,7 @@ export default function DropComposer({
 
       {/* Character count */}
       <div className="flex justify-between items-center">
-        <p
-          className={`text-sm ${
-            remainingChars < 50 ? "text-orange-500" : "text-warm-gray-500"
-          }`}
-        >
-          {remainingChars} characters remaining
-        </p>
+        
       </div>
 
       {/* Mood selector */}
