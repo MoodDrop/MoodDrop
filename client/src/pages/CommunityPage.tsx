@@ -135,8 +135,34 @@ export default function CommunityPage() {
   // After composer posts, reload feed
   const handlePost = async () => await loadDrops();
 
-  // When a reply is added, reload feed
-  const handleReply = async () => await loadDrops();
+  // When a reply is added, INSERT reply into Supabase then reload feed
+  const handleReply = async (parentId: string, text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    try {
+      const { error } = await supabase.from("drops").insert([
+        {
+          text: trimmed,
+          mood: null,
+          reply_to: parentId,
+          visible: true,
+          vibe_id: postVibeId,
+        },
+      ]);
+
+      if (error) throw error;
+
+      await loadDrops();
+    } catch (err: any) {
+      console.error("Reply error:", err);
+      toast({
+        title: "Couldn't post reply",
+        description: err?.message || "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Increment reactions (“I Feel This”)
   const handleReaction = async (dropId: string) => {
