@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
-import { MoodChart } from "@/components/admin/MoodChart";
+import { MoodChart } from "@/components/Admin/MoodChart";
 import { FlagToggle } from "@/components/admin/FlagToggle";
 import { readFlags, setFlag } from "@/lib/featureFlags";
 
