@@ -270,7 +270,7 @@ export default function AdminPage() {
             </span>
             <div>
               <div className="text-xs uppercase tracking-[0.15em] text-rose-400">
-                MoodDrop
+                MoodDrop!
               </div>
               <div className="font-semibold text-sm">Admin Dashboard</div>
             </div>
