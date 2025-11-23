@@ -5,7 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import type { Drop } from "@/types/community";
 import { supabase } from "@/lib/supabaseClient";
 import { canManageDrop } from "@/lib/ownership";
-// your MoodDrop PNG droplet
+// your MoodDrop PNG droplet for OWNER drops
 import ownerDroplet from "../../assets/droplet.png";
 
 type Props = {
@@ -25,7 +25,7 @@ export default function DropCard({
   onUpdated,
   onDeleted,
 }: Props) {
-  // Can this user edit/delete? (author OR owner mode)
+  // Can this user edit/delete the main drop? (author OR owner mode)
   const manageable = canManageDrop({
     currentVibeId,
     dropVibeId: drop.vibeId,
@@ -33,20 +33,27 @@ export default function DropCard({
 
   const isOwnerDrop = drop.vibeId === "Charae 💧";
 
-  // Edit state
+  // ---- Main drop edit/delete state ----
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(drop.text);
   const [isBusy, setIsBusy] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
-  // Reply composer state
+  // ---- Reply composer state (new reply) ----
   const [replyOpen, setReplyOpen] = useState(false);
   const [replyText, setReplyText] = useState("");
 
-  // ---- Edit handlers ----
+  // ---- Reply edit/delete state ----
+  const [replyEditId, setReplyEditId] = useState<string | null>(null);
+  const [replyEditText, setReplyEditText] = useState("");
+  const [isReplyBusy, setIsReplyBusy] = useState(false);
+
+  // ============== MAIN DROP EDIT ==============
+
   async function handleSaveEdit() {
     const newText = editText.trim();
     if (!newText) return;
+
     setIsBusy(true);
     try {
       const { data, error } = await supabase
@@ -55,9 +62,9 @@ export default function DropCard({
         .eq("id", drop.id)
         .select()
         .single();
+
       if (error) throw error;
 
-      // let parent update the list
       onUpdated?.({
         ...drop,
         text: data.text,
@@ -72,7 +79,7 @@ export default function DropCard({
     }
   }
 
-  // ---- Delete handler (soft delete: visible=false) ----
+  // soft delete main drop
   async function handleDelete() {
     setIsBusy(true);
     try {
@@ -80,6 +87,7 @@ export default function DropCard({
         .from("drops")
         .update({ visible: false })
         .eq("id", drop.id);
+
       if (error) throw error;
 
       onDeleted?.(drop.id);
@@ -92,7 +100,8 @@ export default function DropCard({
     }
   }
 
-  // ---- Reply handler ----
+  // ============== NEW REPLY CREATION ==============
+
   function handleSendReply() {
     const text = replyText.trim();
     if (!text) return;
@@ -100,6 +109,72 @@ export default function DropCard({
     setReplyText("");
     setReplyOpen(false);
   }
+
+  // ============== REPLY EDIT / DELETE ==============
+
+  async function handleSaveReplyEdit(replyId: string) {
+    const newText = replyEditText.trim();
+    if (!newText) return;
+
+    setIsReplyBusy(true);
+    try {
+      const { data, error } = await supabase
+        .from("drops")
+        .update({ text: newText })
+        .eq("id", replyId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newReplies = (drop.replies ?? []).map((reply) =>
+        reply.id === replyId ? { ...reply, text: data.text } : reply,
+      );
+
+      onUpdated?.({
+        ...drop,
+        replies: newReplies,
+      });
+
+      setReplyEditId(null);
+      setReplyEditText("");
+    } catch (err) {
+      console.error("Reply edit failed:", err);
+      alert("Could not save your reply. Please try again.");
+    } finally {
+      setIsReplyBusy(false);
+    }
+  }
+
+  async function handleDeleteReply(replyId: string) {
+    if (!window.confirm("Delete this reply? This can’t be undone.")) return;
+
+    setIsReplyBusy(true);
+    try {
+      const { error } = await supabase
+        .from("drops")
+        .update({ visible: false })
+        .eq("id", replyId);
+
+      if (error) throw error;
+
+      const newReplies = (drop.replies ?? []).filter(
+        (reply) => reply.id !== replyId,
+      );
+
+      onUpdated?.({
+        ...drop,
+        replies: newReplies,
+      });
+    } catch (err) {
+      console.error("Reply delete failed:", err);
+      alert("Could not delete this reply. Please try again.");
+    } finally {
+      setIsReplyBusy(false);
+    }
+  }
+
+  // ================================================
 
   return (
     <div
@@ -289,6 +364,12 @@ export default function DropCard({
             <div className="space-y-2">
               {drop.replies.map((reply) => {
                 const isOwnerReply = reply.vibeId === "Charae 💧";
+                const manageableReply = canManageDrop({
+                  currentVibeId,
+                  dropVibeId: reply.vibeId,
+                });
+                const isEditingReply = replyEditId === reply.id;
+
                 return (
                   <div
                     key={reply.id}
@@ -305,14 +386,99 @@ export default function DropCard({
                       )}
                       <span>{reply.vibeId}</span>
                     </div>
-                    <div className="text-[13px] text-[#4a3f41] leading-relaxed">
-                      {reply.text}
-                    </div>
-                    <div className="text-[11px] text-[#8b7b7e] mt-0.5">
-                      {formatDistanceToNow(new Date(reply.createdAt), {
-                        addSuffix: true,
-                      })}
-                    </div>
+
+                    {isEditingReply ? (
+                      <div className="mt-1 space-y-2">
+                        <textarea
+                          className="w-full rounded-xl p-2 outline-none border text-[13px]"
+                          style={{
+                            borderColor: "#f2d9de",
+                            background: "#fff",
+                          }}
+                          rows={3}
+                          maxLength={1000}
+                          value={replyEditText}
+                          onChange={(e) =>
+                            setReplyEditText(e.target.value)
+                          }
+                          disabled={isReplyBusy}
+                        />
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleSaveReplyEdit(reply.id)}
+                            disabled={isReplyBusy}
+                            className="px-3 py-1.5 rounded-full text-xs"
+                            style={{
+                              background: "#f4cbd2",
+                              color: "#4a3f41",
+                              opacity: isReplyBusy ? 0.6 : 1,
+                              boxShadow:
+                                "0 2px 6px rgba(246, 232, 234, 0.6)",
+                            }}
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => {
+                              setReplyEditId(null);
+                              setReplyEditText("");
+                            }}
+                            disabled={isReplyBusy}
+                            className="px-3 py-1.5 rounded-full text-xs"
+                            style={{
+                              background: "#f8eef0",
+                              color: "#6d5e61",
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="text-[13px] text-[#4a3f41] leading-relaxed mt-1">
+                          {reply.text}
+                        </div>
+                        <div className="text-[11px] text-[#8b7b7e] mt-0.5 flex items-center gap-2 justify-between sm:justify-start">
+                          <span>
+                            {formatDistanceToNow(
+                              new Date(reply.createdAt),
+                              { addSuffix: true },
+                            )}
+                          </span>
+
+                          {manageableReply && (
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  setReplyEditId(reply.id);
+                                  setReplyEditText(reply.text);
+                                }}
+                                className="px-2 py-1 rounded-full text-[11px]"
+                                style={{
+                                  background: "#fde7eb",
+                                  color: "#4a3f41",
+                                }}
+                                disabled={isReplyBusy}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteReply(reply.id)}
+                                className="px-2 py-1 rounded-full text-[11px]"
+                                style={{
+                                  background: "#f9d2d9",
+                                  color: "#4a3f41",
+                                }}
+                                disabled={isReplyBusy}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
                 );
               })}
@@ -320,7 +486,7 @@ export default function DropCard({
           </div>
         )}
 
-        {/* Delete confirmation bar */}
+        {/* Delete confirmation bar for main drop */}
         {confirmingDelete && (
           <div
             className="mt-3 p-3 rounded-xl flex items-center justify-between"
