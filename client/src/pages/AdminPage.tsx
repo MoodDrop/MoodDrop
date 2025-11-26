@@ -1,6 +1,6 @@
 // client/src/pages/AdminPage.tsx
 
-import { useEffect, useMemo, useState, ChangeEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import {
   LayoutDashboard,
@@ -11,503 +11,363 @@ import {
 } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
-import { MoodChart } from "@/components/Admin/MoodChart";
-import { FlagToggle } from "@/components/Admin/FlagToggle";
+import { MoodChart } from "@/components/admin/MoodChart";
+import { FlagToggle } from "@/components/admin/FlagToggle";
 import { readFlags, setFlag } from "@/lib/featureFlags";
+import { supabase } from "@/lib/supabaseClient";
+
+type AdminSection = "overview" | "traffic" | "settings";
 
 type SavedDrop = {
-  id?: string;
-  text?: string;
-  content?: string;
-  body?: string;
-
-  mood?: string;
-  emotion?: string;
-
-  timestamp?: number | string;
-  createdAt?: number | string;
-  time?: number | string;
+  id: string;
+  content: string | null;
+  vibe_id: string | null;
+  created_at: string;
 };
 
-type AdminSection = "dashboard" | "traffic" | "engagement" | "settings" | "danger";
+type FeatureFlags = Record<string, boolean>;
 
-const LOCAL_KEY = "mooddrop_messages";
-
-function getMood(d: SavedDrop): string {
-  return (d.mood || d.emotion || "unknown").toLowerCase();
-}
-
-function getText(d: SavedDrop): string {
-  return (
-    d.text ||
-    d.content ||
-    d.body ||
-    ""
-  ).trim();
-}
-
-function getTimestamp(d: SavedDrop): number {
-  const raw = d.timestamp ?? d.createdAt ?? d.time;
-  if (raw == null) return 0;
-  if (typeof raw === "number") return raw;
-  const parsed = Date.parse(raw);
-  return Number.isNaN(parsed) ? 0 : parsed;
-}
-
-function loadDrops(): SavedDrop[] {
-  try {
-    const raw = localStorage.getItem(LOCAL_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed;
-  } catch {
-    return [];
-  }
-}
-
-function saveDrops(drops: SavedDrop[]) {
-  localStorage.setItem(LOCAL_KEY, JSON.stringify(drops));
-}
+const PLAUSIBLE_EMBED_URL = import.meta.env.VITE_PLAUSIBLE_EMBED_URL;
 
 export default function AdminPage() {
   const { toast } = useToast();
 
-  const [section, setSection] = useState<AdminSection>("dashboard");
-  const [drops, setDrops] = useState<SavedDrop[]>([]);
-  const [flags, setFlagsState] = useState<Record<string, boolean>>({});
-  const [isReady, setIsReady] = useState(false);
+  const [activeSection, setActiveSection] = useState<AdminSection>("overview");
 
-  const plausibleUrl = import.meta.env.VITE_PLAUSIBLE_PUBLIC_URL as
-    | string
-    | undefined;
+  const [recentDrops, setRecentDrops] = useState<SavedDrop[]>([]);
+  const [isLoadingDrops, setIsLoadingDrops] = useState(false);
+  const [dropsError, setDropsError] = useState<string | null>(null);
 
-  // Simple password gate (reuses your existing behavior)
+  const [flags, setFlags] = useState<FeatureFlags>({});
+  const [isLoadingFlags, setIsLoadingFlags] = useState(true);
+
+  // ---- Load feature flags on mount ----
   useEffect(() => {
-    const ok = localStorage.getItem("mooddrop_admin_ok");
-    if (!ok) {
-      const input = window.prompt("Enter admin password:");
-      if (!input || input !== import.meta.env.VITE_ADMIN_PASS) {
-        window.location.href = "/";
-        return;
-      }
-      localStorage.setItem("mooddrop_admin_ok", "1");
-    }
-
-    setDrops(loadDrops());
-    setFlagsState(readFlags());
-    setIsReady(true);
-  }, []);
-
-  const stats = useMemo(() => {
-    const total = drops.length;
-    const now = Date.now();
-    const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
-
-    const moodsCount: Record<string, number> = {};
-    let last7 = 0;
-
-    for (const d of drops) {
-      const mood = getMood(d) || "unknown";
-      moodsCount[mood] = (moodsCount[mood] || 0) + 1;
-
-      const ts = getTimestamp(d);
-      if (ts >= sevenDaysAgo) last7++;
-    }
-
-    const moodEntries = Object.entries(moodsCount).sort(
-      (a, b) => b[1] - a[1]
-    );
-
-    const topMoods = moodEntries.slice(0, 3).map(([m]) => m);
-    const chartData = moodEntries.map(([name, value]) => ({
-      name,
-      value,
-    }));
-
-    const recent = [...drops].sort(
-      (a, b) => getTimestamp(b) - getTimestamp(a)
-    ).slice(0, 5);
-
-    return {
-      totalDrops: total,
-      dropsLast7: last7,
-      topMoods,
-      uniqueMoods: moodEntries.length,
-      chartData,
-      recent,
-    };
-  }, [drops]);
-
-  const handleFlagChange = (key: string, value: boolean) => {
-    setFlag(key, value);
-    const next = readFlags();
-    setFlagsState(next);
-    toast({
-      title: "Feature flag updated",
-      description: `${key} set to ${value ? "ON" : "OFF"}`,
-    });
-  };
-
-  const handleExportCsv = () => {
-    if (!drops.length) {
-      toast({ title: "No drops to export", description: "Your list is empty." });
-      return;
-    }
-
-    const rows = [
-      `"date","mood","text"`,
-      ...drops.map((d) => {
-        const date = new Date(getTimestamp(d) || Date.now()).toISOString();
-        const mood = (getMood(d) || "").replace(/"/g, '""');
-        const text = getText(d).replace(/"/g, '""');
-        return `"${date}","${mood}","${text}"`;
-      }),
-    ];
-
-    const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    const today = new Date().toISOString().slice(0, 10);
-    link.href = url;
-    link.download = `mooddrop-admin-export-${today}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-
-    toast({ title: "Exported successfully", description: "CSV file downloaded." });
-  };
-
-  const handleImportCsv = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
+    const loadFlags = async () => {
       try {
-        const text = String(reader.result || "");
-        const lines = text.split(/\r?\n/).filter(Boolean);
-        const imported: SavedDrop[] = [];
-
-        // skip header
-        for (let i = 1; i < lines.length; i++) {
-          const line = lines[i];
-          // naive CSV split on "," while handling quotes
-          const match = line.match(/^"(.+?)","(.*?)","(.*)"$/);
-          if (!match) continue;
-          const [, dateStr, moodStr, bodyStr] = match;
-          const ts = Date.parse(dateStr);
-
-          imported.push({
-            mood: moodStr,
-            text: bodyStr,
-            timestamp: Number.isNaN(ts) ? Date.now() : ts,
-          });
-        }
-
-        if (!imported.length) {
-          toast({
-            title: "No valid rows found",
-            description: "Check the CSV format and try again.",
-          });
-          return;
-        }
-
-        const merged = [...drops, ...imported];
-        saveDrops(merged);
-        setDrops(merged);
-
+        const stored = await readFlags();
+        setFlags(stored ?? {});
+      } catch (error) {
+        console.error("Error reading feature flags", error);
         toast({
-          title: "Import complete",
-          description: `Imported ${imported.length} drops.`,
-        });
-      } catch (err) {
-        console.error(err);
-        toast({
-          title: "Import failed",
-          description: "There was a problem reading that file.",
+          title: "Error loading settings",
+          description: "Feature toggles could not be loaded.",
           variant: "destructive",
         });
       } finally {
-        e.target.value = "";
+        setIsLoadingFlags(false);
       }
     };
 
-    reader.readAsText(file);
+    loadFlags();
+  }, [toast]);
+
+  const handleFlagChange = async (key: string, value: boolean) => {
+    try {
+      setFlags((prev) => ({ ...prev, [key]: value }));
+      await setFlag(key, value);
+      toast({
+        title: "Setting updated",
+        description: `"${key}" has been ${value ? "enabled" : "disabled"}.`,
+      });
+    } catch (error) {
+      console.error("Error updating flag", error);
+      toast({
+        title: "Error updating setting",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleClearAll = () => {
-    const ok = window.confirm(
-      "This will permanently delete ALL stored drops in localStorage. Continue?"
-    );
-    if (!ok) return;
+  // ---- Load recent drops (Supabase) ----
+  useEffect(() => {
+    const loadDrops = async () => {
+      setIsLoadingDrops(true);
+      setDropsError(null);
 
-    saveDrops([]);
-    setDrops([]);
-    toast({
-      title: "All drops cleared",
-      description: "Local admin history has been reset.",
-      variant: "destructive",
-    });
-  };
+      // IMPORTANT FIX: use lowercase table name "drops"
+      const { data, error } = await supabase
+        .from("drops")
+        .select("id, content, vibe_id, created_at")
+        .order("created_at", { ascending: false })
+        .limit(6);
 
-  if (!isReady) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-rose-50 text-rose-900">
-        <p className="text-sm opacity-70">Loading MoodDrop Admin…</p>
-      </div>
-    );
-  }
+      if (error) {
+        console.error("Error loading drops", error);
+        setDropsError(error.message);
+        toast({
+          title: "Error loading drops",
+          description: "Admin could not fetch the latest drops.",
+          variant: "destructive",
+        });
+      } else {
+        setRecentDrops(data ?? []);
+      }
+
+      setIsLoadingDrops(false);
+    };
+
+    loadDrops();
+  }, [toast]);
+
+  const totalDrops = useMemo(() => recentDrops.length, [recentDrops]);
+
+  // Overview stat placeholders – can be wired to real analytics later
+  const totalVisits = 0; // placeholder
+  const activeUsers7d = 0; // placeholder
 
   return (
-    <div className="min-h-screen bg-rose-50 text-rose-900 flex">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-rose-100 bg-rose-50/80 backdrop-blur-sm px-5 py-6 flex flex-col gap-8">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-rose-100 text-xs">
-              💧
-            </span>
-            <div>
-              <div className="text-xs uppercase tracking-[0.15em] text-rose-400">
-                MoodDrop!
-              </div>
-              <div className="font-semibold text-sm">Admin Dashboard</div>
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#ffe4ec_0,_#ffffff_45%,_#ffe4ec_100%)]">
+      {/* Layout A: wide, centered canvas */}
+      <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+        {/* Top header */}
+        <header className="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-rose-100/70 px-3 py-1 text-xs font-medium text-rose-700">
+              <span className="h-2 w-2 rounded-full bg-rose-500" />
+              Owner Mode — MoodDrop Admin
             </div>
-          </div>
-          <p className="text-xs text-rose-400">
-            Quiet overview of how your space is doing.
-          </p>
-        </div>
-
-        <nav className="flex-1 flex flex-col gap-6 text-sm">
-          <div className="space-y-1">
-            <SidebarItem
-              icon={LayoutDashboard}
-              label="Dashboard"
-              active={section === "dashboard"}
-              onClick={() => setSection("dashboard")}
-            />
-            <SidebarItem
-              icon={BarChart3}
-              label="Traffic"
-              active={section === "traffic"}
-              onClick={() => setSection("traffic")}
-            />
-            <SidebarItem
-              icon={Activity}
-              label="Engagement"
-              active={section === "engagement"}
-              onClick={() => setSection("engagement")}
-            />
-            <SidebarItem
-              icon={Settings}
-              label="Settings"
-              active={section === "settings"}
-              onClick={() => setSection("settings")}
-            />
+            <h1 className="mt-3 text-2xl font-semibold text-slate-900 sm:text-3xl">
+              Admin Dashboard
+            </h1>
+            <p className="mt-1 text-sm text-slate-600">
+              Soft, simple overview of how MoodDrop is flowing — visits, drops,
+              and feature controls.
+            </p>
           </div>
 
-          <div className="border-t border-rose-100 pt-4 mt-auto">
-            <SidebarItem
-              icon={AlertTriangle}
-              label="Danger Zone"
-              active={section === "danger"}
-              onClick={() => setSection("danger")}
-              danger
-            />
-          </div>
+          <Link href="/">
+            <button className="rounded-full border border-rose-100 bg-white px-4 py-2 text-xs font-medium text-rose-700 shadow-sm transition hover:border-rose-200 hover:bg-rose-50">
+              ← Back to MoodDrop
+            </button>
+          </Link>
+        </header>
+
+        {/* Tabs */}
+        <nav className="mb-6 flex gap-2 overflow-x-auto rounded-full bg-white/70 p-1 text-sm shadow-sm backdrop-blur">
+          <TabButton
+            icon={LayoutDashboard}
+            label="Overview"
+            isActive={activeSection === "overview"}
+            onClick={() => setActiveSection("overview")}
+          />
+          <TabButton
+            icon={BarChart3}
+            label="Traffic"
+            isActive={activeSection === "traffic"}
+            onClick={() => setActiveSection("traffic")}
+          />
+          <TabButton
+            icon={Settings}
+            label="Settings"
+            isActive={activeSection === "settings"}
+            onClick={() => setActiveSection("settings")}
+          />
         </nav>
 
-        <div className="mt-auto text-[11px] text-rose-400 flex flex-col gap-1">
-          <Link href="/" className="hover:underline">
-            ← Back to MoodDrop
-          </Link>
-          <span>Mode: {import.meta.env.MODE}</span>
-        </div>
-      </aside>
+        {/* Main content */}
+        <main className="flex-1">
+          {activeSection === "overview" && (
+            <OverviewSection
+              totalVisits={totalVisits}
+              totalDrops={totalDrops}
+              activeUsers7d={activeUsers7d}
+              isLoadingDrops={isLoadingDrops}
+              dropsError={dropsError}
+              recentDrops={recentDrops}
+            />
+          )}
 
-      {/* Main content */}
-      <main className="flex-1 px-6 py-6">
-        {section === "dashboard" && (
-          <DashboardSection stats={stats} />
-        )}
+          {activeSection === "traffic" && (
+            <TrafficSection plausibleUrl={PLAUSIBLE_EMBED_URL} />
+          )}
 
-        {section === "traffic" && (
-          <TrafficSection plausibleUrl={plausibleUrl} />
-        )}
-
-        {section === "engagement" && (
-          <EngagementSection stats={stats} />
-        )}
-
-        {section === "settings" && (
-          <SettingsSection
-            flags={flags}
-            onFlagChange={handleFlagChange}
-            onExport={handleExportCsv}
-            onImport={handleImportCsv}
-          />
-        )}
-
-        {section === "danger" && (
-          <DangerSection onClearAll={handleClearAll} />
-        )}
-      </main>
+          {activeSection === "settings" && (
+            <SettingsSection
+              flags={flags}
+              isLoadingFlags={isLoadingFlags}
+              onFlagChange={handleFlagChange}
+            />
+          )}
+        </main>
+      </div>
     </div>
   );
 }
 
-/* --- Sidebar item component --- */
+// ----------------- Sub-components -----------------
 
-type SidebarItemProps = {
+type TabButtonProps = {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
-  active?: boolean;
-  danger?: boolean;
-  onClick?: () => void;
+  isActive: boolean;
+  onClick: () => void;
 };
 
-function SidebarItem({
-  icon: Icon,
-  label,
-  active,
-  danger,
-  onClick,
-}: SidebarItemProps) {
+function TabButton({ icon: Icon, label, isActive, onClick }: TabButtonProps) {
   return (
     <button
       onClick={onClick}
-      className={[
-        "w-full flex items-center gap-2 rounded-xl px-3 py-2 text-left transition",
-        active
-          ? "bg-rose-100 text-rose-900 shadow-sm"
-          : "text-rose-500 hover:bg-rose-100/70 hover:text-rose-900",
-        danger && "text-red-500 hover:bg-red-50 hover:text-red-700",
-      ].join(" ")}
+      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium transition ${
+        isActive
+          ? "bg-rose-600 text-white shadow-sm"
+          : "bg-transparent text-slate-600 hover:bg-rose-50"
+      }`}
     >
       <Icon className="h-4 w-4" />
-      <span className="text-xs font-medium">{label}</span>
+      {label}
     </button>
   );
 }
 
-/* --- Sections --- */
-
-type Stats = ReturnType<typeof AdminPage> extends JSX.Element
-  ? never
-  : never; // ignore
-
-type DashboardStats = ReturnType<typeof useMemo>;
-
-type DashboardProps = {
-  stats: {
-    totalDrops: number;
-    dropsLast7: number;
-    topMoods: string[];
-    uniqueMoods: number;
-    chartData: { name: string; value: number }[];
-    recent: SavedDrop[];
-  };
+type OverviewProps = {
+  totalVisits: number;
+  totalDrops: number;
+  activeUsers7d: number;
+  isLoadingDrops: boolean;
+  dropsError: string | null;
+  recentDrops: SavedDrop[];
 };
 
-function DashboardSection({ stats }: DashboardProps) {
-  const { totalDrops, dropsLast7, topMoods, uniqueMoods, chartData, recent } =
-    stats;
-
+function OverviewSection({
+  totalVisits,
+  totalDrops,
+  activeUsers7d,
+  isLoadingDrops,
+  dropsError,
+  recentDrops,
+}: OverviewProps) {
   return (
     <div className="space-y-6">
-      <header className="flex items-baseline justify-between gap-4">
-        <div>
-          <h1 className="text-lg font-semibold text-rose-900">Dashboard</h1>
-          <p className="text-xs text-rose-400">
-            At-a-glance view of drops and moods.
+      {/* Stats row */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Total Visits
+            </span>
+            <Activity className="h-4 w-4 text-rose-500" />
+          </div>
+          <p className="text-2xl font-semibold text-slate-900">
+            {totalVisits.toLocaleString()}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            Connected to Plausible (coming soon).
           </p>
         </div>
-      </header>
 
-      <section className="grid gap-4 md:grid-cols-4">
-        <StatCard
-          title="Total Drops"
-          value={totalDrops.toLocaleString()}
-          hint="All time"
-        />
-        <StatCard
-          title="Last 7 Days"
-          value={dropsLast7.toLocaleString()}
-          hint="Recent drops"
-        />
-        <StatCard
-          title="Top Moods"
-          value={topMoods.length ? topMoods.join(" • ") : "No data"}
-          hint={`${uniqueMoods || 0} unique moods`}
-        />
-        <StatCard
-          title="Average per Day"
-          value={
-            dropsLast7
-              ? (dropsLast7 / 7).toFixed(1)
-              : "0.0"
-          }
-          hint="Based on last week"
-        />
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl bg-white/80 border border-rose-100 shadow-sm p-4 lg:col-span-2">
-          <h2 className="text-xs font-semibold text-rose-500 mb-3 uppercase tracking-[0.18em]">
-            Mood Distribution
-          </h2>
-          {chartData.length ? (
-            <MoodChart data={chartData} />
-          ) : (
-            <p className="text-xs text-rose-400">
-              Not enough data yet to show mood trends.
-            </p>
-          )}
+        <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Total Drops (sample)
+            </span>
+            <LayoutDashboard className="h-4 w-4 text-rose-500" />
+          </div>
+          <p className="text-2xl font-semibold text-slate-900">
+            {totalDrops.toLocaleString()}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            Based on the recent drops loaded here.
+          </p>
         </div>
 
-        <div className="rounded-2xl bg-white/80 border border-rose-100 shadow-sm p-4 space-y-3">
-          <h2 className="text-xs font-semibold text-rose-500 mb-1 uppercase tracking-[0.18em]">
-            Recent Drops
-          </h2>
-          {recent.length ? (
-            <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
-              {recent.map((d, idx) => {
-                const ts = getTimestamp(d);
-                const date = ts
-                  ? new Date(ts).toLocaleString()
-                  : "Unknown time";
-                const mood = getMood(d) || "unknown";
-                const text = getText(d) || "No text";
+        <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Active users (7d)
+            </span>
+            <BarChart3 className="h-4 w-4 text-rose-500" />
+          </div>
+          <p className="text-2xl font-semibold text-slate-900">
+            {activeUsers7d.toLocaleString()}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            Placeholder for future analytics.
+          </p>
+        </div>
+      </div>
 
-                return (
-                  <li
-                    key={idx}
-                    className="rounded-xl border border-rose-100 bg-rose-50/60 px-3 py-2"
-                  >
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-[11px] font-medium capitalize text-rose-600">
-                        {mood}
-                      </span>
-                      <span className="text-[10px] text-rose-400">
-                        {date}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-rose-700 line-clamp-3">
-                      {text}
-                    </p>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="text-xs text-rose-400">
-              Drops will appear here as your community starts sharing.
+      {/* Middle row: Mood chart + recent drops */}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,_2fr)_minmax(0,_1.3fr)]">
+        {/* Mood activity chart */}
+        <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-900">
+                Mood Activity
+              </h2>
+              <p className="text-xs text-slate-500">
+                Soft snapshot of how emotions are flowing in The Collective
+                Drop.
+              </p>
+            </div>
+          </div>
+          <div className="rounded-xl bg-rose-50/60 p-3">
+           <div className="h-40 flex items-center justify-center text-xs text-slate-400">
+  Mood chart coming soon…
+</div>
+          </div>
+        </div>
+
+        {/* Recent drops list */}
+        <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-900">
+                Recent Drops
+              </h2>
+              <p className="text-xs text-slate-500">
+                Quick peek at what your community is sharing (anonymous).
+              </p>
+            </div>
+          </div>
+
+          {isLoadingDrops && (
+            <p className="text-xs text-slate-500">Loading drops…</p>
+          )}
+
+          {dropsError && !isLoadingDrops && (
+            <div className="flex items-start gap-2 rounded-xl bg-rose-50 p-3 text-xs text-rose-700">
+              <AlertTriangle className="mt-0.5 h-4 w-4" />
+              <div>
+                <p className="font-medium">Error loading drops</p>
+                <p className="text-[11px] text-rose-600/80">
+                  {dropsError}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {!isLoadingDrops && !dropsError && recentDrops.length === 0 && (
+            <p className="text-xs text-slate-500">
+              No drops found yet. Once people start sharing, you’ll see the most
+              recent ones here.
             </p>
           )}
+
+          <ul className="mt-2 space-y-2">
+            {recentDrops.map((drop) => (
+              <li
+                key={drop.id}
+                className="rounded-xl border border-rose-50 bg-rose-50/60 p-3 text-xs"
+              >
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-medium text-rose-700">
+                    💧 {drop.vibe_id ?? "Unknown Vibe"}
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {new Date(drop.created_at).toLocaleString()}
+                  </span>
+                </div>
+                <p className="line-clamp-3 text-slate-700">
+                  {drop.content || "No text content"}
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
@@ -519,236 +379,211 @@ type TrafficProps = {
 function TrafficSection({ plausibleUrl }: TrafficProps) {
   return (
     <div className="space-y-4">
-      <header>
-        <h1 className="text-lg font-semibold text-rose-900">Traffic</h1>
-        <p className="text-xs text-rose-400">
-          High-level visitor analytics powered by Plausible.
+      <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
+        <h2 className="text-sm font-semibold text-slate-900">
+          Traffic & Analytics
+        </h2>
+        <p className="mt-1 text-xs text-slate-500">
+          This panel is ready for Plausible. Once you add the embed URL to your
+          <code className="mx-1 rounded bg-slate-100 px-1 py-0.5 text-[10px]">
+            .env.local
+          </code>
+          as{" "}
+          <code className="rounded bg-slate-100 px-1 py-0.5 text-[10px]">
+            VITE_PLAUSIBLE_EMBED_URL
+          </code>
+          , it will show live site analytics.
         </p>
-      </header>
+      </div>
 
-      {plausibleUrl ? (
-        <div className="rounded-2xl border border-rose-100 bg-white/80 shadow-sm overflow-hidden">
+      <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
+        {plausibleUrl ? (
           <iframe
             src={plausibleUrl}
-            className="w-full h-[520px]"
-            title="MoodDrop Plausible Analytics"
+            title="MoodDrop Analytics"
+            className="h-[480px] w-full rounded-xl border border-rose-100 bg-white"
           />
-        </div>
-      ) : (
-        <div className="rounded-2xl border border-rose-100 bg-white/80 shadow-sm p-4 text-xs text-rose-500">
-          <p className="mb-1 font-medium">Plausible not configured.</p>
-          <p>
-            Set <code className="text-[11px] bg-rose-50 px-1 rounded">
-              VITE_PLAUSIBLE_PUBLIC_URL
-            </code>{" "}
-            in your Vercel project to see live traffic analytics here.
-          </p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function EngagementSection({ stats }: DashboardProps) {
-  const { recent, chartData } = stats;
-
-  return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-lg font-semibold text-rose-900">Engagement</h1>
-        <p className="text-xs text-rose-400">
-          A gentle look at how often people are using MoodDrop.
-        </p>
-      </header>
-
-      <section className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl bg-white/80 border border-rose-100 shadow-sm p-4 lg:col-span-2">
-          <h2 className="text-xs font-semibold text-rose-500 mb-3 uppercase tracking-[0.18em]">
-            Mood Activity
-          </h2>
-          {chartData.length ? (
-            <MoodChart data={chartData} />
-          ) : (
-            <p className="text-xs text-rose-400">
-              Once more people share, you’ll see mood activity here.
+        ) : (
+          <div className="flex h-64 flex-col items-center justify-center rounded-xl border border-dashed border-rose-200 bg-rose-50/50 text-center">
+            <p className="text-sm font-medium text-slate-700">
+              Plausible not connected yet
             </p>
-          )}
-        </div>
-
-        <div className="rounded-2xl bg-white/80 border border-rose-100 shadow-sm p-4 space-y-3">
-          <h2 className="text-xs font-semibold text-rose-500 mb-1 uppercase tracking-[0.18em]">
-            Recent Activity
-          </h2>
-          {recent.length ? (
-            <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
-              {recent.map((d, idx) => {
-                const ts = getTimestamp(d);
-                const date = ts
-                  ? new Date(ts).toLocaleTimeString()
-                  : "Unknown time";
-                const mood = getMood(d) || "unknown";
-
-                return (
-                  <li
-                    key={idx}
-                    className="flex items-center justify-between rounded-xl bg-rose-50/80 border border-rose-100 px-3 py-2"
-                  >
-                    <span className="text-[11px] capitalize text-rose-700">
-                      {mood}
-                    </span>
-                    <span className="text-[10px] text-rose-400">{date}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="text-xs text-rose-400">
-              Activity details will show here as people begin to post.
+            <p className="mt-1 max-w-xs text-xs text-slate-500">
+              Add your Plausible embed URL to{" "}
+              <code className="rounded bg-slate-100 px-1 py-0.5 text-[10px]">
+                VITE_PLAUSIBLE_EMBED_URL
+              </code>{" "}
+              and redeploy to see traffic here.
             </p>
-          )}
-        </div>
-      </section>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 type SettingsProps = {
-  flags: Record<string, boolean>;
+  flags: FeatureFlags;
+  isLoadingFlags: boolean;
   onFlagChange: (key: string, value: boolean) => void;
-  onExport: () => void;
-  onImport: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 
 function SettingsSection({
   flags,
+  isLoadingFlags,
   onFlagChange,
-  onExport,
-  onImport,
 }: SettingsProps) {
+  const featureList: { key: string; label: string; description: string }[] = [
+    {
+      key: "calmStudio",
+      label: "Calm Studio",
+      description: "Toggle access to the Calm Studio experience.",
+    },
+    {
+      key: "collectiveDrop",
+      label: "The Collective Drop",
+      description: "Show or hide the anonymous community feed.",
+    },
+    {
+      key: "replies",
+      label: "Replies",
+      description: "Allow users to reply to each other’s drops.",
+    },
+    {
+      key: "reactions",
+      label: "Reactions (Feels)",
+      description: "Let users react with soft feels on each drop.",
+    },
+    {
+      key: "moodHistory",
+      label: "Mood History",
+      description: "Enable any future mood history / timeline features.",
+    },
+    {
+      key: "adminMode",
+      label: "Admin Mode",
+      description: "Gate admin access behind your secret passcode.",
+    },
+    {
+      key: "vibeIdGenerator",
+      label: "Vibe ID generator",
+      description: "Control the Vibe ID name system site-wide.",
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-lg font-semibold text-rose-900">Settings</h1>
-        <p className="text-xs text-rose-400">
-          Feature toggles and data tools for your space.
+      {/* Feature toggles */}
+      <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
+        <h2 className="text-sm font-semibold text-slate-900">Feature toggles</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Turn MoodDrop features on or off without touching code. Changes apply
+          the next time users visit the site.
         </p>
-      </header>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl bg-white/80 border border-rose-100 shadow-sm p-4 space-y-3">
-          <h2 className="text-xs font-semibold text-rose-500 mb-1 uppercase tracking-[0.18em]">
-            Feature Toggles
-          </h2>
-          <div className="space-y-2 text-xs">
-            <FlagToggle
-              label="Voice Notes"
-              description="Enable voice note experiments."
-              value={!!flags.enableVoiceNotes}
-              onChange={(v) => onFlagChange("enableVoiceNotes", v)}
-            />
-            <FlagToggle
-              label="Mood Garden"
-              description="Show Mood Garden tab (when ready)."
-              value={!!flags.showMoodGardenTab}
-              onChange={(v) => onFlagChange("showMoodGardenTab", v)}
-            />
-            <FlagToggle
-              label="Affirmations"
-              description="Enable daily affirmation features."
-              value={!!flags.enableAffirmations}
-              onChange={(v) => onFlagChange("enableAffirmations", v)}
-            />
+        {isLoadingFlags ? (
+          <p className="mt-3 text-xs text-slate-500">Loading toggles…</p>
+        ) : (
+          <div className="mt-4 space-y-3">
+            {featureList.map((feature) => (
+              <FlagToggle
+                key={feature.key}
+                label={feature.label}
+                description={feature.description}
+                checked={Boolean(flags[feature.key])}
+                onChange={(value: boolean) =>
+                  onFlagChange(feature.key, value)
+                }
+              />
+            ))}
           </div>
-        </div>
+        )}
+      </div>
 
-        <div className="rounded-2xl bg-white/80 border border-rose-100 shadow-sm p-4 space-y-3">
-          <h2 className="text-xs font-semibold text-rose-500 mb-1 uppercase tracking-[0.18em]">
-            Data Tools
-          </h2>
-          <p className="text-[11px] text-rose-500 mb-2">
-            Export your admin history or merge in CSV data.
+      {/* Data tools */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
+          <h3 className="text-sm font-semibold text-slate-900">Data tools</h3>
+          <p className="mt-1 text-xs text-slate-500">
+            Light tools to help you manage data and debugging while developing
+            MoodDrop.
           </p>
-          <div className="flex flex-wrap gap-2 text-xs">
+
+          <div className="mt-3 flex flex-wrap gap-2 text-xs">
             <button
-              type="button"
-              onClick={onExport}
-              className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 hover:bg-rose-100 transition"
+              className="rounded-full bg-rose-600 px-3 py-1.5 font-medium text-white shadow-sm hover:bg-rose-700"
+              onClick={() => {
+                console.log("[Admin] Export CSV clicked");
+                // TODO: implement CSV export
+              }}
             >
               Export CSV
             </button>
-
-            <label className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 hover:bg-rose-100 transition cursor-pointer">
-              Import CSV
-              <input
-                type="file"
-                accept=".csv,text/csv"
-                onChange={onImport}
-                className="hidden"
-              />
-            </label>
+            <button
+              className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 font-medium text-rose-700 hover:bg-rose-100"
+              onClick={() => {
+                console.log("[Admin] Clear local My Drops clicked");
+                // TODO: implement local My Drops clear
+              }}
+            >
+              Clear local My Drops
+            </button>
+            <button
+              className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 font-medium text-rose-700 hover:bg-rose-100"
+              onClick={() => {
+                console.log("[Admin] Refresh Vibe ID list clicked");
+                // TODO: implement Vibe ID refresh
+              }}
+            >
+              Refresh Vibe ID list
+            </button>
           </div>
-          <p className="text-[10px] text-rose-400">
-            CSV format: "date","mood","text".
+        </div>
+
+        {/* Danger zone */}
+        <div className="rounded-2xl border border-rose-200/80 bg-rose-50/80 p-4 shadow-sm">
+          <div className="mb-2 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-rose-700" />
+            <h3 className="text-sm font-semibold text-rose-800">
+              Danger zone
+            </h3>
+          </div>
+          <p className="text-xs text-rose-700/90">
+            Heavy actions for testing or emergencies. These will eventually be
+            wired to real destructive operations, so use carefully.
           </p>
+
+          <div className="mt-3 flex flex-wrap gap-2 text-xs">
+            <button
+              className="rounded-full bg-rose-700 px-3 py-1.5 font-medium text-rose-50 shadow-sm hover:bg-rose-800"
+              onClick={() => {
+                console.log("[Admin] Delete all drops clicked");
+                // TODO: implement delete all drops
+              }}
+            >
+              Delete all drops
+            </button>
+            <button
+              className="rounded-full border border-rose-300 bg-rose-100 px-3 py-1.5 font-medium text-rose-800 hover:bg-rose-200"
+              onClick={() => {
+                console.log("[Admin] Reset admin mode clicked");
+                // TODO: implement reset admin mode
+              }}
+            >
+              Reset admin mode
+            </button>
+            <button
+              className="rounded-full border border-rose-300 bg-rose-100 px-3 py-1.5 font-medium text-rose-800 hover:bg-rose-200"
+              onClick={() => {
+                console.log("[Admin] Clear analytics cache clicked");
+                // TODO: implement clear analytics cache
+              }}
+            >
+              Clear analytics cache
+            </button>
+          </div>
         </div>
-      </section>
-    </div>
-  );
-}
-
-type DangerProps = {
-  onClearAll: () => void;
-};
-
-function DangerSection({ onClearAll }: DangerProps) {
-  return (
-    <div className="space-y-4">
-      <header>
-        <h1 className="text-lg font-semibold text-red-700">Danger Zone</h1>
-        <p className="text-xs text-red-400">
-          Destructive actions. Take a breath before you tap anything here.
-        </p>
-      </header>
-
-      <div className="rounded-2xl border border-red-100 bg-red-50/70 shadow-sm p-4 space-y-3 text-xs text-red-700">
-        <p className="font-semibold">Delete all local admin drops</p>
-        <p className="text-[11px] text-red-500">
-          This only clears the localStorage history used for admin stats and
-          CSV export. It does <span className="font-semibold">not</span> delete
-          anything in Supabase.
-        </p>
-        <button
-          type="button"
-          onClick={onClearAll}
-          className="inline-flex items-center justify-center rounded-xl bg-red-600 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-red-700 transition"
-        >
-          Delete ALL local drops
-        </button>
       </div>
-    </div>
-  );
-}
-
-/* --- Small stat card helper --- */
-
-type StatCardProps = {
-  title: string;
-  value: string;
-  hint?: string;
-};
-
-function StatCard({ title, value, hint }: StatCardProps) {
-  return (
-    <div className="rounded-2xl bg-white/80 border border-rose-100 shadow-sm px-4 py-3 flex flex-col gap-1">
-      <div className="text-[11px] uppercase tracking-[0.18em] text-rose-400">
-        {title}
-      </div>
-      <div className="text-base font-semibold text-rose-900">{value}</div>
-      {hint && (
-        <div className="text-[11px] text-rose-400">
-          {hint}
-        </div>
-      )}
     </div>
   );
 }
