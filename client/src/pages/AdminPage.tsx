@@ -12,7 +12,7 @@ import {
 
 import { useToast } from "@/hooks/use-toast";
 import { MoodChart } from "@/components/admin/MoodChart";
-import { FlagToggle } from "@/components/admin/FlagToggle";
+import { FlagToggle } from "@/components/Admin/FlagToggle";
 import { readFlags, setFlag } from "@/lib/featureFlags";
 import { supabase } from "@/lib/supabaseClient";
 
