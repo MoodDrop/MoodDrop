@@ -70,7 +70,7 @@ export default function HomePage() {
       <section className="mb-10 text-center">
         {/* Mood circles */}
         <p className="text-sm text-warm-gray-600 mb-4">
-          Choose your mood to begin…
+          Choose your mood to begin your private drop...
         </p>
 
         <div className="flex flex-wrap justify-center gap-6 mb-8">
