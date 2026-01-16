@@ -24,6 +24,10 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import QAPage from "@/pages/QAPage";
 import ContactPage from "@/pages/ContactPage";
 
+// ✅ Soft Reads (Blog)
+import SoftReadsPage from "@/pages/SoftReadsPage";
+import SoftReadPostPage from "@/pages/SoftReadPostPage";
+
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 
@@ -66,6 +70,10 @@ function Router() {
       <Route path="/privacy" component={Privacy} />
       <Route path="/qa" component={QAPage} />
       <Route path="/contact" component={ContactPage} />
+
+      {/* ✅ Soft Reads */}
+      <Route path="/soft-reads" component={SoftReadsPage} />
+      <Route path="/soft-reads/:slug" component={SoftReadPostPage} />
 
       {/* Admin */}
       <Route path="/admin" component={AdminPage} />

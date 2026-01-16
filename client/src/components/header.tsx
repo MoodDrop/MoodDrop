@@ -9,9 +9,7 @@ export default function Header() {
   const flags = readFlags();
 
   return (
-    <header
-      className="px-6 py-4 border-b border-blush-200 bg-gradient-to-r from-blush-50 to-cream-100"
-    >
+    <header className="px-6 py-4 border-b border-blush-200 bg-gradient-to-r from-blush-50 to-cream-100">
       <div className="flex flex-col items-center gap-3">
         <div className="flex items-center justify-between w-full">
           <Link href="/">
@@ -26,6 +24,7 @@ export default function Header() {
         </div>
 
         <nav className="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm">
+          {/* Home */}
           <Link href="/">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
@@ -41,6 +40,7 @@ export default function Header() {
 
           <span className="text-warm-gray-400">•</span>
 
+          {/* Take a Breath */}
           <Link href="/release">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
@@ -56,6 +56,7 @@ export default function Header() {
 
           <span className="text-warm-gray-400">•</span>
 
+          {/* Mood Garden */}
           <Link href="/garden">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
@@ -71,6 +72,7 @@ export default function Header() {
 
           <span className="text-warm-gray-400">•</span>
 
+          {/* Calm Studio */}
           <Link href="/calm-studio">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
@@ -84,10 +86,27 @@ export default function Header() {
             </button>
           </Link>
 
+          <span className="text-warm-gray-400">•</span>
+
+          {/* ✅ Soft Reads */}
+          <Link href="/soft-reads">
+            <button
+              className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
+                location.startsWith("/soft-reads")
+                  ? "text-blush-400 font-medium"
+                  : "text-warm-gray-600 hover:text-blush-300"
+              }`}
+              data-testid="nav-soft-reads"
+            >
+              Soft Reads
+            </button>
+          </Link>
+
           {flags.communityEnabled && (
             <>
               <span className="text-warm-gray-400">•</span>
 
+              {/* Community */}
               <Link href="/community">
                 <button
                   className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
@@ -102,8 +121,6 @@ export default function Header() {
               </Link>
             </>
           )}
-
-          {/* 👇 About MoodDrop removed completely */}
         </nav>
       </div>
     </header>
