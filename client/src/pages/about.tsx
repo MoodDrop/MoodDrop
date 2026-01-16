@@ -49,18 +49,33 @@ export default function About() {
         </p>
 
         <div className="mt-6 flex justify-center">
-          <Link href="/drop-it">
+          <Link href="/">
             <button
-              className="rounded-full border border-blush-200 bg-white/70 px-6 py-2 text-sm font-medium text-gray-700 transition hover:bg-white hover:border-blush-300 focus:outline-none focus:ring-2 focus:ring-blush-200"
               type="button"
+              className="
+                rounded-full
+                border border-blush-200
+                bg-white/70
+                px-6 py-2
+                text-sm font-medium
+                text-gray-700
+                transition
+                hover:bg-white
+                hover:border-blush-300
+                focus:outline-none
+                focus:ring-2
+                focus:ring-blush-200
+              "
             >
-              Drop It
+              Start a Drop
             </button>
           </Link>
         </div>
       </div>
 
-      <p className="mt-8 text-right font-medium text-gray-800">~ Charae 💕</p>
+      <p className="mt-8 text-right font-medium text-gray-800">
+        ~ Charae 💕
+      </p>
     </div>
   );
 }
