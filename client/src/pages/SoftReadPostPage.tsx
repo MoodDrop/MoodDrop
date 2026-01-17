@@ -1,50 +1,122 @@
-import { useEffect } from "react";
-import { Link } from "wouter";
-import dropletIcon from "@/assets/droplet.png";
+import React from "react";
+import { Link, useRoute } from "wouter";
 
 export default function SoftReadPostPage() {
-  // Ensure page always starts at top
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  const [, params] = useRoute("/soft-reads/:slug");
+  const slug = params?.slug;
 
-  const startTenseDrop = () => {
-    localStorage.setItem("mooddrop_selected_mood", "Tense");
-    window.location.href = "/drop-it";
-  };
+  /* ===============================
+     📌 PINNED / WELCOME POST
+     =============================== */
+  if (slug === "welcome" || slug === "why-mooddrop-exists") {
+    return (
+      <PostLayout
+        mood="Foundations"
+        title="I Needed a Place That Didn’t Talk Back"
+      >
+        <p>
+          Hi, I’m <strong>Charae</strong> 💧
+        </p>
 
-  return (
-    <main className="max-w-2xl mx-auto px-6 py-10 text-warm-gray-700">
-      {/* Back link */}
-      <div className="mb-6">
-        <Link href="/soft-reads">
-          <span className="text-sm text-blush-400 hover:underline cursor-pointer">
-            ← Back to Soft Reads
-          </span>
-        </Link>
-      </div>
+        <p>
+          I’m a stay-at-home mom of four daughters. I’m a wife. And I’m a woman
+          who’s still figuring herself out in the middle of everyone else needing
+          her.
+        </p>
 
-      {/* Title */}
-      <h1 className="text-2xl sm:text-3xl font-semibold text-warm-gray-900 mb-4">
-        Why You Feel Tense Even When Nothing Is Wrong
-      </h1>
+        <p>
+          My days are full — of love, responsibility, noise, repetition, care,
+          and invisible work. Some days I feel grounded and grateful. Other days
+          I feel stretched thin, quietly overwhelmed, or unsure of who I’m
+          becoming in this season of my life.
+        </p>
 
-      {/* TL;DR */}
-      <p className="text-sm italic text-warm-gray-500 mb-8">
-        If your body feels tight, restless, or “on edge” even when life seems
-        calm, you’re not broken. This is what happens when your nervous system
-        hasn’t had a chance to release yet.
-      </p>
+        <p>And then there were days I didn’t want advice.</p>
+        <p>Not encouragement.</p>
+        <p>Not “have you tried this?”</p>
+        <p>Not even a response.</p>
 
-      {/* Content */}
-      <section className="space-y-6 leading-relaxed">
-        <h2 className="font-medium text-warm-gray-900">
+        <p>
+          I just needed somewhere to put the feeling so it wouldn’t keep sitting
+          in my chest.
+        </p>
+
+        <p>
+          Private journaling helped — but it still felt like everything stayed
+          trapped inside me.
+        </p>
+        <p>Social media felt loud.</p>
+        <p>Talking felt like work.</p>
+
+        <p>I was also changing.</p>
+        <p>Outgrowing certain friendships.</p>
+        <p>Losing people I thought would be around forever.</p>
+        <p>
+          Trying to find connection again — especially over 40 — when starting
+          over socially feels awkward and vulnerable.
+        </p>
+
+        <p>
+          Sometimes I had wins that felt huge to me… and life just kept moving
+          like nothing happened.
+        </p>
+        <p>Not because people didn’t care — they just didn’t always see it.</p>
+
+        <p>
+          So I built MoodDrop — not as a solution, but as a place to{" "}
+          <strong>release</strong>.
+        </p>
+
+        <p>A place where you don’t have to explain yourself.</p>
+        <p>Where you don’t have to organize your thoughts.</p>
+        <p>Where you don’t have to make sense for anyone else.</p>
+
+        <p>Some days you’re calm.</p>
+        <p>Some days you’re overwhelmed.</p>
+        <p>
+          Some days you’re holding it together so tightly you can feel it in your
+          body.
+        </p>
+
+        <p>I created MoodDrop for all of those days.</p>
+
+        <p>You don’t have to be “ready” to be here.</p>
+        <p>You don’t have to know what you’re feeling.</p>
+        <p>You don’t have to write well or say the right thing.</p>
+
+        <p>You can just… drop it.</p>
+
+        <p>If you found your way here, I’m really glad you did.</p>
+        <p>
+          I’m here too — navigating change, identity, and the quiet parts of life
+          no one talks about enough.
+        </p>
+
+        <p className="pt-2 font-medium">— Charae 💧</p>
+      </PostLayout>
+    );
+  }
+
+  /* ===============================
+     😣 TENSE POST (FULL)
+     =============================== */
+  if (slug === "tense" || slug === "tense-for-no-reason") {
+    return (
+      <PostLayout
+        mood="Tense"
+        title="Why You Feel Tense Even When Nothing Is Wrong"
+      >
+        <p className="text-sm text-muted-foreground">
+          If your body feels tight, restless, or “on edge” even when life seems
+          calm, you’re not broken. This is what happens when your nervous system
+          hasn’t had a chance to release yet.
+        </p>
+
+        <h2 className="pt-4 text-lg font-semibold">
           A personal note from me 💧
         </h2>
 
-        <p>
-          I want to say this first — because I’ve lived it.
-        </p>
+        <p>I want to say this first — because I’ve lived it.</p>
 
         <p>
           There are days when nothing bad is happening, but my shoulders are
@@ -58,12 +130,12 @@ export default function SoftReadPostPage() {
           explain why I felt tense — I just knew I did.
         </p>
 
-        <p className="font-medium">
+        <p>
           What I’ve learned is this: tension doesn’t always come from chaos.
           Sometimes it comes from holding it together for too long.
         </p>
 
-        <h2 className="font-medium text-warm-gray-900 mt-8">
+        <h2 className="pt-4 text-lg font-semibold">
           When your body stays “on” longer than it needs to
         </h2>
 
@@ -80,7 +152,7 @@ export default function SoftReadPostPage() {
           even when nothing feels wrong and you’re craving rest.
         </p>
 
-        <h2 className="font-medium text-warm-gray-900 mt-8">
+        <h2 className="pt-4 text-lg font-semibold">
           Why overthinking shows up when you finally stop moving
         </h2>
 
@@ -95,45 +167,97 @@ export default function SoftReadPostPage() {
           Nothing is wrong — your system is just catching up.
         </p>
 
-        <h2 className="font-medium text-warm-gray-900 mt-8">
+        <h2 className="pt-4 text-lg font-semibold">
           3 Soft Ways to Unwind the Coil
         </h2>
 
-        <h3 className="font-medium mt-4">1. The “Exhale” Priority</h3>
+        <h3 className="pt-2 font-medium">1. The “Exhale” Priority</h3>
         <p>
           When we’re tense, we tend to take short, shallow sips of air. Focus only
           on the exhale — make it twice as long as the inhale. This gently signals
           safety to your nervous system.
         </p>
 
-        <h3 className="font-medium mt-4">2. The 10-Second Shake</h3>
+        <h3 className="pt-2 font-medium">2. The 10-Second Shake</h3>
         <p>
           Stand up and shake your hands, arms, and feet for ten seconds. It may
           feel silly, but it physically breaks the tension loop your body is
           holding.
         </p>
 
-        <h3 className="font-medium mt-4">3. The Brain Dump</h3>
+        <h3 className="pt-2 font-medium">3. The Brain Dump</h3>
         <p>
           Tension often comes from mental clutter. Give those thoughts somewhere
           to land so they don’t have to live in your body.
         </p>
-      </section>
+      </PostLayout>
+    );
+  }
 
-      {/* CTA */}
-      <div className="mt-12 text-center">
-        <button
-          onClick={startTenseDrop}
-          className="mx-auto flex items-center justify-center gap-3 rounded-3xl bg-blush-300 hover:bg-blush-400 text-white px-8 py-4 shadow-md transition-all"
-        >
-          <img src={dropletIcon} alt="" className="w-6 h-6" />
-          <span className="font-medium">Start a Tense Drop</span>
-        </button>
+  /* ===============================
+     🌱 COMING SOON POSTS
+     =============================== */
+  if (
+    slug === "crashout" ||
+    slug === "overwhelmed" ||
+    slug === "grounded" ||
+    slug === "calm" ||
+    slug === "joyful"
+  ) {
+    const titles: Record<string, string> = {
+      crashout: "CrashOut",
+      overwhelmed: "Overwhelmed",
+      grounded: "Grounded",
+      calm: "Calm",
+      joyful: "Joyful",
+    };
 
-        <p className="mt-4 text-xs text-warm-gray-500">
-          You don’t have to fix it. Just release it.
-        </p>
+    return (
+      <PostLayout mood={titles[slug]} title={titles[slug]}>
+        <p>Coming soon. Softly.</p>
+      </PostLayout>
+    );
+  }
+
+  /* ===============================
+     ❌ FALLBACK
+     =============================== */
+  return (
+    <div className="mx-auto w-full max-w-3xl px-6 py-10">
+      <p className="text-muted-foreground">
+        That Soft Read couldn’t be found.
+      </p>
+      <Link href="/soft-reads" className="underline underline-offset-4">
+        Back to Soft Reads →
+      </Link>
+    </div>
+  );
+}
+
+/* ===============================
+   LAYOUT
+   =============================== */
+function PostLayout({
+  title,
+  mood,
+  children,
+}: {
+  title: string;
+  mood: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="mx-auto w-full max-w-3xl px-6 py-10">
+      <Link href="/soft-reads" className="text-sm underline underline-offset-4">
+        ← Back to Soft Reads
+      </Link>
+
+      <p className="mt-4 text-sm text-muted-foreground">{mood}</p>
+      <h1 className="mt-2 text-3xl font-semibold tracking-tight">{title}</h1>
+
+      <div className="mt-6 space-y-4 leading-relaxed text-warm-gray-700">
+        {children}
       </div>
-    </main>
+    </div>
   );
 }
