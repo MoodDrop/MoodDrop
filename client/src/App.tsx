@@ -24,7 +24,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import QAPage from "@/pages/QAPage";
 import ContactPage from "@/pages/ContactPage";
 
-// ✅ Soft Reads (Blog)
+// ✅ Soft Reads
 import SoftReadsPage from "@/pages/SoftReadsPage";
 import SoftReadPostPage from "@/pages/SoftReadPostPage";
 
@@ -54,6 +54,10 @@ function Router() {
       <Route path="/my-drops" component={MyDropsPage} />
       <Route path="/drop-it" component={DropItPage} />
 
+      {/* ✅ Soft Reads */}
+      <Route path="/soft-reads" component={SoftReadsPage} />
+      <Route path="/soft-reads/:slug" component={SoftReadPostPage} />
+
       {/* Community (feature-flagged) */}
       {flags.communityEnabled && (
         <Route
@@ -71,10 +75,6 @@ function Router() {
       <Route path="/qa" component={QAPage} />
       <Route path="/contact" component={ContactPage} />
 
-      {/* ✅ Soft Reads */}
-      <Route path="/soft-reads" component={SoftReadsPage} />
-      <Route path="/soft-reads/:slug" component={SoftReadPostPage} />
-
       {/* Admin */}
       <Route path="/admin" component={AdminPage} />
       <Route path="/admin-legacy" component={AdminLogin} />
@@ -90,11 +90,14 @@ function AppContent() {
   const [location] = useLocation();
   console.log("[MoodDrop] Current route:", location);
 
+  // ✅ Make Soft Reads full-width (so the grid has room)
   const isFullWidthPage =
     location === "/garden" ||
     location === "/dashboard" ||
     location === "/calm-studio" ||
-    location === "/comfort";
+    location === "/comfort" ||
+    location === "/soft-reads" ||
+    location.startsWith("/soft-reads/");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blush-50 via-cream-50 to-blush-100">

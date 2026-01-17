@@ -1,6 +1,12 @@
 // client/src/lib/moods.ts
 
-export type MoodKey = "Calm" | "Grounded" | "Joyful" | "Overwhelmed" | "CrashOut";
+export type MoodKey =
+  | "Calm"
+  | "Grounded"
+  | "Joyful"
+  | "Tense"
+  | "Overwhelmed"
+  | "CrashOut";
 
 export interface MoodData {
   key: MoodKey;
@@ -32,6 +38,16 @@ export const MOOD_PALETTE: Record<MoodKey, MoodData> = {
     meaning: "Happy, excited, hopeful.",
     icon: "★",
   },
+
+  // ✅ Added mood: Tense
+  Tense: {
+    key: "Tense",
+    color: "#FBEFB0", // soft buttery yellow (matches your homepage Tense circle)
+    shape: "cloud",
+    meaning: "Restless, tight-chested, overthinking, mentally 'on.'",
+    icon: "〰",
+  },
+
   Overwhelmed: {
     key: "Overwhelmed",
     color: "#C9C7D2", // gentle gray/lavender

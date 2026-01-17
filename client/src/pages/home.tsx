@@ -13,7 +13,7 @@ export default function HomePage() {
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-10">
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="mb-10 max-w-xl mx-auto text-center">
         <img
           src={moodDropTextLogo}
@@ -28,23 +28,21 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* Benefits Row (no “Why MoodDrop” heading) */}
+      {/* Benefits */}
       <section className="mb-10 max-w-2xl mx-auto">
         <div className="grid gap-8 sm:grid-cols-3 text-center text-sm text-warm-gray-700">
-          {/* Safe & Confidential */}
           <div className="flex flex-col items-center gap-2">
-            <div className="mb-1 rounded-full bg-amber-50 px-3 py-3 shadow-sm">
+            <div className="rounded-full bg-amber-50 px-3 py-3 shadow-sm">
               <ShieldCheck className="h-6 w-6 text-amber-500" />
             </div>
-            <p className="font-semibold text-stone-800">Safe &amp; Confidential</p>
+            <p className="font-semibold text-stone-800">Safe & Confidential</p>
             <p className="text-xs text-warm-gray-500">
               Your drops stay private and protected.
             </p>
           </div>
 
-          {/* Voice or Text Entries */}
           <div className="flex flex-col items-center gap-2">
-            <div className="mb-1 rounded-full bg-amber-50 px-3 py-3 shadow-sm">
+            <div className="rounded-full bg-amber-50 px-3 py-3 shadow-sm">
               <Mic className="h-6 w-6 text-amber-500" />
             </div>
             <p className="font-semibold text-stone-800">Voice or Text Entries</p>
@@ -53,9 +51,8 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Join The Collective */}
           <div className="flex flex-col items-center gap-2">
-            <div className="mb-1 rounded-full bg-amber-50 px-3 py-3 shadow-sm">
+            <div className="rounded-full bg-amber-50 px-3 py-3 shadow-sm">
               <SunMedium className="h-6 w-6 text-amber-500" />
             </div>
             <p className="font-semibold text-stone-800">Join The Collective</p>
@@ -66,63 +63,38 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Mood Selector + Primary Actions */}
+      {/* Mood Selector */}
       <section className="mb-10 text-center">
-        {/* Mood circles */}
         <p className="text-sm text-warm-gray-600 mb-4">
           Choose your mood to begin your private drop...
         </p>
 
-        <div className="flex flex-wrap justify-center gap-6 mb-8">
-          {/* Calm */}
-          <button
-            onClick={() => handleMoodClick("Calm")}
-            className="flex flex-col items-center gap-2 group"
-          >
-            <span className="h-14 w-14 rounded-full bg-[#F8EEDC] shadow-sm group-hover:scale-105 transition-transform" />
-            <span className="text-xs font-medium text-stone-800">Calm</span>
-          </button>
-
-          {/* Joyful */}
-          <button
-            onClick={() => handleMoodClick("Joyful")}
-            className="flex flex-col items-center gap-2 group"
-          >
-            <span className="h-14 w-14 rounded-full bg-[#FBD2A8] shadow-sm group-hover:scale-105 transition-transform" />
-            <span className="text-xs font-medium text-stone-800">Joyful</span>
-          </button>
-
-          {/* CrashOut */}
-          <button
-            onClick={() => handleMoodClick("CrashOut")}
-            className="flex flex-col items-center gap-2 group"
-          >
-            <span className="h-14 w-14 rounded-full bg-[#F0A25A] shadow-sm group-hover:scale-105 transition-transform" />
-            <span className="text-xs font-medium text-stone-800">CrashOut</span>
-          </button>
-
-          {/* Tense */}
-          <button
-            onClick={() => handleMoodClick("Tense")}
-            className="flex flex-col items-center gap-2 group"
-          >
-            <span className="h-14 w-14 rounded-full bg-[#FBEFB0] shadow-sm group-hover:scale-105 transition-transform" />
-            <span className="text-xs font-medium text-stone-800">Tense</span>
-          </button>
-
-          {/* Overwhelmed */}
-          <button
-            onClick={() => handleMoodClick("Overwhelmed")}
-            className="flex flex-col items-center gap-2 group"
-          >
-            <span className="h-14 w-14 rounded-full bg-[#E7B6A9] shadow-sm group-hover:scale-105 transition-transform" />
-            <span className="text-xs font-medium text-stone-800">
-              Overwhelmed
-            </span>
-          </button>
+        <div className="flex justify-center gap-4 mb-8 flex-wrap sm:flex-nowrap">
+          {[
+            { key: "Calm", color: "#F8EEDC" },
+            { key: "Grounded", color: "#DCEAD9" },
+            { key: "Joyful", color: "#FBD2A8" },
+            { key: "CrashOut", color: "#F0A25A" },
+            { key: "Tense", color: "#FBEFB0" },
+            { key: "Overwhelmed", color: "#E7B6A9" },
+          ].map((mood) => (
+            <button
+              key={mood.key}
+              onClick={() => handleMoodClick(mood.key)}
+              className="flex flex-col items-center gap-1 group"
+            >
+              <span
+                className="h-10 w-10 rounded-full shadow-sm transition-all group-hover:scale-110"
+                style={{ backgroundColor: mood.color }}
+              />
+              <span className="text-[11px] font-medium text-stone-800">
+                {mood.key}
+              </span>
+            </button>
+          ))}
         </div>
 
-        {/* DROP IT BUTTON — bigger, rounder, with droplet icon */}
+        {/* Drop It Button */}
         <a
           href="/drop-it"
           className="block mx-auto w-full max-w-md rounded-3xl bg-blush-300 hover:bg-blush-400 text-white py-5 shadow-md hover:shadow-lg transition-all"
@@ -133,13 +105,12 @@ export default function HomePage() {
           </div>
         </a>
 
-        {/* Spacer text */}
-        <div className="mt-4 text-center text-xs text-warm-gray-500">
+        <div className="mt-4 text-xs text-warm-gray-500">
           Let it out — this space is just for you.
         </div>
 
-        {/* View My Drops button */}
-        <div className="mt-6 text-center">
+        {/* View My Drops */}
+        <div className="mt-6">
           <a
             href="/my-drops"
             className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white px-5 py-3 shadow-sm hover:bg-rose-50 transition-colors"
@@ -148,10 +119,7 @@ export default function HomePage() {
             <span className="text-sm font-medium">View My Drops</span>
           </a>
         </div>
-        {/* ⬆️ No extra text block here anymore */}
       </section>
-
-      
     </main>
   );
 }
