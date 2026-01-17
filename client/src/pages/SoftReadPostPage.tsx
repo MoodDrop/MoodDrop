@@ -1,9 +1,20 @@
 import React from "react";
-import { Link, useRoute } from "wouter";
+import { Link, useRoute, useLocation } from "wouter";
 
 export default function SoftReadPostPage() {
   const [, params] = useRoute("/soft-reads/:slug");
   const slug = params?.slug;
+  const [, navigate] = useLocation();
+
+  const startDropWithMood = (mood: string) => {
+    localStorage.setItem("mooddrop_selected_mood", mood);
+    navigate("/drop-it");
+  };
+
+  const startDropRitual = () => {
+    // Keeps your intended flow: Emotion → Mood Choice → Release
+    navigate("/");
+  };
 
   /* ===============================
      📌 PINNED / WELCOME POST
@@ -93,6 +104,13 @@ export default function SoftReadPostPage() {
         </p>
 
         <p className="pt-2 font-medium">— Charae 💧</p>
+
+        {/* ✅ Welcome CTA (Ritual: route to homepage mood picker) */}
+        <CtaCard
+          buttonText="Start a Drop"
+          subText="Type it or voice it — release it, and walk away."
+          onClick={startDropRitual}
+        />
       </PostLayout>
     );
   }
@@ -190,6 +208,21 @@ export default function SoftReadPostPage() {
           Tension often comes from mental clutter. Give those thoughts somewhere
           to land so they don’t have to live in your body.
         </p>
+
+        {/* ✅ Tense CTA (Mood already chosen: go straight to Drop It) */}
+        <div className="pt-6">
+          <div className="flex justify-center">
+            <button
+              onClick={() => startDropWithMood("Tense")}
+              className="rounded-full bg-rose-200 px-10 py-4 text-sm font-medium text-rose-950 shadow-sm transition hover:shadow"
+            >
+              Start a Tense Drop
+            </button>
+          </div>
+          <p className="mt-3 text-center text-sm text-muted-foreground">
+            You don’t have to fix it. Just release it.
+          </p>
+        </div>
       </PostLayout>
     );
   }
@@ -230,6 +263,37 @@ export default function SoftReadPostPage() {
       <Link href="/soft-reads" className="underline underline-offset-4">
         Back to Soft Reads →
       </Link>
+    </div>
+  );
+}
+
+/* ===============================
+   CTA CARD (Welcome)
+   =============================== */
+function CtaCard({
+  buttonText,
+  subText,
+  onClick,
+}: {
+  buttonText: string;
+  subText: string;
+  onClick: () => void;
+}) {
+  return (
+    <div className="mt-10 rounded-2xl border border-blush/40 bg-white px-6 py-8 text-center">
+      <p className="text-sm font-medium">
+        If you want a place to release it (without advice)…
+      </p>
+      <p className="mt-2 text-sm text-muted-foreground">{subText}</p>
+
+      <div className="mt-5 flex justify-center">
+        <button
+          onClick={onClick}
+          className="rounded-full border border-blush/50 bg-white px-8 py-3 text-sm font-medium transition hover:shadow-sm"
+        >
+          {buttonText}
+        </button>
+      </div>
     </div>
   );
 }
