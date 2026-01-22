@@ -1,3 +1,4 @@
+// client/src/pages/EchoVaultPage.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation } from "wouter";
@@ -14,7 +15,7 @@ import {
   base64ToBlob,
 } from "@/lib/EchoVaultLocal";
 
-/* ----------------------- positioning helpers ----------------------- */
+/* ----------------------- helpers ----------------------- */
 
 function seedRng(seed: string) {
   let h = 2166136261;
@@ -32,28 +33,17 @@ function seedRng(seed: string) {
 
 type Pos = { x: number; y: number; dur: number; delay: number };
 
-function generatePositions(ids: string[], seedKey: string, minDist = 16) {
+function generatePositions(ids: string[], seedKey: string): Record<string, Pos> {
   const rand = seedRng(seedKey);
-  const placed: { x: number; y: number }[] = [];
   const out: Record<string, Pos> = {};
-
-  const dist = (a: any, b: any) => Math.hypot(a.x - b.x, a.y - b.y);
-
-  const pick = () => ({
-    x: 8 + rand() * 84,
-    y: 12 + rand() * 76,
+  ids.forEach((id) => {
+    out[id] = {
+      x: 10 + rand() * 80,
+      y: 18 + rand() * 62,
+      dur: 6 + rand() * 3,
+      delay: rand() * 2,
+    };
   });
-
-  for (const id of ids) {
-    let p = pick();
-    let tries = 0;
-    while (tries < 300 && placed.some((q) => dist(q, p) < minDist)) {
-      p = pick();
-      tries++;
-    }
-    placed.push(p);
-    out[id] = { x: p.x, y: p.y, dur: 6 + rand() * 3, delay: rand() * 3 };
-  }
   return out;
 }
 
@@ -70,26 +60,17 @@ function formatShort(ts: number) {
 
 /* ----------------------- page ----------------------- */
 
-type VaultView = "pond" | "tucked";
-type LastAction =
-  | { kind: "tuck"; id: string; prevTuckedAt?: number }
-  | { kind: "delete"; id: string; prevTuckedAt?: number };
-
 const UNDO_MS = 6000;
 
 export default function EchoVaultPage() {
   const [, setLocation] = useLocation();
 
-  const [view, setView] = useState<VaultView>("pond");
   const [echoes, setEchoes] = useState<EchoItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; id: string } | null>(null);
 
-  const [activeAudioUrl, setActiveAudioUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const [toast, setToast] = useState<{ message: string; action: LastAction } | null>(null);
-  const toastTimerRef = useRef<number | null>(null);
-  const finalizeTimerRef = useRef<number | null>(null);
+  const [activeAudioUrl, setActiveAudioUrl] = useState<string | null>(null);
 
   const refresh = () => {
     purgeExpiredDeletesLocal(UNDO_MS);
@@ -103,7 +84,7 @@ export default function EchoVaultPage() {
   }, []);
 
   const active = useMemo(
-    () => (activeId ? echoes.find((e) => e.id === activeId) : null),
+    () => echoes.find((e) => e.id === activeId) || null,
     [activeId, echoes]
   );
 
@@ -112,169 +93,190 @@ export default function EchoVaultPage() {
     [echoes]
   );
 
-  const tuckedEchoes = useMemo(
-    () => echoes.filter((e) => !e.deletedAt && e.tuckedAt),
-    [echoes]
-  );
-
   const positions = useMemo(
-    () => generatePositions(pondEchoes.map((e) => e.id), "vault-v4", 16),
+    () => generatePositions(pondEchoes.map((e) => e.id), "vault"),
     [pondEchoes]
   );
 
-  /* ----------------------- audio restore ----------------------- */
+  /* ---------- audio rebuild ---------- */
 
   useEffect(() => {
-    if (activeAudioUrl) URL.revokeObjectURL(activeAudioUrl);
-    setActiveAudioUrl(null);
+    if (activeAudioUrl) {
+      URL.revokeObjectURL(activeAudioUrl);
+      setActiveAudioUrl(null);
+    }
 
     if (!active || active.type !== "voice") return;
 
     if (active.audioBase64) {
-      const blob = base64ToBlob(active.audioBase64, active.audioMime || "audio/webm");
+      const blob = base64ToBlob(
+        active.audioBase64,
+        active.audioMime || "audio/webm"
+      );
       const url = URL.createObjectURL(blob);
       setActiveAudioUrl(url);
       return () => URL.revokeObjectURL(url);
     }
-
-    if (active.audioUrl) setActiveAudioUrl(active.audioUrl);
   }, [activeId]);
 
-  useEffect(() => {
-    if (active?.type === "voice" && audioRef.current) {
-      try {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play();
-      } catch {}
-    }
-  }, [activeAudioUrl]);
+  /* ---------- actions ---------- */
 
-  /* ----------------------- undo helpers ----------------------- */
-
-  const clearTimers = () => {
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    if (finalizeTimerRef.current) clearTimeout(finalizeTimerRef.current);
-  };
-
-  const showUndoToast = (message: string, action: LastAction, finalize?: () => void) => {
-    clearTimers();
-    setToast({ message, action });
-
-    toastTimerRef.current = window.setTimeout(() => setToast(null), UNDO_MS);
-
-    if (finalize) {
-      finalizeTimerRef.current = window.setTimeout(finalize, UNDO_MS);
-    }
-  };
-
-  const undoLast = () => {
-    if (!toast) return;
-    const { action } = toast;
-
-    if (action.kind === "tuck") {
-      action.prevTuckedAt ? tuckEchoLocal(action.id) : returnEchoLocal(action.id);
-    } else {
-      const all = readEchoesLocal();
-      const next = all.map((e) =>
-        e.id === action.id
-          ? { ...e, deletedAt: undefined, tuckedAt: action.prevTuckedAt }
-          : e
-      );
-      localStorage.setItem("mooddrop_echo_vault_v1", JSON.stringify(next));
-    }
-
-    clearTimers();
-    setToast(null);
-    refresh();
-  };
-
-  /* ----------------------- actions ----------------------- */
+  const closeOverlay = () => setActiveId(null);
 
   const onTuckAway = () => {
     if (!active) return;
     tuckEchoLocal(active.id);
+    setToast({ message: "Echo tucked away.", id: active.id });
     setActiveId(null);
     refresh();
-    showUndoToast("Echo tucked away.", { kind: "tuck", id: active.id });
-  };
-
-  const onReturnToPond = () => {
-    if (!active) return;
-    returnEchoLocal(active.id);
-    setActiveId(null);
-    refresh();
-    showUndoToast("Echo returned to the pond.", { kind: "tuck", id: active.id, prevTuckedAt: Date.now() });
   };
 
   const onDelete = () => {
     if (!active) return;
     softDeleteEchoLocal(active.id);
+    setToast({ message: "Echo deleted.", id: active.id });
     setActiveId(null);
-    refresh();
-    showUndoToast(
-      "Echo deleted.",
-      { kind: "delete", id: active.id },
-      () => finalizeDeleteEchoLocal(active.id)
-    );
+
+    setTimeout(() => {
+      finalizeDeleteEchoLocal(active.id);
+      refresh();
+    }, UNDO_MS);
   };
 
   /* ----------------------- render ----------------------- */
 
   return (
     <main className="relative min-h-screen overflow-hidden">
-      <section className="relative mx-auto flex min-h-screen max-w-md flex-col px-6 pb-10 pt-10">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#fff1ec] via-[#f9ece6] to-[#fff]" />
 
-        {/* Pond */}
-        {view === "pond" && (
-          <div className="relative mt-10 h-[62vh] w-full">
-            {pondEchoes.map((e) => {
-              const p = positions[e.id];
-              return (
-                <motion.div
-                  key={e.id}
-                  className="absolute"
-                  style={{ left: `${p.x}%`, top: `${p.y}%`, transform: "translate(-50%, -50%)" }}
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ duration: p.dur, repeat: Infinity }}
-                >
-                  <HaloRippleEmber type={e.type} onClick={() => setActiveId(e.id)} />
-                </motion.div>
-              );
-            })}
+      <section className="relative mx-auto max-w-md px-6 pt-10 pb-10">
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => setLocation("/")}
+            className="h-10 w-10 rounded-full bg-white/50 border border-blush-200"
+          >
+            ←
+          </button>
+
+          <div className="text-center">
+            <h1 className="text-[30px] italic font-serif text-warm-800">
+              Your Echoes
+            </h1>
+            <p className="text-[12px] italic text-warm-500">
+              Drift through what you’ve released.
+            </p>
           </div>
-        )}
 
-        {/* Overlay */}
-        <AnimatePresence>
-          {active && (
-            <motion.div className="absolute inset-0 z-50 flex items-center justify-center px-6">
-              <motion.div className="w-full max-w-md rounded-[28px] px-6 py-7 bg-white/70">
+          <div className="w-10" />
+        </div>
 
-                {/* ✅ FIXED BUTTON GROUP */}
-                <div className="flex flex-wrap items-center justify-end gap-2 max-w-[220px] sm:max-w-none">
-                  <button onClick={active.tuckedAt ? onReturnToPond : onTuckAway}>
-                    {active.tuckedAt ? "Return to pond" : "Tuck away"}
+        <div className="relative h-[62vh]">
+          {pondEchoes.map((e) => {
+            const p = positions[e.id];
+            return (
+              <motion.div
+                key={e.id}
+                className="absolute"
+                style={{
+                  left: `${p.x}%`,
+                  top: `${p.y}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+                animate={{ y: [0, -10, 0] }}
+                transition={{
+                  duration: p.dur,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <HaloRippleEmber
+                  type={e.type}
+                  dateLabel={formatShort(e.createdAt)}
+                  onClick={() => setActiveId(e.id)}
+                />
+              </motion.div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ---------- OVERLAY ---------- */}
+      <AnimatePresence>
+        {active && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              background: "rgba(255,255,255,0.14)",
+              backdropFilter: "blur(20px)",
+            }}
+          >
+            <motion.div
+              className="w-full max-w-md rounded-[28px] px-6 py-6 bg-white/70 border border-blush-200"
+              initial={{ scale: 0.96, y: 8, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.98, y: 8, opacity: 0 }}
+            >
+              <div className="mb-4">
+                <div className="text-[11px] uppercase tracking-widest text-warm-500">
+                  {active.type === "voice" ? "Voice Echo" : "Text Echo"} •{" "}
+                  {active.mood}
+                </div>
+
+                <div className="mt-2 text-[22px] italic font-serif text-warm-800">
+                  {active.type === "voice" ? "Listening…" : "Reading…"}
+                </div>
+              </div>
+
+              {active.type === "text" && (
+                <div className="rounded-2xl p-4 bg-white/60 border border-blush-200 text-warm-700">
+                  {active.content}
+                </div>
+              )}
+
+              {active.type === "voice" && activeAudioUrl && (
+                <audio
+                  ref={audioRef}
+                  src={activeAudioUrl}
+                  controls
+                  className="w-full mt-4"
+                />
+              )}
+
+              <div className="mt-6 flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <button
+                    onClick={onTuckAway}
+                    className="flex-1 rounded-full px-4 py-2 text-[10px] uppercase bg-white/60 border border-blush-200"
+                  >
+                    Tuck away
                   </button>
-                  <button onClick={onDelete}>Delete</button>
-                  <button className="w-full sm:w-auto" onClick={() => setActiveId(null)}>
-                    Back to stillness
+
+                  <button
+                    onClick={onDelete}
+                    className="flex-1 rounded-full px-4 py-2 text-[10px] uppercase bg-white/60 border border-blush-200 text-rose-700"
+                  >
+                    Delete
                   </button>
                 </div>
 
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <button
+                  onClick={closeOverlay}
+                  className="rounded-full px-4 py-2 text-[10px] uppercase bg-white/60 border border-blush-200"
+                >
+                  Back to stillness
+                </button>
+              </div>
 
-        {/* Undo toast */}
-        <AnimatePresence>
-          {toast && (
-            <motion.div className="fixed bottom-5 left-1/2 -translate-x-1/2">
-              <button onClick={undoLast}>Undo</button>
+              <p className="mt-4 text-center text-[11px] italic text-warm-500 font-serif">
+                Nothing here needs to be fixed.
+              </p>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </section>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
