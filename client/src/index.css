@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ================================
+   ROOT TOKENS
+================================ */
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(20, 14.3%, 4.1%);
@@ -23,8 +26,8 @@
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
-  
-  /* Hushed Haven custom colors */
+
+  /* MoodDrop Sanctuary Palette */
   --blush-50: hsl(18, 75%, 98%);
   --blush-100: hsl(15, 67%, 94%);
   --blush-200: hsl(15, 50%, 88%);
@@ -37,6 +40,9 @@
   --warm-gray-700: hsl(20, 10%, 25%);
 }
 
+/* ================================
+   DARK MODE (unchanged)
+================================ */
 .dark {
   --background: hsl(240, 10%, 3.9%);
   --foreground: hsl(0, 0%, 98%);
@@ -57,137 +63,77 @@
   --destructive: hsl(0, 62.8%, 30.6%);
   --destructive-foreground: hsl(0, 0%, 98%);
   --ring: hsl(240, 4.9%, 83.9%);
-  --radius: 0.5rem;
 }
 
+/* ================================
+   BASE STYLES
+================================ */
 @layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply font-sans antialiased;
-    background: linear-gradient(135deg, var(--cream-50), var(--blush-50));
+    font-family: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+
+    background: linear-gradient(
+      135deg,
+      var(--cream-50),
+      var(--blush-50)
+    );
     color: var(--warm-gray-700);
     min-height: 100vh;
     transition: background 1000ms ease-in-out;
   }
 }
 
+/* ================================
+   UTILITIES
+================================ */
 @layer utilities {
-  .text-blush-300 {
-    color: var(--blush-300);
+  .text-blush-300 { color: var(--blush-300); }
+  .text-blush-400 { color: var(--blush-400); }
+  .text-warm-gray-600 { color: var(--warm-gray-600); }
+  .text-warm-gray-700 { color: var(--warm-gray-700); }
+
+  .bg-blush-50 { background-color: var(--blush-50); }
+  .bg-blush-100 { background-color: var(--blush-100); }
+  .bg-blush-200 { background-color: var(--blush-200); }
+  .bg-blush-300 { background-color: var(--blush-300); }
+  .bg-blush-400 { background-color: var(--blush-400); }
+
+  .bg-cream-50 { background-color: var(--cream-50); }
+  .bg-cream-100 { background-color: var(--cream-100); }
+  .bg-cream-200 { background-color: var(--cream-200); }
+
+  .border-blush-200 { border-color: var(--blush-200); }
+  .border-blush-300 { border-color: var(--blush-300); }
+  .border-blush-400 { border-color: var(--blush-400); }
+}
+
+/* ================================
+   ORB BREATHING ANIMATION
+================================ */
+@keyframes mooddrop-breathe {
+  0%, 100% {
+    transform: translateZ(0) scale(1);
+    filter: drop-shadow(0 18px 55px rgba(210, 160, 170, 0.18));
   }
-  
-  .text-blush-400 {
-    color: var(--blush-400);
+  50% {
+    transform: translateZ(0) scale(1.075);
+    filter: drop-shadow(0 26px 75px rgba(210, 160, 170, 0.24));
   }
-  
-  .text-warm-gray-600 {
-    color: var(--warm-gray-600);
-  }
-  
-  .text-warm-gray-700 {
-    color: var(--warm-gray-700);
-  }
-  
-  .bg-blush-50 {
-    background-color: var(--blush-50);
-  }
-  
-  .bg-blush-100 {
-    background-color: var(--blush-100);
-  }
-  
-  .bg-blush-200 {
-    background-color: var(--blush-200);
-  }
-  
-  .bg-blush-300 {
-    background-color: var(--blush-300);
-  }
-  
-  .bg-blush-400 {
-    background-color: var(--blush-400);
-  }
-  
-  .bg-cream-50 {
-    background-color: var(--cream-50);
-  }
-  
-  .bg-cream-100 {
-    background-color: var(--cream-100);
-  }
-  
-  .bg-cream-200 {
-    background-color: var(--cream-200);
-  }
-  
-  .border-blush-100 {
-    border-color: var(--blush-100);
-  }
-  
-  .border-blush-200 {
-    border-color: var(--blush-200);
-  }
-  
-  .border-blush-300 {
-    border-color: var(--blush-300);
-  }
-  
-  .border-blush-400 {
-    border-color: var(--blush-400);
-  }
-  
-  .hover\:bg-blush-400:hover {
-    background-color: var(--blush-400);
-  }
-  
-  .hover\:bg-blush-50:hover {
-    background-color: var(--blush-50);
-  }
-  
-  .hover\:border-blush-300:hover {
-    border-color: var(--blush-300);
-  }
-  
-  .hover\:text-blush-500:hover {
-    color: hsl(15, 35%, 55%);
-  }
-  
-  .focus\:border-blush-300:focus {
-    border-color: var(--blush-300);
-  }
-  
-  /* Custom animations for mood selector */
-  @keyframes pulse-gentle {
-    0%, 100% {
-      opacity: 0.6;
-    }
-    50% {
-      opacity: 1.0;
-    }
-  }
-  
-  @keyframes glow-pulse {
-    0%, 100% {
-      box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-    }
-    50% {
-      box-shadow: 0 0 16px 4px rgba(var(--glow-rgb), 0.2);
-    }
-  }
-  
-  .animate-pulse-gentle {
-    animation: pulse-gentle 4s ease-in-out infinite;
-  }
-  
-  .animate-glow-pulse {
-    animation: glow-pulse 4s ease-in-out infinite;
-  }
-  
-  .animate-glow-pulse:hover,
-  .animate-glow-pulse:active {
-    animation-play-state: paused;
+}
+
+.mooddrop-breathe {
+  animation: mooddrop-breathe 11.5s ease-in-out infinite;
+  will-change: transform, filter;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mooddrop-breathe {
+    animation: none !important;
+    filter: none !important;
   }
 }

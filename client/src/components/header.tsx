@@ -40,11 +40,27 @@ export default function Header() {
 
           <span className="text-warm-gray-400">•</span>
 
-          {/* Take a Breath */}
-          <Link href="/release">
+          {/* ✅ Echo Vault */}
+          <Link href="/vault">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                location === "/release" || location === "/breathe"
+                location === "/vault"
+                  ? "text-blush-400 font-medium"
+                  : "text-warm-gray-600 hover:text-blush-300"
+              }`}
+              data-testid="nav-vault"
+            >
+              Echoes
+            </button>
+          </Link>
+
+          <span className="text-warm-gray-400">•</span>
+
+          {/* ✅ Take a Breath (correct route) */}
+          <Link href="/calm-studio/breathe">
+            <button
+              className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
+                location === "/calm-studio/breathe"
                   ? "text-blush-400 font-medium"
                   : "text-warm-gray-600 hover:text-blush-300"
               }`}
@@ -88,7 +104,7 @@ export default function Header() {
 
           <span className="text-warm-gray-400">•</span>
 
-          {/* ✅ Soft Reads */}
+          {/* Soft Reads */}
           <Link href="/soft-reads">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
@@ -102,11 +118,10 @@ export default function Header() {
             </button>
           </Link>
 
-          {flags.communityEnabled && (
+          {/* 🚫 The Collective Drop intentionally hidden for now (Supabase kept) */}
+          {/* {flags.communityEnabled && (
             <>
               <span className="text-warm-gray-400">•</span>
-
-              {/* Community */}
               <Link href="/community">
                 <button
                   className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
@@ -120,7 +135,7 @@ export default function Header() {
                 </button>
               </Link>
             </>
-          )}
+          )} */}
         </nav>
       </div>
     </header>

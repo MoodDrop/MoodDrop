@@ -1,237 +1,140 @@
-import { useEffect, useState } from "react";
-import { Link, useLocation } from "wouter";
-
-// Floating Petal Component
-function FloatingPetal({
-  delay,
-  left,
-  size,
-}: {
-  delay: number;
-  left: string;
-  size: number;
-}) {
-  return (
-    <div
-      className="absolute animate-float opacity-60"
-      style={{
-        left,
-        animationDelay: `${delay}s`,
-        animationDuration: `${8 + Math.random() * 4}s`,
-        bottom: "-20px",
-      }}
-    >
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M12 3C12 3 8 6 8 10C8 12.2091 9.79086 14 12 14C14.2091 14 16 12.2091 16 10C16 6 12 3 12 3Z"
-          fill="#F9A8D4"
-          opacity="0.7"
-        />
-        <path
-          d="M12 14C12 14 9 16 9 19C9 20.6569 10.3431 22 12 22C13.6569 22 15 20.6569 15 19C15 16 12 14 12 14Z"
-          fill="#FBCFE8"
-          opacity="0.7"
-        />
-        <path
-          d="M12 14C12 14 15 11 19 11C20.6569 11 22 12.3431 22 14C22 15.6569 20.6569 17 19 17C15 17 12 14 12 14Z"
-          fill="#E8C5C9"
-          opacity="0.7"
-        />
-        <path
-          d="M12 14C12 14 9 11 5 11C3.34315 11 2 12.3431 2 14C2 15.6569 3.34315 17 5 17C9 17 12 14 12 14Z"
-          fill="#F0D9D7"
-          opacity="0.7"
-        />
-      </svg>
-    </div>
-  );
-}
+import { useId, useState } from "react";
+import { Link } from "wouter";
 
 export default function Footer() {
-  const [location] = useLocation();
-  const [petals, setPetals] = useState<
-    Array<{ id: number; left: string; delay: number; size: number }>
-  >([]);
-  const isHomePage = location === "/";
-
-  useEffect(() => {
-    const newPetals = Array.from({ length: 8 }, (_, i) => ({
-      id: i,
-      left: `${Math.random() * 90 + 5}%`,
-      delay: Math.random() * 5,
-      size: 20 + Math.random() * 15,
-    }));
-    setPetals(newPetals);
-  }, []);
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
 
   return (
-    <footer className="bg-gradient-to-br from-blush-100 to-[#E8D5C4] px-6 py-12 mt-auto relative overflow-hidden">
-      {/* Floating petals */}
-      <div className="absolute inset-0 pointer-events-none">
-        {petals.map((petal) => (
-          <FloatingPetal
-            key={petal.id}
-            delay={petal.delay}
-            left={petal.left}
-            size={petal.size}
-          />
-        ))}
+    <footer className="relative mt-10 overflow-hidden bg-[#FFF7F9]">
+      {/* Petals layer */}
+      <div className="pointer-events-none absolute inset-0">
+        <span className="petal petal-1" />
+        <span className="petal petal-2" />
+        <span className="petal petal-3" />
+        <span className="petal petal-4" />
+        <span className="petal petal-5" />
       </div>
 
-      <div className="max-w-4xl mx-auto relative z-10 text-center space-y-4 footer-content">
-        {/* Shared tagline */}
-        <p className="text-sm text-[#8B7355] leading-relaxed">
-          A quiet space to breathe, release, and reset.
-        </p>
+      {/* Soft atmospheric band */}
+      <div className="h-[8px] w-full bg-gradient-to-r from-[#F4CBD2]/60 via-[#FFF7F9] to-[#F1AEB8]/50" />
 
-        {isHomePage ? (
-          <>
-            {/* Home: short reassurance */}
-            <p className="text-sm text-[#8B7355] leading-relaxed">
-              Your words are safe — always private, always anonymous.
+      {/* Footer content */}
+      <div className="relative z-10 border-t border-black/5">
+        <div className="mx-auto max-w-5xl px-6 py-8">
+          {/* Tagline */}
+          <div className="flex items-center justify-center gap-3">
+            <span className="h-[1px] w-10 bg-black/10" />
+            <span className="text-[11px] tracking-wide text-[#8B7B7E]">
+              A quiet space to breathe, release, and reset.
+            </span>
+            <span className="h-[1px] w-10 bg-black/10" />
+          </div>
+
+          {/* Care & Support trigger */}
+          <div className="mt-4 flex flex-col items-center">
+            <button
+              type="button"
+              className="group inline-flex items-center gap-2 text-sm text-[#4A3F41]"
+              aria-expanded={open}
+              aria-controls={panelId}
+              onClick={() => setOpen((v) => !v)}
+            >
+              <span className="relative">
+                Care &amp; Support
+                <span className="absolute left-0 right-0 -bottom-1 h-[2px] rounded-full bg-[#F4CBD2]/70 opacity-70 transition-opacity group-hover:opacity-100" />
+              </span>
+              <span className="text-[#6D5E61] opacity-70" aria-hidden="true">
+                {open ? "˄" : "˅"}
+              </span>
+            </button>
+
+            <p className="mt-1 text-xs text-[#6D5E61]">
+              Resources are here if you need them.
             </p>
-          </>
-        ) : (
-          <>
-            {/* Other pages: disclaimer + numbers */}
-            <div className="space-y-4 mt-2">
-              <div>
-                <h3 className="text-base font-semibold text-[#8B7355] mb-2">
-                  Disclaimer
-                </h3>
-                <p className="text-sm text-[#8B7355] leading-relaxed">
-                  MoodDrop is designed for emotional release and calm reflection.
-                  It is not a substitute for professional mental health support.
-                  If you are in crisis, please reach out for help immediately.
-                </p>
-              </div>
+          </div>
 
-              <div>
-                <h3 className="text-base font-semibold text-[#8B7355] mb-2">
-                  Important Numbers
-                </h3>
-                <div className="text-sm text-[#8B7355] leading-relaxed space-y-1">
-                  <p>
-                    📞 National Suicide &amp; Crisis Lifeline (US):{" "}
-                    <strong>988</strong>
-                  </p>
-                  <p>
-                    🌍 International helplines:{" "}
+          {/* Care & Support reveal */}
+          <div
+            id={panelId}
+            className={[
+              "overflow-hidden transition-all duration-500 ease-out",
+              open ? "max-h-[520px] opacity-100 mt-5" : "max-h-0 opacity-0 mt-0",
+            ].join(" ")}
+          >
+            <div className="relative mx-auto max-w-2xl">
+              {/* Soft ribbon accent */}
+              <div className="absolute left-0 top-0 h-full w-[2px] rounded-full bg-[#F1AEB8]/40" />
+
+              <div className="pl-6 pr-2 space-y-3">
+                <p className="text-sm leading-relaxed text-[#6D5E61]">
+                  MoodDrop is a quiet space for emotional release and reflection.
+                  It isn’t a substitute for professional mental health care.
+                </p>
+
+                <p className="text-xs text-[#8B7B7E]">
+                  If you’re feeling overwhelmed or in crisis, support is available:
+                </p>
+
+                <ul className="space-y-3 text-sm text-[#6D5E61]">
+                  <li className="flex items-start justify-between gap-4">
+                    <span>U.S. Suicide &amp; Crisis Lifeline</span>
+                    <span className="font-medium text-[#4A3F41]">988</span>
+                  </li>
+
+                  <li className="flex items-start justify-between gap-4">
+                    <span>Crisis Text Line (U.S./Canada)</span>
+                    <span className="font-medium text-[#4A3F41]">
+                      Text HELLO to 741741
+                    </span>
+                  </li>
+
+                  <li className="flex items-start justify-between gap-4">
+                    <span>International help</span>
                     <a
                       href="https://findahelpline.com"
                       target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#D4AF37] hover:text-[#F9A8D4] transition-colors underline"
+                      rel="noreferrer"
+                      className="font-medium text-[#4A3F41] underline underline-offset-4 decoration-[#F4CBD2]/70 hover:decoration-[#F1AEB8]"
                     >
                       findahelpline.com
                     </a>
-                  </p>
-                  <p>
-                    💬 Crisis Text Line (US/Canada): text{" "}
-                    <strong>HELLO</strong> to <strong>741741</strong>.
-                  </p>
-                </div>
+                  </li>
+                </ul>
+
+                <p className="pt-1 text-xs text-[#8B7B7E]">
+                  You don’t have to hold everything alone.
+                </p>
               </div>
             </div>
-          </>
-        )}
+          </div>
 
-        {/* Centered brand + year */}
-        <div className="pt-2">
-          <p className="text-xs font-medium text-[#8B7355]">
-            MoodDrop © 2025
-          </p>
+          {/* Footer links */}
+          <div className="mt-6 flex flex-col items-center gap-3">
+            <p className="text-xs text-[#8B7B7E]">
+              MoodDrop © {new Date().getFullYear()}
+            </p>
+
+            <nav className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs text-[#6D5E61]">
+              <Link href="/about" className="hover:text-[#4A3F41]">
+                About
+              </Link>
+              <span className="opacity-30">•</span>
+              <Link href="/qa" className="hover:text-[#4A3F41]">
+                Q&amp;A
+              </Link>
+              <span className="opacity-30">•</span>
+              <Link href="/privacy" className="hover:text-[#4A3F41]">
+                Privacy
+              </Link>
+              <span className="opacity-30">•</span>
+              <Link href="/contact" className="hover:text-[#4A3F41]">
+                Contact
+              </Link>
+            </nav>
+          </div>
         </div>
-
-        {/* Horizontal nav row like your sketch */}
-        <nav className="flex flex-wrap items-center justify-center gap-2 text-sm text-[#8B7355]">
-          <Link
-            href="/about"
-            className="hover:text-[#F9A8D4] transition-colors duration-300 cursor-pointer"
-          >
-            About MoodDrop
-          </Link>
-
-          <span className="mx-1 text-[#A08B73]">|</span>
-
-          <Link
-            href="/qa"
-            className="hover:text-[#F9A8D4] transition-colors duration-300 cursor-pointer"
-          >
-            Q&amp;A
-          </Link>
-
-          <span className="mx-1 text-[#A08B73]">|</span>
-
-          <Link
-            href="/privacy"
-            className="hover:text-[#F9A8D4] transition-colors duration-300 cursor-pointer"
-          >
-            Privacy
-          </Link>
-
-          <span className="mx-1 text-[#A08B73]">|</span>
-
-          <Link
-            href="/contact"
-            className="hover:text-[#F9A8D4] transition-colors duration-300 cursor-pointer"
-          >
-            Contact
-          </Link>
-        </nav>
       </div>
-
-      <style>{`
-        @keyframes float {
-          0% {
-            transform: translateY(0) rotate(0deg);
-            opacity: 0;
-          }
-          10% {
-            opacity: 0.6;
-          }
-          90% {
-            opacity: 0.6;
-          }
-          100% {
-            transform: translateY(-100vh) rotate(180deg);
-            opacity: 0;
-          }
-        }
-
-        .animate-float {
-          animation: float linear infinite;
-        }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(6px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .footer-content {
-          animation: fadeInUp 0.8s ease-out 150ms both;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .footer-content {
-            animation: none;
-            opacity: 1;
-            transform: none;
-          }
-        }
-      `}</style>
     </footer>
   );
 }
