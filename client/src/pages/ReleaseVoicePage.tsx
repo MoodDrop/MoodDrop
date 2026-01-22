@@ -2,8 +2,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { saveVoiceEchoLocal } from "@/lib/EchoVaultLocal";
+import HeldOverlay from "@/components/HeldOverlay";
 
 const VOICE_MAX_MS = 120_000; // 2 minutes
+const HELD_MS = 2600;
 
 function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
@@ -29,9 +31,7 @@ function usePrefersReducedMotion(): boolean {
 
 function pickMimeType() {
   if (typeof MediaRecorder === "undefined") return "";
-  if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) return "audio/webm;codecs=opus";
   if (MediaRecorder.isTypeSupported("audio/webm")) return "audio/webm";
-  if (MediaRecorder.isTypeSupported("audio/ogg;codecs=opus")) return "audio/ogg;codecs=opus";
   if (MediaRecorder.isTypeSupported("audio/ogg")) return "audio/ogg";
   return "";
 }
@@ -56,14 +56,20 @@ export default function ReleaseVoicePage() {
   const [isRecording, setIsRecording] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
 
-  // We keep these for preview on this page
+  // ✅ Recorded blob (this is what EchoVaultLocal expects)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string>("");
+
+  // ✅ Preview playback on this page (blob URL)
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+
   const [audioMime, setAudioMime] = useState<string>("audio/webm");
   const [audioDurationMs, setAudioDurationMs] = useState<number>(0);
 
   const [showCopy, setShowCopy] = useState(false);
   const [showActions, setShowActions] = useState(false);
+
+  // Held overlay
+  const [showHeld, setShowHeld] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -72,6 +78,9 @@ export default function ReleaseVoicePage() {
 
   const tickTimerRef = useRef<number | null>(null);
   const hardLimitTimerRef = useRef<number | null>(null);
+
+  // Track whether we “released” (saved + navigated)
+  const didReleaseRef = useRef(false);
 
   const headline = useMemo(() => "Say it out loud.", []);
   const subline = useMemo(() => "You can keep it messy. The pond will hold it.", []);
@@ -85,10 +94,15 @@ export default function ReleaseVoicePage() {
     };
   }, []);
 
+  const stopAllTracks = () => {
+    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+    mediaStreamRef.current = null;
+  };
+
   useEffect(() => {
     return () => {
-      // ✅ Always safe to revoke our local preview URL
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      // If we didn’t release it, cleanup preview blob URL.
+      if (!didReleaseRef.current && previewUrl) URL.revokeObjectURL(previewUrl);
 
       stopAllTracks();
       if (tickTimerRef.current) window.clearInterval(tickTimerRef.current);
@@ -112,11 +126,6 @@ export default function ReleaseVoicePage() {
     return () => window.clearInterval(id);
   }, [isRecording]);
 
-  const stopAllTracks = () => {
-    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
-    mediaStreamRef.current = null;
-  };
-
   const requestMic = async () => {
     try {
       setPermissionError("");
@@ -132,14 +141,13 @@ export default function ReleaseVoicePage() {
   };
 
   const resetAudio = () => {
-    if (audioUrl) URL.revokeObjectURL(audioUrl);
-    setAudioUrl("");
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl("");
     setAudioBlob(null);
     setAudioDurationMs(0);
   };
 
   const startRecording = async () => {
-    // starting a new take → safe to reset
     resetAudio();
 
     const stream = mediaStreamRef.current ?? (await requestMic());
@@ -154,20 +162,32 @@ export default function ReleaseVoicePage() {
     };
 
     mr.onstop = () => {
-      const finalMime = mr.mimeType || mime || "audio/webm";
-      const blob = new Blob(chunksRef.current, { type: finalMime });
+      try {
+        const blob = new Blob(chunksRef.current, {
+          type: mr.mimeType || mime || "audio/webm",
+        });
 
-      const url = URL.createObjectURL(blob);
-      setAudioBlob(blob);
-      setAudioUrl(url);
-      setIsRecording(false);
+        // ✅ Store Blob for saving
+        setAudioBlob(blob);
 
-      const dur = Math.max(0, elapsedMs);
-      setAudioDurationMs(dur);
+        // ✅ Preview URL for this page
+        const url = URL.createObjectURL(blob);
+        setPreviewUrl(url);
 
-      if (tickTimerRef.current) window.clearInterval(tickTimerRef.current);
-      if (hardLimitTimerRef.current) window.clearTimeout(hardLimitTimerRef.current);
-      stopAllTracks();
+        setIsRecording(false);
+
+        const dur = Math.max(0, elapsedMs);
+        setAudioDurationMs(dur);
+
+        if (tickTimerRef.current) window.clearInterval(tickTimerRef.current);
+        if (hardLimitTimerRef.current) window.clearTimeout(hardLimitTimerRef.current);
+        stopAllTracks();
+      } catch (err) {
+        console.error("[ReleaseVoicePage] Failed to finalize recording:", err);
+        setPermissionError("Something went wrong saving your recording. Please try again.");
+        setIsRecording(false);
+        stopAllTracks();
+      }
     };
 
     mr.start(250);
@@ -194,24 +214,30 @@ export default function ReleaseVoicePage() {
     resetAudio();
   };
 
+  // ✅ Now based on blob, not dataUrl
   const canRelease = !!audioBlob && !isRecording;
 
   const onRelease = async () => {
     if (!canRelease || !audioBlob) return;
 
-    // ✅ Save as base64 (inside EchoVaultLocal)
+    // Mark as released BEFORE navigation
+    didReleaseRef.current = true;
+
+    // ✅ Save to Echo Vault (base64 is created inside EchoVaultLocal)
     await saveVoiceEchoLocal({
       mood,
-      content: note?.trim() ? note.trim() : "Voice echo",
+      content: note,
       audioBlob,
-      audioMime: audioBlob.type || audioMime,
+      audioMime,
       audioDurationMs,
     });
 
-    // optional: clear the take after saving
-    // resetAudio();
-
-    setLocation("/vault");
+    // ✅ Held moment (auto-fade)
+    setShowHeld(true);
+    window.setTimeout(() => {
+      setShowHeld(false);
+      setLocation("/vault");
+    }, HELD_MS);
   };
 
   const goBack = () => setLocation("/");
@@ -384,7 +410,7 @@ export default function ReleaseVoicePage() {
                   color: "rgba(35,28,28,0.62)",
                 }}
               >
-                {isRecording ? "Hold the moment." : audioUrl ? "A take is ready." : "Whenever you’re ready."}
+                {isRecording ? "Hold the moment." : previewUrl ? "A take is ready." : "Whenever you’re ready."}
               </div>
             </div>
 
@@ -461,7 +487,7 @@ export default function ReleaseVoicePage() {
               </button>
             )}
 
-            {audioUrl && !isRecording && (
+            {previewUrl && !isRecording && (
               <div
                 className="rounded-3xl px-5 py-4"
                 style={{
@@ -471,7 +497,7 @@ export default function ReleaseVoicePage() {
                   WebkitBackdropFilter: "blur(12px)",
                 }}
               >
-                <audio src={audioUrl} controls className="w-full" preload="auto" />
+                <audio src={previewUrl} controls className="w-full" preload="auto" />
                 <div className="mt-3 flex gap-3">
                   <button
                     type="button"
@@ -490,7 +516,8 @@ export default function ReleaseVoicePage() {
                   <button
                     type="button"
                     onClick={onRelease}
-                    className="flex-1 rounded-2xl px-4 py-3 text-[11px] uppercase"
+                    disabled={!canRelease}
+                    className="flex-1 rounded-2xl px-4 py-3 text-[11px] uppercase disabled:opacity-60"
                     style={{
                       letterSpacing: "0.22em",
                       background: "rgba(255,255,255,0.68)",
@@ -517,6 +544,9 @@ export default function ReleaseVoicePage() {
           </div>
         </div>
       </section>
+
+      {/* ✅ Held auto-fade overlay */}
+      <HeldOverlay show={showHeld} />
     </main>
   );
 }

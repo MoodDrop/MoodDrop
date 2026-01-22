@@ -1,77 +1,76 @@
 // client/src/pages/ReleaseTextPage.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { saveEchoLocal } from "@/lib/EchoVaultLocal";
+import { saveTextEchoLocal } from "@/lib/EchoVaultLocal";
+import HeldOverlay from "@/components/HeldOverlay";
 
-const MOODS = [
-  { key: "Calm", hint: "Soft, steady, quieter inside." },
-  { key: "Tense", hint: "Restless, tight-chested, mentally ‘on.’" },
-  { key: "Overwhelmed", hint: "Too much at once. Too loud." },
-  { key: "Grounded", hint: "Present. Here. In your body." },
-  { key: "Joy", hint: "Lightness returning." },
-  { key: "Crash Out", hint: "Raw. Sharp. Unfiltered." },
-];
+const HELD_MS = 2600;
+
+const MOODS = ["Joy", "Calm", "Grounded", "Tense", "Overwhelmed", "Crash Out"] as const;
 
 export default function ReleaseTextPage() {
   const [, setLocation] = useLocation();
 
-  const [mood, setMood] = useState(MOODS[0].key);
+  const [mood, setMood] = useState<(typeof MOODS)[number]>("Calm");
   const [text, setText] = useState("");
 
-  // “It is released.” overlay
-  const [released, setReleased] = useState(false);
+  const [showCopy, setShowCopy] = useState(false);
+  const [showActions, setShowActions] = useState(false);
 
-  const moodHint = useMemo(
-    () => MOODS.find((m) => m.key === mood)?.hint ?? "",
-    [mood]
-  );
+  const [showHeld, setShowHeld] = useState(false);
 
-  const canDrop = text.trim().length > 0;
+  const headline = useMemo(() => "Let it spill.", []);
+  const subline = useMemo(() => "No performance. No replies. Just release.", []);
+
+  useEffect(() => {
+    const t1 = window.setTimeout(() => setShowCopy(true), 200);
+    const t2 = window.setTimeout(() => setShowActions(true), 900);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+    };
+  }, []);
 
   const goBack = () => setLocation("/");
-  const goVoice = () => setLocation("/release/voice");
 
-  const onDrop = () => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
+  const canRelease = text.trim().length >= 2;
 
-    // ✅ Save to Echo Vault (localStorage) for tonight
-    saveEchoLocal({
-      type: "text",
+  const onRelease = () => {
+    if (!canRelease) return;
+
+    saveTextEchoLocal({
       mood,
-      content: trimmed,
+      content: text.trim(),
     });
 
-    // ✅ Soft confirmation
-    setReleased(true);
-    setText("");
+    setShowHeld(true);
+
+    window.setTimeout(() => {
+      setShowHeld(false);
+      setLocation("/vault");
+    }, HELD_MS);
   };
 
-  // After “released” moment, return home (stillness)
-  useEffect(() => {
-    if (!released) return;
-    const t = window.setTimeout(() => {
-      setReleased(false);
-      setLocation("/");
-    }, 1100);
-    return () => window.clearTimeout(t);
-  }, [released, setLocation]);
-
   return (
-    <main className="relative min-h-screen overflow-hidden">
-      {/* Atmosphere */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(circle at 20% 15%, rgba(255, 240, 235, 0.92), rgba(252, 232, 225, 0.70), rgba(249, 244, 240, 0.98))",
-        }}
-      />
+    <main
+      className="relative min-h-screen overflow-hidden"
+      style={{
+        background:
+          "radial-gradient(circle at 20% 15%, rgba(255, 240, 235, 0.95), rgba(252, 232, 225, 0.72), rgba(249, 244, 240, 0.98))",
+      }}
+    >
       <div className="pointer-events-none absolute inset-0 mooddrop-grain opacity-20" />
 
-      <section className="relative mx-auto flex min-h-screen max-w-md flex-col px-6 pb-10 pt-10">
-        {/* Top bar */}
-        <div className="flex items-center gap-3">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 35%, rgba(255,255,255,0.0), rgba(0,0,0,0.035))",
+        }}
+      />
+
+      <section className="relative mx-auto flex min-h-screen max-w-md flex-col px-6 pb-12 pt-10">
+        <div className="flex items-center justify-between">
           <button
             type="button"
             onClick={goBack}
@@ -83,204 +82,150 @@ export default function ReleaseTextPage() {
               WebkitBackdropFilter: "blur(10px)",
             }}
             aria-label="Back"
+            title="Back"
           >
             <span style={{ color: "rgba(35,28,28,0.72)" }}>←</span>
           </button>
 
-          <div className="flex-1">
-            <div
-              className="text-[20px] leading-tight"
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                color: "rgba(35,28,28,0.88)",
-              }}
-            >
-              Release
-            </div>
-            <div
-              className="text-[12px] italic"
-              style={{ color: "rgba(35,28,28,0.52)" }}
-            >
-              Nothing needs to be fixed here.
-            </div>
-          </div>
-        </div>
-
-        {/* Mood select */}
-        <div className="mt-8">
-          <div
-            className="rounded-3xl px-5 py-4"
-            style={{
-              background: "rgba(255,255,255,0.52)",
-              border: "1px solid rgba(210,160,170,0.18)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              boxShadow: "0 16px 40px rgba(210,160,170,0.14)",
-            }}
-          >
+          <div className="text-center">
             <div
               className="text-[11px] uppercase"
-              style={{
-                letterSpacing: "0.26em",
-                color: "rgba(35,28,28,0.46)",
-              }}
+              style={{ letterSpacing: "0.28em", color: "rgba(35,28,28,0.48)" }}
             >
-              Mood
-            </div>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              {MOODS.map((m) => {
-                const active = m.key === mood;
-                return (
-                  <button
-                    key={m.key}
-                    type="button"
-                    onClick={() => setMood(m.key)}
-                    className="rounded-full px-4 py-2 text-[12px]"
-                    style={{
-                      background: active
-                        ? "rgba(255,255,255,0.62)"
-                        : "rgba(255,255,255,0.34)",
-                      border: active
-                        ? "1px solid rgba(210,160,170,0.32)"
-                        : "1px solid rgba(210,160,170,0.16)",
-                      color: active
-                        ? "rgba(35,28,28,0.78)"
-                        : "rgba(35,28,28,0.60)",
-                      backdropFilter: "blur(10px)",
-                      WebkitBackdropFilter: "blur(10px)",
-                    }}
-                  >
-                    {m.key}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div
-              className="mt-3 text-[12px] italic"
-              style={{ color: "rgba(35,28,28,0.52)" }}
-            >
-              {moodHint}
+              Text Release
             </div>
           </div>
+
+          <div className="w-10" />
         </div>
 
-        {/* Mode toggle */}
-        <div className="mt-6 flex gap-2">
-          <button
-            type="button"
-            className="flex-1 rounded-2xl px-4 py-3 text-[13px] uppercase"
+        <div className="mt-10 text-center">
+          <h1
+            className="text-[30px] italic leading-tight"
             style={{
-              letterSpacing: "0.22em",
-              background: "rgba(255,255,255,0.60)",
-              border: "1px solid rgba(210,160,170,0.20)",
-              color: "rgba(35,28,28,0.74)",
-              boxShadow: "0 12px 30px rgba(210,160,170,0.12)",
+              fontFamily: "'Playfair Display', serif",
+              color: "rgba(35,28,28,0.88)",
+              opacity: showCopy ? 1 : 0,
+              transition: "opacity 900ms ease",
             }}
           >
-            Write
-          </button>
+            {headline}
+          </h1>
 
-          <button
-            type="button"
-            onClick={goVoice}
-            className="flex-1 rounded-2xl px-4 py-3 text-[13px] uppercase"
+          <p
+            className="mt-3 text-[14px] italic"
             style={{
-              letterSpacing: "0.22em",
-              background: "rgba(255,255,255,0.34)",
-              border: "1px solid rgba(210,160,170,0.16)",
-              color: "rgba(35,28,28,0.62)",
+              fontFamily: "'Playfair Display', serif",
+              color: "rgba(35,28,28,0.55)",
+              opacity: showCopy ? 1 : 0,
+              transition: "opacity 900ms ease",
             }}
           >
-            Voice
-          </button>
+            {subline}
+          </p>
         </div>
 
-        {/* Text box */}
-        <div className="mt-6 flex-1">
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Let it land here…"
-            className="h-[44vh] w-full resize-none rounded-3xl p-5 text-[14px] outline-none"
-            style={{
-              background: "rgba(255,255,255,0.45)",
-              border: "1px solid rgba(210,160,170,0.16)",
-              color: "rgba(35,28,28,0.78)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-            }}
-          />
-          <div
-            className="mt-3 text-center text-[12px] italic"
-            style={{ color: "rgba(35,28,28,0.46)" }}
-          >
-            Whenever you’re ready.
-          </div>
-        </div>
-
-        {/* Drop button */}
-        <button
-          type="button"
-          disabled={!canDrop || released}
-          onClick={onDrop}
-          className="mt-6 w-full rounded-3xl px-6 py-4 text-[12px] uppercase transition-opacity"
+        <div
+          className="mt-10 rounded-3xl px-5 py-5"
           style={{
-            letterSpacing: "0.28em",
-            background:
-              canDrop && !released
-                ? "rgba(255,255,255,0.62)"
-                : "rgba(255,255,255,0.28)",
-            border: "1px solid rgba(210,160,170,0.18)",
-            color:
-              canDrop && !released
-                ? "rgba(35,28,28,0.78)"
-                : "rgba(35,28,28,0.42)",
+            background: "rgba(255,255,255,0.46)",
+            border: "1px solid rgba(210,160,170,0.16)",
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
-            boxShadow:
-              canDrop && !released
-                ? "0 18px 44px rgba(210,160,170,0.16)"
-                : "none",
-            opacity: canDrop && !released ? 1 : 0.75,
+            boxShadow: "0 18px 44px rgba(210,160,170,0.12)",
+            opacity: showActions ? 1 : 0,
+            transition: "opacity 700ms ease",
           }}
         >
-          Drop it
-        </button>
-      </section>
-
-      {/* ✅ Sanctuary receipt overlay */}
-      {released && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center">
           <div
-            className="rounded-3xl px-6 py-5 text-center"
-            style={{
-              background: "rgba(255,255,255,0.55)",
-              border: "1px solid rgba(210,160,170,0.20)",
-              backdropFilter: "blur(14px)",
-              WebkitBackdropFilter: "blur(14px)",
-              boxShadow: "0 20px 60px rgba(210,160,170,0.18)",
-            }}
+            className="text-[11px] uppercase"
+            style={{ letterSpacing: "0.22em", color: "rgba(35,28,28,0.58)" }}
           >
+            Choose a mood
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {MOODS.map((m) => {
+              const selected = m === mood;
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMood(m)}
+                  className="rounded-full px-4 py-2 text-[11px] uppercase"
+                  style={{
+                    letterSpacing: "0.20em",
+                    background: selected ? "rgba(255,255,255,0.70)" : "rgba(255,255,255,0.44)",
+                    border: selected
+                      ? "1px solid rgba(210,160,170,0.28)"
+                      : "1px solid rgba(210,160,170,0.14)",
+                    color: selected ? "rgba(35,28,28,0.72)" : "rgba(35,28,28,0.55)",
+                    backdropFilter: "blur(10px)",
+                    WebkitBackdropFilter: "blur(10px)",
+                  }}
+                >
+                  {m}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-5">
             <div
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                color: "rgba(35,28,28,0.82)",
-              }}
-              className="text-[22px] italic"
+              className="text-[11px] uppercase"
+              style={{ letterSpacing: "0.22em", color: "rgba(35,28,28,0.52)" }}
             >
-              It is released.
+              Your release
             </div>
-            <div
-              className="mt-2 text-[12px] italic"
-              style={{ color: "rgba(35,28,28,0.52)" }}
-            >
-              You can return to silence.
+
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={10}
+              placeholder="Let it pour out here…"
+              className="mt-2 w-full rounded-2xl px-4 py-4 text-[14px] leading-relaxed outline-none"
+              style={{
+                background: "rgba(255,255,255,0.46)",
+                border: "1px solid rgba(210,160,170,0.14)",
+                color: "rgba(35,28,28,0.72)",
+              }}
+            />
+
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={onRelease}
+                disabled={!canRelease}
+                className="w-full rounded-3xl px-6 py-4 text-[12px] uppercase disabled:opacity-60"
+                style={{
+                  letterSpacing: "0.28em",
+                  background: "rgba(255,255,255,0.70)",
+                  border: "1px solid rgba(210,160,170,0.18)",
+                  color: "rgba(35,28,28,0.74)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  boxShadow: "0 18px 44px rgba(210,160,170,0.14)",
+                }}
+              >
+                Release
+              </button>
+
+              <p
+                className="mt-3 text-center text-[11px] italic"
+                style={{
+                  color: "rgba(35,28,28,0.46)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
+              >
+                Nothing here needs to be fixed.
+              </p>
             </div>
           </div>
         </div>
-      )}
+      </section>
+
+      {/* ✅ Held auto-fade overlay */}
+      <HeldOverlay show={showHeld} />
     </main>
   );
 }

@@ -11,6 +11,7 @@ import {
   returnEchoLocal,
   softDeleteEchoLocal,
   finalizeDeleteEchoLocal,
+  patchEchoLocal,
   type EchoItem,
   base64ToBlob,
 } from "@/lib/EchoVaultLocal";
@@ -33,7 +34,11 @@ function seedRng(seed: string) {
 
 type Pos = { x: number; y: number; dur: number; delay: number };
 
-function generatePositions(ids: string[], seedKey: string, minDist = 16): Record<string, Pos> {
+function generatePositions(
+  ids: string[],
+  seedKey: string,
+  minDist = 16
+): Record<string, Pos> {
   const rand = seedRng(seedKey);
   const placed: { x: number; y: number }[] = [];
   const out: Record<string, Pos> = {};
@@ -61,7 +66,10 @@ function generatePositions(ids: string[], seedKey: string, minDist = 16): Record
 
 function formatShort(ts: number) {
   try {
-    return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    return new Date(ts).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
   } catch {
     return "";
   }
@@ -84,9 +92,12 @@ export default function EchoVaultPage() {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const [activeAudioUrl, setActiveAudioUrl] = useState<string | null>(null);
+  const createdAudioUrlRef = useRef(false); // ✅ only revoke URLs we created
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const [toast, setToast] = useState<{ message: string; action: LastAction } | null>(null);
+  const [toast, setToast] = useState<{ message: string; action: LastAction } | null>(
+    null
+  );
   const toastTimerRef = useRef<number | null>(null);
   const finalizeTimerRef = useRef<number | null>(null);
 
@@ -124,34 +135,42 @@ export default function EchoVaultPage() {
 
   /* ---------- audio rebuild for overlay ---------- */
   useEffect(() => {
-    if (activeAudioUrl) {
+    // ✅ Clean up previous URL ONLY if we created it
+    if (activeAudioUrl && createdAudioUrlRef.current) {
       URL.revokeObjectURL(activeAudioUrl);
-      setActiveAudioUrl(null);
     }
+    setActiveAudioUrl(null);
+    createdAudioUrlRef.current = false;
 
     if (!active || active.type !== "voice") return;
 
+    // ✅ Preferred: audioBase64 -> Blob URL (we create it)
     if (active.audioBase64) {
       const blob = base64ToBlob(active.audioBase64, active.audioMime || "audio/webm");
       const url = URL.createObjectURL(blob);
+      createdAudioUrlRef.current = true;
       setActiveAudioUrl(url);
-      return () => URL.revokeObjectURL(url);
+      return;
     }
 
-    // legacy (may still work in same session)
-    if (active.audioUrl) setActiveAudioUrl(active.audioUrl);
-  }, [activeId]);
+    // ✅ Legacy: use stored blob: URL as-is (do NOT revoke)
+    if (active.audioUrl) {
+      createdAudioUrlRef.current = false;
+      setActiveAudioUrl(active.audioUrl);
+    }
+  }, [activeId]); // only when opening a different echo
 
   useEffect(() => {
     if (active?.type !== "voice") return;
     if (!audioRef.current) return;
+
     try {
       audioRef.current.currentTime = 0;
       void audioRef.current.play();
     } catch {
-      // autoplay may be blocked
+      // autoplay may be blocked; user can press play
     }
-  }, [activeAudioUrl]);
+  }, [activeAudioUrl, active?.type]);
 
   /* ---------- toast helpers (global undo) ---------- */
   const clearTimers = () => {
@@ -172,7 +191,6 @@ export default function EchoVaultPage() {
 
     if (finalize) {
       finalizeTimerRef.current = window.setTimeout(() => {
-        // only finalize if the toast/action is still current
         finalize();
         finalizeTimerRef.current = null;
       }, UNDO_MS) as unknown as number;
@@ -183,7 +201,6 @@ export default function EchoVaultPage() {
     if (!toast) return;
     const { action } = toast;
 
-    // stop audio if any
     audioRef.current?.pause();
 
     if (action.kind === "tuck") {
@@ -191,13 +208,11 @@ export default function EchoVaultPage() {
       if (action.prevTuckedAt) tuckEchoLocal(action.id);
       else returnEchoLocal(action.id);
     } else if (action.kind === "delete") {
-      // undo soft delete: remove deletedAt
-      // also restore tucked state if it was tucked
-      const patch = action.prevTuckedAt ? { deletedAt: undefined, tuckedAt: action.prevTuckedAt } : { deletedAt: undefined, tuckedAt: undefined };
-      // patchEchoLocal is not imported here; easiest is to use tuck/return + a tiny inline update via read/write:
-      const all = readEchoesLocal();
-      const next = all.map((e) => (e.id === action.id ? { ...e, ...patch } : e));
-      localStorage.setItem("mooddrop_echo_vault_v1", JSON.stringify(next));
+      // ✅ undo soft delete cleanly
+      patchEchoLocal(action.id, {
+        deletedAt: undefined,
+        tuckedAt: action.prevTuckedAt, // restore tuck if it was tucked
+      });
     }
 
     clearTimers();
@@ -238,7 +253,11 @@ export default function EchoVaultPage() {
     refresh();
 
     // Undo should re-tuck it
-    showUndoToast("Echo returned to the pond.", { kind: "tuck", id: active.id, prevTuckedAt });
+    showUndoToast("Echo returned to the pond.", {
+      kind: "tuck",
+      id: active.id,
+      prevTuckedAt,
+    });
   };
 
   const onDelete = () => {
@@ -247,7 +266,6 @@ export default function EchoVaultPage() {
     const ok = window.confirm("Delete this echo?");
     if (!ok) return;
 
-    // stop audio if playing
     audioRef.current?.pause();
 
     const prevTuckedAt = active.tuckedAt;
@@ -256,12 +274,10 @@ export default function EchoVaultPage() {
     setActiveId(null);
     refresh();
 
-    // finalize after 6s if not undone
     showUndoToast(
       "Echo deleted.",
       { kind: "delete", id: active.id, prevTuckedAt },
       () => {
-        // finalize if still deleted
         const current = readEchoesLocal().find((e) => e.id === active.id);
         if (current?.deletedAt) {
           finalizeDeleteEchoLocal(active.id);
@@ -315,12 +331,17 @@ export default function EchoVaultPage() {
           <div className="text-center">
             <h1
               className="text-[30px] italic leading-none"
-              style={{ fontFamily: "'Playfair Display', serif", color: "rgba(35,28,28,0.88)" }}
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "rgba(35,28,28,0.88)",
+              }}
             >
               {view === "pond" ? "Your Echoes" : "Tucked Away"}
             </h1>
             <p className="mt-2 text-[12.5px] italic" style={{ color: "rgba(35,28,28,0.52)" }}>
-              {view === "pond" ? "Drift through what you’ve released." : "Held gently, out of sight."}
+              {view === "pond"
+                ? "Drift through what you’ve released."
+                : "Held gently, out of sight."}
             </p>
           </div>
 
@@ -372,11 +393,23 @@ export default function EchoVaultPage() {
                 <motion.div
                   key={e.id}
                   className="absolute"
-                  style={{ left: `${p.x}%`, top: `${p.y}%`, transform: "translate(-50%, -50%)" }}
+                  style={{
+                    left: `${p.x}%`,
+                    top: `${p.y}%`,
+                    transform: "translate(-50%, -50%)",
+                  }}
                   animate={{ x: [0, 8, 0, -6, 0], y: [0, -10, 0, 8, 0] }}
-                  transition={{ duration: p.dur + (idx % 3) * 0.35, repeat: Infinity, ease: "easeInOut", delay: p.delay }}
+                  transition={{
+                    duration: p.dur + (idx % 3) * 0.35,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: p.delay,
+                  }}
                 >
-                  <div className={e.type === "voice" ? "scale-[1.12]" : "scale-100"} style={{ transformOrigin: "center" }}>
+                  <div
+                    className={e.type === "voice" ? "scale-[1.12]" : "scale-100"}
+                    style={{ transformOrigin: "center" }}
+                  >
                     <HaloRippleEmber
                       type={e.type}
                       dateLabel={dateLabel}
@@ -398,7 +431,13 @@ export default function EchoVaultPage() {
                   boxShadow: "0 18px 44px rgba(210,160,170,0.12)",
                 }}
               >
-                <div className="text-[18px] italic" style={{ fontFamily: "'Playfair Display', serif", color: "rgba(35,28,28,0.82)" }}>
+                <div
+                  className="text-[18px] italic"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "rgba(35,28,28,0.82)",
+                  }}
+                >
                   The pond is still.
                 </div>
                 <p className="mt-2 text-[12px] italic" style={{ color: "rgba(35,28,28,0.52)" }}>
@@ -437,7 +476,13 @@ export default function EchoVaultPage() {
                   boxShadow: "0 18px 44px rgba(210,160,170,0.12)",
                 }}
               >
-                <div className="text-[18px] italic" style={{ fontFamily: "'Playfair Display', serif", color: "rgba(35,28,28,0.82)" }}>
+                <div
+                  className="text-[18px] italic"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "rgba(35,28,28,0.82)",
+                  }}
+                >
                   Nothing tucked away.
                 </div>
                 <p className="mt-2 text-[12px] italic" style={{ color: "rgba(35,28,28,0.52)" }}>
@@ -450,7 +495,7 @@ export default function EchoVaultPage() {
                   key={e.id}
                   type="button"
                   onClick={() => setActiveId(e.id)}
-                  className="w-full text-left rounded-3xl px-5 py-4"
+                  className="w-full rounded-3xl px-5 py-4 text-left"
                   style={{
                     background: "rgba(255,255,255,0.46)",
                     border: "1px solid rgba(210,160,170,0.14)",
@@ -464,9 +509,16 @@ export default function EchoVaultPage() {
                         className="text-[11px] uppercase"
                         style={{ letterSpacing: "0.22em", color: "rgba(35,28,28,0.58)" }}
                       >
-                        {e.type === "voice" ? "Listen" : "Read"} • {e.mood || "Mood"} • {formatShort(e.createdAt)}
+                        {e.type === "voice" ? "Listen" : "Read"} • {e.mood || "Mood"} •{" "}
+                        {formatShort(e.createdAt)}
                       </div>
-                      <div className="mt-2 text-[14px] italic" style={{ color: "rgba(35,28,28,0.70)", fontFamily: "'Playfair Display', serif" }}>
+                      <div
+                        className="mt-2 text-[14px] italic"
+                        style={{
+                          color: "rgba(35,28,28,0.70)",
+                          fontFamily: "'Playfair Display', serif",
+                        }}
+                      >
                         {e.content || (e.type === "voice" ? "Voice echo" : "Text echo")}
                       </div>
                     </div>
@@ -483,7 +535,10 @@ export default function EchoVaultPage() {
 
         {/* Bottom whisper */}
         <div className="mt-auto pt-8 text-center">
-          <p className="text-[11px] italic" style={{ color: "rgba(35,28,28,0.45)", fontFamily: "'Playfair Display', serif" }}>
+          <p
+            className="text-[11px] italic"
+            style={{ color: "rgba(35,28,28,0.45)", fontFamily: "'Playfair Display', serif" }}
+          >
             Tap a light to remember.
           </p>
         </div>
@@ -517,11 +572,21 @@ export default function EchoVaultPage() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[11px] uppercase" style={{ letterSpacing: "0.26em", color: "rgba(35,28,28,0.58)" }}>
+                  <div
+                    className="text-[11px] uppercase"
+                    style={{ letterSpacing: "0.26em", color: "rgba(35,28,28,0.58)" }}
+                  >
                     {active.type === "voice" ? "Voice Echo" : "Text Echo"} • {active.mood}
                   </div>
+
                   <div className="mt-2">
-                    <div className="text-[22px] italic" style={{ fontFamily: "'Playfair Display', serif", color: "rgba(35,28,28,0.84)" }}>
+                    <div
+                      className="text-[22px] italic"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        color: "rgba(35,28,28,0.84)",
+                      }}
+                    >
                       {active.type === "voice" ? "Listening…" : "Reading…"}
                     </div>
                     <div className="mt-1 text-[12px] italic" style={{ color: "rgba(35,28,28,0.50)" }}>
@@ -530,7 +595,7 @@ export default function EchoVaultPage() {
                   </div>
                 </div>
 
-                {/* Buttons in the order you chose: Tuck away, Delete, Back */}
+                {/* Buttons: Tuck away, Delete, Back */}
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
@@ -638,7 +703,10 @@ export default function EchoVaultPage() {
               )}
 
               <div className="mt-6 text-center">
-                <p className="text-[11px] italic" style={{ color: "rgba(35,28,28,0.45)", fontFamily: "'Playfair Display', serif" }}>
+                <p
+                  className="text-[11px] italic"
+                  style={{ color: "rgba(35,28,28,0.45)", fontFamily: "'Playfair Display', serif" }}
+                >
                   Nothing here needs to be fixed.
                 </p>
               </div>
@@ -668,7 +736,10 @@ export default function EchoVaultPage() {
                 boxShadow: "0 18px 50px rgba(210,160,170,0.18)",
               }}
             >
-              <div className="text-[12px] italic" style={{ color: "rgba(35,28,28,0.68)", fontFamily: "'Playfair Display', serif" }}>
+              <div
+                className="text-[12px] italic"
+                style={{ color: "rgba(35,28,28,0.68)", fontFamily: "'Playfair Display', serif" }}
+              >
                 {toast.message}
               </div>
 
