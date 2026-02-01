@@ -8,10 +8,10 @@ import {
   Activity,
   Settings,
   AlertTriangle,
+  ExternalLink,
 } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
-import { MoodChart } from "@/components/admin/MoodChart";
 import { FlagToggle } from "@/components/Admin/FlagToggle";
 import { readFlags, setFlag } from "@/lib/featureFlags";
 import { supabase } from "@/lib/supabaseClient";
@@ -20,19 +20,32 @@ type AdminSection = "overview" | "traffic" | "settings";
 
 type SavedDrop = {
   id: string;
-  content: string | null;
-  vibe_id: string | null;
+  mood: string | null;
   created_at: string;
 };
 
 type FeatureFlags = Record<string, boolean>;
 
+// (Optional for later) Keeping this in case you revisit Plausible.
 const PLAUSIBLE_EMBED_URL = import.meta.env.VITE_PLAUSIBLE_EMBED_URL;
+
+// Optional: set this in client/.env.local later to enable a direct link button.
+// Example:
+// VITE_VERCEL_ANALYTICS_URL=https://vercel.com/<team-or-user>/<project>/analytics
+const VERCEL_ANALYTICS_URL = import.meta.env.VITE_VERCEL_ANALYTICS_URL as
+  | string
+  | undefined;
+
+// LocalStorage key name for your trusted device token
+const OWNER_KEY_STORAGE = "mooddrop_owner_key";
 
 export default function AdminPage() {
   const { toast } = useToast();
 
   const [activeSection, setActiveSection] = useState<AdminSection>("overview");
+
+  // 🔒 Access gate state
+  const [isVerifying, setIsVerifying] = useState(true);
 
   const [recentDrops, setRecentDrops] = useState<SavedDrop[]>([]);
   const [isLoadingDrops, setIsLoadingDrops] = useState(false);
@@ -40,6 +53,44 @@ export default function AdminPage() {
 
   const [flags, setFlags] = useState<FeatureFlags>({});
   const [isLoadingFlags, setIsLoadingFlags] = useState(true);
+
+  // -----------------------------
+  // 🔒 Quiet Room verification
+  // -----------------------------
+  useEffect(() => {
+    const verify = async () => {
+      try {
+        const ownerKey = localStorage.getItem(OWNER_KEY_STORAGE);
+
+        // No key on this device = instant redirect
+        if (!ownerKey) {
+          window.location.replace("/");
+          return;
+        }
+
+        const res = await fetch("/api/admin/verify", {
+          method: "GET",
+          headers: {
+            "x-admin-key": ownerKey,
+          },
+        });
+
+        if (!res.ok) {
+          // Wrong/expired key = instant redirect
+          window.location.replace("/");
+          return;
+        }
+
+        // Authorized
+        setIsVerifying(false);
+      } catch (err) {
+        // Any failure = fail closed
+        window.location.replace("/");
+      }
+    };
+
+    verify();
+  }, []);
 
   // ---- Load feature flags on mount ----
   useEffect(() => {
@@ -59,8 +110,9 @@ export default function AdminPage() {
       }
     };
 
-    loadFlags();
-  }, [toast]);
+    // Only load flags after verification is complete
+    if (!isVerifying) loadFlags();
+  }, [toast, isVerifying]);
 
   const handleFlagChange = async (key: string, value: boolean) => {
     try {
@@ -86,10 +138,9 @@ export default function AdminPage() {
       setIsLoadingDrops(true);
       setDropsError(null);
 
-      // IMPORTANT FIX: use lowercase table name "drops"
       const { data, error } = await supabase
         .from("drops")
-        .select("id, content, vibe_id, created_at")
+        .select("id, mood, created_at")
         .order("created_at", { ascending: false })
         .limit(6);
 
@@ -98,24 +149,39 @@ export default function AdminPage() {
         setDropsError(error.message);
         toast({
           title: "Error loading drops",
-          description: "Admin could not fetch the latest drops.",
+          description: "Quiet Room could not fetch the latest drops.",
           variant: "destructive",
         });
       } else {
-        setRecentDrops(data ?? []);
+        setRecentDrops((data as SavedDrop[]) ?? []);
       }
 
       setIsLoadingDrops(false);
     };
 
-    loadDrops();
-  }, [toast]);
+    // Only load after verification is complete
+    if (!isVerifying) loadDrops();
+  }, [toast, isVerifying]);
 
   const totalDrops = useMemo(() => recentDrops.length, [recentDrops]);
 
   // Overview stat placeholders – can be wired to real analytics later
   const totalVisits = 0; // placeholder
   const activeUsers7d = 0; // placeholder
+
+  // While verifying, show nothing "helpful" (no hints). Keep it calm.
+  if (isVerifying) {
+    return (
+      <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#ffe4ec_0,_#ffffff_45%,_#ffe4ec_100%)]">
+        <div className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3 rounded-2xl bg-white/80 px-5 py-4 shadow-sm">
+            <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-rose-400" />
+            <p className="text-xs text-slate-600">Entering…</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#ffe4ec_0,_#ffffff_45%,_#ffe4ec_100%)]">
@@ -126,14 +192,16 @@ export default function AdminPage() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-rose-100/70 px-3 py-1 text-xs font-medium text-rose-700">
               <span className="h-2 w-2 rounded-full bg-rose-500" />
-              Owner Mode — MoodDrop Admin
+              Owner Mode — The Quiet Room
             </div>
+
             <h1 className="mt-3 text-2xl font-semibold text-slate-900 sm:text-3xl">
-              Admin Dashboard
+              The Quiet Room
             </h1>
+
             <p className="mt-1 text-sm text-slate-600">
-              Soft, simple overview of how MoodDrop is flowing — visits, drops,
-              and feature controls.
+              A calm place to observe MoodDrop’s pulse — gently, privately, and
+              without noise.
             </p>
           </div>
 
@@ -148,13 +216,13 @@ export default function AdminPage() {
         <nav className="mb-6 flex gap-2 overflow-x-auto rounded-full bg-white/70 p-1 text-sm shadow-sm backdrop-blur">
           <TabButton
             icon={LayoutDashboard}
-            label="Overview"
+            label="Pulse"
             isActive={activeSection === "overview"}
             onClick={() => setActiveSection("overview")}
           />
           <TabButton
             icon={BarChart3}
-            label="Traffic"
+            label="Footsteps"
             isActive={activeSection === "traffic"}
             onClick={() => setActiveSection("traffic")}
           />
@@ -180,7 +248,7 @@ export default function AdminPage() {
           )}
 
           {activeSection === "traffic" && (
-            <TrafficSection plausibleUrl={PLAUSIBLE_EMBED_URL} />
+            <FootstepsSection vercelAnalyticsUrl={VERCEL_ANALYTICS_URL} />
           )}
 
           {activeSection === "settings" && (
@@ -245,7 +313,7 @@ function OverviewSection({
         <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Total Visits
+              Footsteps
             </span>
             <Activity className="h-4 w-4 text-rose-500" />
           </div>
@@ -253,14 +321,14 @@ function OverviewSection({
             {totalVisits.toLocaleString()}
           </p>
           <p className="mt-1 text-xs text-slate-500">
-            Connected to Plausible (coming soon).
+            Vercel Analytics can be linked in Footsteps when you’re ready.
           </p>
         </div>
 
         <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Total Drops (sample)
+              Echoes Held (sample)
             </span>
             <LayoutDashboard className="h-4 w-4 text-rose-500" />
           </div>
@@ -275,7 +343,7 @@ function OverviewSection({
         <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Active users (7d)
+              Active (7d)
             </span>
             <BarChart3 className="h-4 w-4 text-rose-500" />
           </div>
@@ -283,66 +351,55 @@ function OverviewSection({
             {activeUsers7d.toLocaleString()}
           </p>
           <p className="mt-1 text-xs text-slate-500">
-            Placeholder for future analytics.
+            Placeholder for privacy-first analytics.
           </p>
         </div>
       </div>
 
-      {/* Middle row: Mood chart + recent drops */}
+      {/* Middle row: Atmosphere placeholder + recent echoes */}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,_2fr)_minmax(0,_1.3fr)]">
-        {/* Mood activity chart */}
+        {/* Atmosphere */}
         <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-semibold text-slate-900">
-                Mood Activity
-              </h2>
-              <p className="text-xs text-slate-500">
-                Soft snapshot of how emotions are flowing in The Collective
-                Drop.
-              </p>
-            </div>
+          <div className="mb-3">
+            <h2 className="text-sm font-semibold text-slate-900">Atmosphere</h2>
+            <p className="text-xs text-slate-500">
+              A soft snapshot of what’s most common — no harsh metrics.
+            </p>
           </div>
           <div className="rounded-xl bg-rose-50/60 p-3">
-           <div className="h-40 flex items-center justify-center text-xs text-slate-400">
-  Mood chart coming soon…
-</div>
+            <div className="flex h-40 items-center justify-center text-xs text-slate-400">
+              Atmosphere view coming soon…
+            </div>
           </div>
         </div>
 
-        {/* Recent drops list */}
+        {/* Recent echoes */}
         <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-semibold text-slate-900">
-                Recent Drops
-              </h2>
-              <p className="text-xs text-slate-500">
-                Quick peek at what your community is sharing (anonymous).
-              </p>
-            </div>
+          <div className="mb-3">
+            <h2 className="text-sm font-semibold text-slate-900">
+              Recent Echoes
+            </h2>
+            <p className="text-xs text-slate-500">
+              A gentle peek — collapsed by nature, not performative.
+            </p>
           </div>
 
-          {isLoadingDrops && (
-            <p className="text-xs text-slate-500">Loading drops…</p>
-          )}
+          {isLoadingDrops && <p className="text-xs text-slate-500">Loading…</p>}
 
           {dropsError && !isLoadingDrops && (
             <div className="flex items-start gap-2 rounded-xl bg-rose-50 p-3 text-xs text-rose-700">
               <AlertTriangle className="mt-0.5 h-4 w-4" />
               <div>
-                <p className="font-medium">Error loading drops</p>
-                <p className="text-[11px] text-rose-600/80">
-                  {dropsError}
-                </p>
+                <p className="font-medium">Couldn’t load recent echoes</p>
+                <p className="text-[11px] text-rose-600/80">{dropsError}</p>
               </div>
             </div>
           )}
 
           {!isLoadingDrops && !dropsError && recentDrops.length === 0 && (
             <p className="text-xs text-slate-500">
-              No drops found yet. Once people start sharing, you’ll see the most
-              recent ones here.
+              No drops found yet. When people begin releasing, the newest ones
+              will appear here.
             </p>
           )}
 
@@ -354,14 +411,14 @@ function OverviewSection({
               >
                 <div className="mb-1 flex items-center justify-between gap-2">
                   <span className="inline-flex items-center rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-medium text-rose-700">
-                    💧 {drop.vibe_id ?? "Unknown Vibe"}
+                    💗 echo
                   </span>
                   <span className="text-[10px] text-slate-400">
                     {new Date(drop.created_at).toLocaleString()}
                   </span>
                 </div>
-                <p className="line-clamp-3 text-slate-700">
-                  {drop.content || "No text content"}
+                <p className="text-slate-700">
+                  {drop.mood ? `Mood: ${drop.mood}` : "Mood: (unset)"}
                 </p>
               </li>
             ))}
@@ -372,51 +429,107 @@ function OverviewSection({
   );
 }
 
-type TrafficProps = {
-  plausibleUrl?: string;
-};
-
-function TrafficSection({ plausibleUrl }: TrafficProps) {
+function FootstepsSection({
+  vercelAnalyticsUrl,
+}: {
+  vercelAnalyticsUrl?: string;
+}) {
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-900">
-          Traffic & Analytics
-        </h2>
-        <p className="mt-1 text-xs text-slate-500">
-          This panel is ready for Plausible. Once you add the embed URL to your
-          <code className="mx-1 rounded bg-slate-100 px-1 py-0.5 text-[10px]">
-            .env.local
-          </code>
-          as{" "}
-          <code className="rounded bg-slate-100 px-1 py-0.5 text-[10px]">
-            VITE_PLAUSIBLE_EMBED_URL
-          </code>
-          , it will show live site analytics.
-        </p>
-      </div>
+      <div className="rounded-2xl bg-white/80 p-5 shadow-sm">
+        <h2 className="text-sm font-semibold text-slate-900">Footsteps</h2>
 
-      <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
-        {plausibleUrl ? (
-          <iframe
-            src={plausibleUrl}
-            title="MoodDrop Analytics"
-            className="h-[480px] w-full rounded-xl border border-rose-100 bg-white"
-          />
-        ) : (
-          <div className="flex h-64 flex-col items-center justify-center rounded-xl border border-dashed border-rose-200 bg-rose-50/50 text-center">
-            <p className="text-sm font-medium text-slate-700">
-              Plausible not connected yet
-            </p>
-            <p className="mt-1 max-w-xs text-xs text-slate-500">
-              Add your Plausible embed URL to{" "}
-              <code className="rounded bg-slate-100 px-1 py-0.5 text-[10px]">
-                VITE_PLAUSIBLE_EMBED_URL
-              </code>{" "}
-              and redeploy to see traffic here.
+        <p className="mt-2 text-sm text-slate-600">
+          Footsteps reflect how people find their way to MoodDrop. This view is
+          intentionally high-level — designed to observe arrival, not behavior.
+        </p>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-rose-100 bg-rose-50/60 p-4">
+            <p className="text-xs font-semibold text-slate-900">Instagram</p>
+            <p className="mt-1 text-xs text-slate-600">
+              Shared links and profile visits
             </p>
           </div>
-        )}
+
+          <div className="rounded-2xl border border-rose-100 bg-rose-50/60 p-4">
+            <p className="text-xs font-semibold text-slate-900">Direct</p>
+            <p className="mt-1 text-xs text-slate-600">
+              Typed links, bookmarks, or saved access
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-rose-100 bg-rose-50/60 p-4">
+            <p className="text-xs font-semibold text-slate-900">Search</p>
+            <p className="mt-1 text-xs text-slate-600">
+              Quiet discovery through search engines
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-rose-100 bg-rose-50/60 p-4">
+            <p className="text-xs font-semibold text-slate-900">Other paths</p>
+            <p className="mt-1 text-xs text-slate-600">
+              Mentions, shares, or external links
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-4 text-xs text-slate-500">
+          Footsteps show how the sanctuary is being discovered — not what happens
+          once someone arrives.
+        </p>
+
+        <div className="mt-4">
+          {vercelAnalyticsUrl ? (
+            <a
+              href={vercelAnalyticsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-rose-100 bg-white px-4 py-2 text-xs font-medium text-rose-700 shadow-sm transition hover:border-rose-200 hover:bg-rose-50"
+            >
+              View full analytics in Vercel <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          ) : (
+            <div className="rounded-2xl border border-rose-100 bg-white/70 p-4">
+              <p className="text-xs font-medium text-slate-700">
+                View full analytics in Vercel
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                Optional: add{" "}
+                <code className="rounded bg-slate-100 px-1 py-0.5 text-[10px]">
+                  VITE_VERCEL_ANALYTICS_URL
+                </code>{" "}
+                to{" "}
+                <code className="rounded bg-slate-100 px-1 py-0.5 text-[10px]">
+                  client/.env.local
+                </code>{" "}
+                to enable a direct button link.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Keeping Plausible note for later (quiet, non-blocking) */}
+      <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
+        <h3 className="text-xs font-semibold text-slate-900">
+          Optional: Plausible (later)
+        </h3>
+        <p className="mt-1 text-xs text-slate-500">
+          If you decide to embed Plausible in the future, you can use{" "}
+          <code className="mx-1 rounded bg-slate-100 px-1 py-0.5 text-[10px]">
+            VITE_PLAUSIBLE_EMBED_URL
+          </code>
+          . For now, Footsteps stays light and link-out only.
+        </p>
+
+        {PLAUSIBLE_EMBED_URL ? (
+          <iframe
+            src={PLAUSIBLE_EMBED_URL}
+            title="MoodDrop Analytics"
+            className="mt-3 h-[380px] w-full rounded-xl border border-rose-100 bg-white"
+          />
+        ) : null}
       </div>
     </div>
   );
@@ -428,11 +541,8 @@ type SettingsProps = {
   onFlagChange: (key: string, value: boolean) => void;
 };
 
-function SettingsSection({
-  flags,
-  isLoadingFlags,
-  onFlagChange,
-}: SettingsProps) {
+function SettingsSection({ flags, isLoadingFlags, onFlagChange }: SettingsProps) {
+  // Removed Vibe ID controls and any “admin mode” wording
   const featureList: { key: string; label: string; description: string }[] = [
     {
       key: "calmStudio",
@@ -459,16 +569,6 @@ function SettingsSection({
       label: "Mood History",
       description: "Enable any future mood history / timeline features.",
     },
-    {
-      key: "adminMode",
-      label: "Admin Mode",
-      description: "Gate admin access behind your secret passcode.",
-    },
-    {
-      key: "vibeIdGenerator",
-      label: "Vibe ID generator",
-      description: "Control the Vibe ID name system site-wide.",
-    },
   ];
 
   return (
@@ -477,12 +577,12 @@ function SettingsSection({
       <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-slate-900">Feature toggles</h2>
         <p className="mt-1 text-xs text-slate-500">
-          Turn MoodDrop features on or off without touching code. Changes apply
-          the next time users visit the site.
+          Turn features on or off without touching code. Changes apply the next
+          time users visit the site.
         </p>
 
         {isLoadingFlags ? (
-          <p className="mt-3 text-xs text-slate-500">Loading toggles…</p>
+          <p className="mt-3 text-xs text-slate-500">Loading…</p>
         ) : (
           <div className="mt-4 space-y-3">
             {featureList.map((feature) => (
@@ -491,29 +591,26 @@ function SettingsSection({
                 label={feature.label}
                 description={feature.description}
                 checked={Boolean(flags[feature.key])}
-                onChange={(value: boolean) =>
-                  onFlagChange(feature.key, value)
-                }
+                onChange={(value: boolean) => onFlagChange(feature.key, value)}
               />
             ))}
           </div>
         )}
       </div>
 
-      {/* Data tools */}
+      {/* Tools + Danger zone */}
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
-          <h3 className="text-sm font-semibold text-slate-900">Data tools</h3>
+          <h3 className="text-sm font-semibold text-slate-900">Tools</h3>
           <p className="mt-1 text-xs text-slate-500">
-            Light tools to help you manage data and debugging while developing
-            MoodDrop.
+            Light tools for development and maintenance — kept gentle.
           </p>
 
           <div className="mt-3 flex flex-wrap gap-2 text-xs">
             <button
               className="rounded-full bg-rose-600 px-3 py-1.5 font-medium text-white shadow-sm hover:bg-rose-700"
               onClick={() => {
-                console.log("[Admin] Export CSV clicked");
+                console.log("[Quiet Room] Export CSV clicked");
                 // TODO: implement CSV export
               }}
             >
@@ -522,42 +619,29 @@ function SettingsSection({
             <button
               className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 font-medium text-rose-700 hover:bg-rose-100"
               onClick={() => {
-                console.log("[Admin] Clear local My Drops clicked");
+                console.log("[Quiet Room] Clear local My Drops clicked");
                 // TODO: implement local My Drops clear
               }}
             >
               Clear local My Drops
             </button>
-            <button
-              className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 font-medium text-rose-700 hover:bg-rose-100"
-              onClick={() => {
-                console.log("[Admin] Refresh Vibe ID list clicked");
-                // TODO: implement Vibe ID refresh
-              }}
-            >
-              Refresh Vibe ID list
-            </button>
           </div>
         </div>
 
-        {/* Danger zone */}
         <div className="rounded-2xl border border-rose-200/80 bg-rose-50/80 p-4 shadow-sm">
           <div className="mb-2 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-rose-700" />
-            <h3 className="text-sm font-semibold text-rose-800">
-              Danger zone
-            </h3>
+            <h3 className="text-sm font-semibold text-rose-800">Danger zone</h3>
           </div>
           <p className="text-xs text-rose-700/90">
-            Heavy actions for testing or emergencies. These will eventually be
-            wired to real destructive operations, so use carefully.
+            Heavy actions for testing or emergencies. Use carefully.
           </p>
 
           <div className="mt-3 flex flex-wrap gap-2 text-xs">
             <button
               className="rounded-full bg-rose-700 px-3 py-1.5 font-medium text-rose-50 shadow-sm hover:bg-rose-800"
               onClick={() => {
-                console.log("[Admin] Delete all drops clicked");
+                console.log("[Quiet Room] Delete all drops clicked");
                 // TODO: implement delete all drops
               }}
             >
@@ -566,16 +650,7 @@ function SettingsSection({
             <button
               className="rounded-full border border-rose-300 bg-rose-100 px-3 py-1.5 font-medium text-rose-800 hover:bg-rose-200"
               onClick={() => {
-                console.log("[Admin] Reset admin mode clicked");
-                // TODO: implement reset admin mode
-              }}
-            >
-              Reset admin mode
-            </button>
-            <button
-              className="rounded-full border border-rose-300 bg-rose-100 px-3 py-1.5 font-medium text-rose-800 hover:bg-rose-200"
-              onClick={() => {
-                console.log("[Admin] Clear analytics cache clicked");
+                console.log("[Quiet Room] Clear analytics cache clicked");
                 // TODO: implement clear analytics cache
               }}
             >
