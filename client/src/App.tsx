@@ -6,6 +6,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { readFlags } from "@/lib/featureFlags";
 
+// ✅ Vercel Analytics
+import { Analytics } from "@vercel/analytics/react";
+
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
@@ -148,6 +151,9 @@ function App() {
       <TooltipProvider>
         <AppContent />
         <Toaster />
+
+        {/* ✅ Vercel Web Analytics */}
+        <Analytics />
       </TooltipProvider>
     </QueryClientProvider>
   );
