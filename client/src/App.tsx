@@ -6,9 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { readFlags } from "@/lib/featureFlags";
 
-// ✅ Vercel Analytics
-import { Analytics } from "@vercel/analytics/react";
-
+// Pages
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
@@ -25,28 +23,33 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import QAPage from "@/pages/QAPage";
 import ContactPage from "@/pages/ContactPage";
 
-// ✅ Soft Reads
+// 🔓 Owner unlock page (NEW)
+import OwnerUnlockPage from "@/pages/OwnerUnlockPage";
+
+// Soft Reads
 import SoftReadsPage from "@/pages/SoftReadsPage";
 import SoftReadPostPage from "@/pages/SoftReadPostPage";
 
-// 🧪 MoodCanvas Playground
+// Playground
 import CanvasPlayground from "@/pages/CanvasPlayground";
 
+// Layout
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-
-// ✅ Ghost Navigation (global)
 import GhostMenu from "@/components/GhostMenu";
 
-// ✅ Echo Vault
+// Echo Vault
 import EchoVaultPage from "@/pages/EchoVaultPage";
 
-// ✅ New Release Ritual pages
+// Release Ritual
 import ReleaseTextPage from "@/pages/ReleaseTextPage";
 import ReleaseVoicePage from "@/pages/ReleaseVoicePage";
 
-// ✅ Calm Studio sub-route only
+// Calm Studio sub-route
 import TakeABreath from "@/pages/take-a-breath";
+
+// Vercel Analytics
+import { Analytics } from "@vercel/analytics/react";
 
 console.log("[MoodDrop] App.tsx mounted");
 
@@ -59,6 +62,9 @@ function Router() {
       {/* Home */}
       <Route path="/" component={Home} />
 
+      {/* 🔓 Owner unlock (temporary but intentional) */}
+      <Route path="/owner-unlock" component={OwnerUnlockPage} />
+
       {/* Release Ritual */}
       <Route path="/release/text" component={ReleaseTextPage} />
       <Route path="/release/voice" component={ReleaseVoicePage} />
@@ -66,7 +72,7 @@ function Router() {
       {/* Echo Vault */}
       <Route path="/vault" component={EchoVaultPage} />
 
-      {/* 🚫 Collective Drop DISABLED — redirect to Echo Vault */}
+      {/* 🚫 Collective Drop disabled */}
       <Route path="/community">
         {() => {
           window.location.replace("/vault");
@@ -74,7 +80,7 @@ function Router() {
         }}
       </Route>
 
-      {/* Canvas Playground */}
+      {/* Playground */}
       <Route path="/playground" component={CanvasPlayground} />
 
       {/* Dashboard */}
@@ -86,7 +92,7 @@ function Router() {
       <Route path="/garden" component={Garden} />
       <Route path="/calm-studio/breathe" component={TakeABreath} />
 
-      {/* Legacy Drops (kept but not primary) */}
+      {/* Legacy Drops */}
       <Route path="/my-drops" component={MyDropsPage} />
       <Route path="/drop-it" component={DropItPage} />
 
@@ -140,6 +146,9 @@ function AppContent() {
       </main>
 
       <Footer />
+
+      {/* Analytics */}
+      <Analytics />
     </div>
   );
 }
@@ -151,9 +160,6 @@ function App() {
       <TooltipProvider>
         <AppContent />
         <Toaster />
-
-        {/* ✅ Vercel Web Analytics */}
-        <Analytics />
       </TooltipProvider>
     </QueryClientProvider>
   );
