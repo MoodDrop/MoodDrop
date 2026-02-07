@@ -25,7 +25,8 @@ type SavedDrop = {
 
 const PLAUSIBLE_EMBED_URL = import.meta.env.VITE_PLAUSIBLE_EMBED_URL;
 
-// Optional: if you want a button that jumps straight to Vercel analytics
+// ✅ Vercel Analytics URL (link-out). Add this to your env:
+// VITE_VERCEL_ANALYTICS_URL="https://vercel.com/<team>/<project>/analytics"
 const VERCEL_ANALYTICS_URL = import.meta.env.VITE_VERCEL_ANALYTICS_URL;
 
 // LocalStorage key name for your trusted device token
@@ -134,7 +135,7 @@ export default function AdminPage() {
 
   const totalEchoesLoaded = useMemo(() => recentDrops.length, [recentDrops]);
 
-  // Placeholder values for now (until analytics is wired)
+  // Placeholder values for now
   const totalFootsteps = 0;
   const active7d = 0;
 
@@ -288,7 +289,7 @@ function OverviewSection({
             {totalFootsteps.toLocaleString()}
           </p>
           <p className="mt-1 text-xs text-slate-500">
-            Connect analytics when you’re ready (Vercel is easiest).
+            Connected via Vercel Analytics (see Footsteps tab).
           </p>
         </div>
 
@@ -409,22 +410,30 @@ function FootstepsSection({
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-4 text-xs">
             <p className="font-semibold text-slate-900">Instagram</p>
-            <p className="mt-1 text-slate-600">Shared links and profile visits</p>
+            <p className="mt-1 text-slate-600">
+              Shared links and profile visits
+            </p>
           </div>
 
           <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-4 text-xs">
             <p className="font-semibold text-slate-900">Direct</p>
-            <p className="mt-1 text-slate-600">Typed links, bookmarks, or saved access</p>
+            <p className="mt-1 text-slate-600">
+              Typed links, bookmarks, or saved access
+            </p>
           </div>
 
           <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-4 text-xs">
             <p className="font-semibold text-slate-900">Search</p>
-            <p className="mt-1 text-slate-600">Quiet discovery through search engines</p>
+            <p className="mt-1 text-slate-600">
+              Quiet discovery through search engines
+            </p>
           </div>
 
           <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-4 text-xs">
             <p className="font-semibold text-slate-900">Other paths</p>
-            <p className="mt-1 text-slate-600">Mentions, shares, or external links</p>
+            <p className="mt-1 text-slate-600">
+              Mentions, shares, or external links
+            </p>
           </div>
         </div>
 
@@ -433,10 +442,12 @@ function FootstepsSection({
           once someone arrives.
         </p>
 
+        {/* ✅ Vercel Analytics button (link-out) */}
         <div className="mt-4 rounded-2xl border border-rose-100 bg-white/70 p-4 text-xs">
-          <p className="font-semibold text-slate-900">View full analytics in Vercel</p>
+          <p className="font-semibold text-slate-900">Vercel Analytics</p>
           <p className="mt-1 text-slate-600">
-            Open your project’s Analytics tab to see referrers, top pages, and trends.
+            Open your project’s Analytics tab to see referrers, top pages, and
+            trends.
           </p>
 
           {vercelUrl ? (
@@ -444,28 +455,31 @@ function FootstepsSection({
               href={vercelUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-3 inline-flex rounded-full bg-rose-600 px-4 py-2 text-[11px] font-medium text-white shadow-sm hover:bg-rose-700"
+              className="mt-3 inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-[11px] font-medium text-white shadow-sm transition hover:bg-rose-700"
             >
-              Open Vercel Analytics
+              Open Vercel Analytics <span aria-hidden>↗</span>
             </a>
           ) : (
-            <p className="mt-3 text-[11px] text-slate-500">
-              Optional: add{" "}
-              <code className="rounded bg-slate-100 px-1 py-0.5">
-                VITE_VERCEL_ANALYTICS_URL
-              </code>{" "}
-              to{" "}
-              <code className="rounded bg-slate-100 px-1 py-0.5">
-                client/.env.local
-              </code>{" "}
-              to enable a direct button.
-            </p>
+            <div className="mt-3 rounded-xl bg-rose-50/60 p-3">
+              <p className="text-[11px] text-slate-600">
+                Add this env var to enable the button:
+              </p>
+              <code className="mt-2 block rounded bg-white/80 px-2 py-1 text-[10px] text-slate-700">
+                VITE_VERCEL_ANALYTICS_URL="https://vercel.com/&lt;team&gt;/&lt;project&gt;/analytics"
+              </code>
+              <p className="mt-2 text-[11px] text-slate-500">
+                Put it in <code className="rounded bg-white/80 px-1">client/.env.local</code>{" "}
+                (or your Vercel Environment Variables), then redeploy.
+              </p>
+            </div>
           )}
         </div>
       </div>
 
       <div className="rounded-2xl bg-white/80 p-4 shadow-sm">
-        <h3 className="text-sm font-semibold text-slate-900">Optional: Plausible (later)</h3>
+        <h3 className="text-sm font-semibold text-slate-900">
+          Optional: Plausible (later)
+        </h3>
         <p className="mt-1 text-xs text-slate-500">
           If you decide to embed Plausible in the future, you can use{" "}
           <code className="rounded bg-slate-100 px-1 py-0.5 text-[10px]">

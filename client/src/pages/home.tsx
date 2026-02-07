@@ -1,9 +1,8 @@
-// client/src/pages/home.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Orb } from "../components/Orb";
 
-// ✅ Wordmark (rename file to avoid spaces)
+// Wordmark
 import moodDropText from "../assets/mooddrop-text.png";
 
 function usePrefersReducedMotion(): boolean {
@@ -33,19 +32,10 @@ export default function HomePage() {
   const reducedMotion = usePrefersReducedMotion();
 
   const [showChoices, setShowChoices] = useState(false);
-  const [showSecondary, setShowSecondary] = useState(false);
-
-  const secondaryLine = useMemo(() => {
-    return "You don't have to figure it out right now.";
-  }, []);
 
   useEffect(() => {
-    const t1 = window.setTimeout(() => setShowSecondary(true), 350);
-    const t2 = window.setTimeout(() => setShowChoices(true), 1650);
-    return () => {
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-    };
+    const t = window.setTimeout(() => setShowChoices(true), 900);
+    return () => window.clearTimeout(t);
   }, []);
 
   const goText = () => setLocation("/release/text");
@@ -53,7 +43,7 @@ export default function HomePage() {
 
   return (
     <main
-      className="relative min-h-screen overflow-hidden"
+      className="relative min-h-screen overflow-hidden font-sans"
       style={{
         background:
           "radial-gradient(circle at 20% 15%, rgba(255, 240, 235, 0.95), rgba(252, 232, 225, 0.72), rgba(249, 244, 240, 0.98))",
@@ -71,12 +61,12 @@ export default function HomePage() {
         }}
       />
 
-      {/* ✅ Wordmark (subtle arrival) */}
+      {/* Wordmark */}
       <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20">
         <img
           src={moodDropText}
           alt="MoodDrop"
-          className="h-7 w-auto opacity-50"
+          className="h-7 w-auto opacity-60"
           style={{
             filter: "drop-shadow(0 10px 22px rgba(210,160,170,0.18))",
           }}
@@ -85,24 +75,20 @@ export default function HomePage() {
 
       <section className="relative mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 text-center">
         {/* Orb */}
-        <div className={reducedMotion ? "" : "mooddrop-breathe"}>
+        <div className={`${reducedMotion ? "" : "mooddrop-breathe"} mt-6`}>
           <Orb className="h-40 w-40" />
         </div>
 
-        {/* Copy */}
-        <h1 className="mt-10 text-[26px] leading-tight tracking-wide text-[rgba(35,28,28,0.92)]">
-          You’re here.
+        {/* Primary Headline */}
+        <h1 className="mt-10 text-[22px] leading-tight tracking-wide text-[rgba(35,28,28,0.9)]">
+          A place to release, not perform.
         </h1>
 
-        <p
-          className={[
-            "mt-3 max-w-xs text-[15px] leading-relaxed",
-            "text-[rgba(35,28,28,0.62)] transition-opacity duration-700",
-            showSecondary ? "opacity-100" : "opacity-0",
-          ].join(" ")}
-        >
-          {secondaryLine}
-        </p>
+        {/* Permission Whisper (Anchor-style) */}
+        <p className="mt-2 text-[13px] italic text-[rgba(35,28,28,0.48)] select-none">
+  Nothing is expected of you here.
+</p>
+
 
         {/* Choices */}
         <div
@@ -138,11 +124,17 @@ export default function HomePage() {
               Say it out loud
             </button>
 
-            <p className="pt-1 text-[13px] text-[rgba(35,28,28,0.48)] italic">
+            {/* Secondary Line */}
+            <p className="pt-0.5 text-[13px] text-[rgba(35,28,28,0.48)] italic">
               Whenever you’re ready.
             </p>
           </div>
         </div>
+
+        {/* Gentle Anchor */}
+        <p className="mt-8 text-[13px] text-[rgba(35,28,28,0.48)] select-none">
+          "Your words belong only to you. Always private, always yours."
+        </p>
       </section>
     </main>
   );
