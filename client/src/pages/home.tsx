@@ -31,13 +31,6 @@ export default function HomePage() {
   const [, setLocation] = useLocation();
   const reducedMotion = usePrefersReducedMotion();
 
-  const [showChoices, setShowChoices] = useState(false);
-
-  useEffect(() => {
-    const t = window.setTimeout(() => setShowChoices(true), 900);
-    return () => window.clearTimeout(t);
-  }, []);
-
   const goText = () => setLocation("/release/text");
   const goVoice = () => setLocation("/release/voice");
 
@@ -86,17 +79,11 @@ export default function HomePage() {
 
         {/* Permission Whisper (Anchor-style) */}
         <p className="mt-2 text-[13px] italic text-[rgba(35,28,28,0.48)] select-none">
-  Nothing is expected of you here.
-</p>
+          Nothing is expected of you here.
+        </p>
 
-
-        {/* Choices */}
-        <div
-          className={[
-            "mt-10 w-full max-w-xs transition-opacity duration-700",
-            showChoices ? "opacity-100" : "opacity-0",
-          ].join(" ")}
-        >
+        {/* Choices — now immediate (Option A) */}
+        <div className="mt-10 w-full max-w-xs">
           <div className="flex flex-col items-center gap-5">
             <button
               type="button"
