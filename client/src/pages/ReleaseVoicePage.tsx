@@ -56,10 +56,10 @@ export default function ReleaseVoicePage() {
   const [isRecording, setIsRecording] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
 
-  // Preview playback URL (blob:)
+  // Preview playback (blob URL)
   const [previewUrl, setPreviewUrl] = useState<string>("");
 
-  // ✅ The real Blob we will persist to Echo Vault
+  // ✅ Keep audio as Blob for saving (your “audioBlob” version)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
   const [audioMime, setAudioMime] = useState<string>("audio/webm");
@@ -161,17 +161,17 @@ export default function ReleaseVoicePage() {
       if (evt.data && evt.data.size > 0) chunksRef.current.push(evt.data);
     };
 
-    mr.onstop = async () => {
+    mr.onstop = () => {
       try {
         const blob = new Blob(chunksRef.current, {
           type: mr.mimeType || mime || "audio/webm",
         });
 
-        // Preview URL for this page
+        // Preview URL
         const url = URL.createObjectURL(blob);
         setPreviewUrl(url);
 
-        // ✅ Save blob in state for persistence
+        // ✅ Save Blob for Echo Vault
         setAudioBlob(blob);
 
         setIsRecording(false);
@@ -210,7 +210,7 @@ export default function ReleaseVoicePage() {
     }
   };
 
-  const deleteTake = () => {
+  const discardTake = () => {
     resetAudio();
   };
 
@@ -231,7 +231,7 @@ export default function ReleaseVoicePage() {
       audioDurationMs,
     });
 
-    // ✅ Held moment (auto-fade)
+    // ✅ Held moment (auto-fade) then go to Echo Vault
     setShowHeld(true);
     window.setTimeout(() => {
       setShowHeld(false);
@@ -315,6 +315,7 @@ export default function ReleaseVoicePage() {
           </p>
         </div>
 
+        {/* Mood + note */}
         <div
           className="mt-10 rounded-3xl px-5 py-5"
           style={{
@@ -334,25 +335,35 @@ export default function ReleaseVoicePage() {
             Choose a mood
           </div>
 
+          {/* ✅ Updated pill styling (matches your Write it out page) */}
           <div className="mt-3 flex flex-wrap gap-2">
             {MOODS.map((m) => {
-              const selected = m === mood;
+              const active = m === mood;
+
+              const pillStyle: React.CSSProperties = {
+                background: active ? "rgba(255,255,255,0.74)" : "rgba(255,255,255,0.34)",
+                border: active
+                  ? "1px solid rgba(210,160,170,0.46)"
+                  : "1px solid rgba(210,160,170,0.16)",
+                color: active ? "rgba(35,28,28,0.82)" : "rgba(35,28,28,0.60)",
+                backdropFilter: "blur(10px)",
+                WebkitBackdropFilter: "blur(10px)",
+                boxShadow: active
+                  ? "0 12px 28px rgba(210,160,170,0.20), 0 0 0 1px rgba(255,255,255,0.28) inset"
+                  : "none",
+                transform: active ? "scale(1.02)" : "scale(1)",
+                transition:
+                  "transform 200ms ease, box-shadow 250ms ease, background 250ms ease, border-color 250ms ease, color 250ms ease",
+              };
+
               return (
                 <button
                   key={m}
                   type="button"
                   onClick={() => setMood(m)}
-                  className="rounded-full px-4 py-2 text-[11px] uppercase"
-                  style={{
-                    letterSpacing: "0.20em",
-                    background: selected ? "rgba(255,255,255,0.70)" : "rgba(255,255,255,0.44)",
-                    border: selected
-                      ? "1px solid rgba(210,160,170,0.28)"
-                      : "1px solid rgba(210,160,170,0.14)",
-                    color: selected ? "rgba(35,28,28,0.72)" : "rgba(35,28,28,0.55)",
-                    backdropFilter: "blur(10px)",
-                    WebkitBackdropFilter: "blur(10px)",
-                  }}
+                  className="rounded-full px-4 py-2 text-[12px] focus:outline-none focus-visible:ring-2"
+                  style={pillStyle}
+                  aria-pressed={active}
                 >
                   {m}
                 </button>
@@ -382,6 +393,7 @@ export default function ReleaseVoicePage() {
           </div>
         </div>
 
+        {/* Recorder */}
         <div
           className="mt-6 rounded-3xl px-5 py-6"
           style={{
@@ -497,10 +509,11 @@ export default function ReleaseVoicePage() {
                 }}
               >
                 <audio src={previewUrl} controls className="w-full" preload="auto" />
+
                 <div className="mt-3 flex gap-3">
                   <button
                     type="button"
-                    onClick={deleteTake}
+                    onClick={discardTake}
                     className="flex-1 rounded-2xl px-4 py-3 text-[11px] uppercase"
                     style={{
                       letterSpacing: "0.22em",
