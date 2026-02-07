@@ -81,7 +81,7 @@ export default function HomePage() {
 
         {/* Primary Headline */}
         <h1 className="mt-10 text-[22px] leading-tight tracking-wide text-[rgba(35,28,28,0.9)]">
-          A place to release, not perform.
+          A place to let go
         </h1>
 
         {/* Permission Whisper (Anchor-style) */}
