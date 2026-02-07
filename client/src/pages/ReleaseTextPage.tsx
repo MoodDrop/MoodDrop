@@ -47,12 +47,12 @@ export default function ReleaseTextPage() {
     setText("");
   };
 
-  // After “released” moment, return home (stillness)
+  // ✅ After “released” moment, go to Echo Vault
   useEffect(() => {
     if (!released) return;
     const t = window.setTimeout(() => {
       setReleased(false);
-      setLocation("/");
+      setLocation("/vault");
     }, 1100);
     return () => window.clearTimeout(t);
   }, [released, setLocation]);
@@ -132,7 +132,6 @@ export default function ReleaseTextPage() {
               {MOODS.map((m) => {
                 const active = m.key === mood;
 
-                // ✅ Option A + tiny Option C: glow + richer frosted fill + micro scale
                 const pillStyle: React.CSSProperties = {
                   background: active
                     ? "rgba(255,255,255,0.74)"
@@ -159,12 +158,7 @@ export default function ReleaseTextPage() {
                     type="button"
                     onClick={() => setMood(m.key)}
                     className="rounded-full px-4 py-2 text-[12px] focus:outline-none focus-visible:ring-2"
-                    style={{
-                      ...pillStyle,
-                      // subtle focus ring that matches sanctuary palette
-                      // (kept inline so it works without Tailwind ring tokens)
-                      // ring via boxShadow is already present when active, so focus is extra gentle
-                    }}
+                    style={pillStyle}
                     aria-pressed={active}
                   >
                     {m.key}
@@ -295,7 +289,7 @@ export default function ReleaseTextPage() {
               className="mt-2 text-[12px] italic"
               style={{ color: "rgba(35,28,28,0.52)" }}
             >
-              You can return to silence.
+              Your echo is waiting in the Vault.
             </div>
           </div>
         </div>

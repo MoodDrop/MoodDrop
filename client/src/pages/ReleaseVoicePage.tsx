@@ -2,8 +2,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { saveVoiceEchoLocal } from "@/lib/EchoVaultLocal";
+import HeldOverlay from "@/components/HeldOverlay";
 
 const VOICE_MAX_MS = 120_000; // 2 minutes
+const HELD_MS = 2600;
 
 function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
@@ -54,13 +56,20 @@ export default function ReleaseVoicePage() {
   const [isRecording, setIsRecording] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
 
+  // Preview playback URL (blob:)
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+
+  // ✅ The real Blob we will persist to Echo Vault
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string>("");
+
   const [audioMime, setAudioMime] = useState<string>("audio/webm");
   const [audioDurationMs, setAudioDurationMs] = useState<number>(0);
 
   const [showCopy, setShowCopy] = useState(false);
   const [showActions, setShowActions] = useState(false);
+
+  // Held overlay
+  const [showHeld, setShowHeld] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -69,6 +78,9 @@ export default function ReleaseVoicePage() {
 
   const tickTimerRef = useRef<number | null>(null);
   const hardLimitTimerRef = useRef<number | null>(null);
+
+  // Track whether we “released” (saved + navigated)
+  const didReleaseRef = useRef(false);
 
   const headline = useMemo(() => "Say it out loud.", []);
   const subline = useMemo(() => "You can keep it messy. The pond will hold it.", []);
@@ -82,9 +94,16 @@ export default function ReleaseVoicePage() {
     };
   }, []);
 
+  const stopAllTracks = () => {
+    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+    mediaStreamRef.current = null;
+  };
+
   useEffect(() => {
     return () => {
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      // If we didn’t release it, cleanup preview blob URL.
+      if (!didReleaseRef.current && previewUrl) URL.revokeObjectURL(previewUrl);
+
       stopAllTracks();
       if (tickTimerRef.current) window.clearInterval(tickTimerRef.current);
       if (hardLimitTimerRef.current) window.clearTimeout(hardLimitTimerRef.current);
@@ -107,11 +126,6 @@ export default function ReleaseVoicePage() {
     return () => window.clearInterval(id);
   }, [isRecording]);
 
-  const stopAllTracks = () => {
-    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
-    mediaStreamRef.current = null;
-  };
-
   const requestMic = async () => {
     try {
       setPermissionError("");
@@ -127,8 +141,8 @@ export default function ReleaseVoicePage() {
   };
 
   const resetAudio = () => {
-    if (audioUrl) URL.revokeObjectURL(audioUrl);
-    setAudioUrl("");
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl("");
     setAudioBlob(null);
     setAudioDurationMs(0);
   };
@@ -147,22 +161,33 @@ export default function ReleaseVoicePage() {
       if (evt.data && evt.data.size > 0) chunksRef.current.push(evt.data);
     };
 
-    mr.onstop = () => {
-      const blob = new Blob(chunksRef.current, {
-        type: mr.mimeType || mime || "audio/webm",
-      });
+    mr.onstop = async () => {
+      try {
+        const blob = new Blob(chunksRef.current, {
+          type: mr.mimeType || mime || "audio/webm",
+        });
 
-      const url = URL.createObjectURL(blob);
-      setAudioBlob(blob);
-      setAudioUrl(url);
-      setIsRecording(false);
+        // Preview URL for this page
+        const url = URL.createObjectURL(blob);
+        setPreviewUrl(url);
 
-      const dur = Math.max(0, elapsedMs);
-      setAudioDurationMs(dur);
+        // ✅ Save blob in state for persistence
+        setAudioBlob(blob);
 
-      if (tickTimerRef.current) window.clearInterval(tickTimerRef.current);
-      if (hardLimitTimerRef.current) window.clearTimeout(hardLimitTimerRef.current);
-      stopAllTracks();
+        setIsRecording(false);
+
+        const dur = Math.max(0, elapsedMs);
+        setAudioDurationMs(dur);
+
+        if (tickTimerRef.current) window.clearInterval(tickTimerRef.current);
+        if (hardLimitTimerRef.current) window.clearTimeout(hardLimitTimerRef.current);
+        stopAllTracks();
+      } catch (err) {
+        console.error("[ReleaseVoicePage] Failed to finalize recording:", err);
+        setPermissionError("Something went wrong saving your recording. Please try again.");
+        setIsRecording(false);
+        stopAllTracks();
+      }
     };
 
     mr.start(250);
@@ -189,20 +214,29 @@ export default function ReleaseVoicePage() {
     resetAudio();
   };
 
-  const canRelease = !!audioUrl && !isRecording;
+  const canRelease = !!audioBlob && !isRecording;
 
-  const onRelease = () => {
-    if (!canRelease) return;
+  const onRelease = async () => {
+    if (!canRelease || !audioBlob) return;
 
-    saveVoiceEchoLocal({
+    // Mark as released BEFORE navigation
+    didReleaseRef.current = true;
+
+    // ✅ Save to Echo Vault (Blob -> base64 happens inside saveVoiceEchoLocal)
+    await saveVoiceEchoLocal({
       mood,
       content: note.trim() ? note.trim() : "Voice echo",
-      audioUrl,
+      audioBlob,
       audioMime,
       audioDurationMs,
     });
 
-    setLocation("/vault");
+    // ✅ Held moment (auto-fade)
+    setShowHeld(true);
+    window.setTimeout(() => {
+      setShowHeld(false);
+      setLocation("/vault");
+    }, HELD_MS);
   };
 
   const goBack = () => setLocation("/");
@@ -281,7 +315,6 @@ export default function ReleaseVoicePage() {
           </p>
         </div>
 
-        {/* Mood selector */}
         <div
           className="mt-10 rounded-3xl px-5 py-5"
           style={{
@@ -304,38 +337,22 @@ export default function ReleaseVoicePage() {
           <div className="mt-3 flex flex-wrap gap-2">
             {MOODS.map((m) => {
               const selected = m === mood;
-
-              const pillStyle: React.CSSProperties = {
-                background: selected
-                  ? "rgba(255,255,255,0.76)"
-                  : "rgba(255,255,255,0.44)",
-                border: selected
-                  ? "1px solid rgba(210,160,170,0.46)"
-                  : "1px solid rgba(210,160,170,0.14)",
-                color: selected
-                  ? "rgba(35,28,28,0.82)"
-                  : "rgba(35,28,28,0.55)",
-                backdropFilter: "blur(10px)",
-                WebkitBackdropFilter: "blur(10px)",
-                boxShadow: selected
-                  ? "0 12px 28px rgba(210,160,170,0.20), 0 0 0 1px rgba(255,255,255,0.28) inset"
-                  : "none",
-                transform: selected ? "scale(1.02)" : "scale(1)",
-                transition:
-                  "transform 200ms ease, box-shadow 250ms ease, background 250ms ease, border-color 250ms ease, color 250ms ease",
-              };
-
               return (
                 <button
                   key={m}
                   type="button"
                   onClick={() => setMood(m)}
-                  className="rounded-full px-4 py-2 text-[11px] uppercase focus:outline-none"
+                  className="rounded-full px-4 py-2 text-[11px] uppercase"
                   style={{
                     letterSpacing: "0.20em",
-                    ...pillStyle,
+                    background: selected ? "rgba(255,255,255,0.70)" : "rgba(255,255,255,0.44)",
+                    border: selected
+                      ? "1px solid rgba(210,160,170,0.28)"
+                      : "1px solid rgba(210,160,170,0.14)",
+                    color: selected ? "rgba(35,28,28,0.72)" : "rgba(35,28,28,0.55)",
+                    backdropFilter: "blur(10px)",
+                    WebkitBackdropFilter: "blur(10px)",
                   }}
-                  aria-pressed={selected}
                 >
                   {m}
                 </button>
@@ -365,7 +382,6 @@ export default function ReleaseVoicePage() {
           </div>
         </div>
 
-        {/* Recorder */}
         <div
           className="mt-6 rounded-3xl px-5 py-6"
           style={{
@@ -393,23 +409,12 @@ export default function ReleaseVoicePage() {
                   color: "rgba(35,28,28,0.62)",
                 }}
               >
-                {isRecording
-                  ? "Hold the moment."
-                  : audioUrl
-                  ? "A take is ready."
-                  : "Whenever you’re ready."}
+                {isRecording ? "Hold the moment." : previewUrl ? "A take is ready." : "Whenever you’re ready."}
               </div>
             </div>
 
-            <div
-              className="text-[12px] tabular-nums"
-              style={{ color: "rgba(35,28,28,0.55)" }}
-            >
-              {isRecording
-                ? formatMs(elapsedMs)
-                : audioDurationMs
-                ? formatMs(audioDurationMs)
-                : "0:00"}
+            <div className="text-[12px] tabular-nums" style={{ color: "rgba(35,28,28,0.55)" }}>
+              {isRecording ? formatMs(elapsedMs) : audioDurationMs ? formatMs(audioDurationMs) : "0:00"}
             </div>
           </div>
 
@@ -481,7 +486,7 @@ export default function ReleaseVoicePage() {
               </button>
             )}
 
-            {audioUrl && !isRecording && (
+            {previewUrl && !isRecording && (
               <div
                 className="rounded-3xl px-5 py-4"
                 style={{
@@ -491,7 +496,7 @@ export default function ReleaseVoicePage() {
                   WebkitBackdropFilter: "blur(12px)",
                 }}
               >
-                <audio src={audioUrl} controls className="w-full" />
+                <audio src={previewUrl} controls className="w-full" preload="auto" />
                 <div className="mt-3 flex gap-3">
                   <button
                     type="button"
@@ -510,7 +515,8 @@ export default function ReleaseVoicePage() {
                   <button
                     type="button"
                     onClick={onRelease}
-                    className="flex-1 rounded-2xl px-4 py-3 text-[11px] uppercase"
+                    disabled={!canRelease}
+                    className="flex-1 rounded-2xl px-4 py-3 text-[11px] uppercase disabled:opacity-60"
                     style={{
                       letterSpacing: "0.22em",
                       background: "rgba(255,255,255,0.68)",
@@ -537,6 +543,9 @@ export default function ReleaseVoicePage() {
           </div>
         </div>
       </section>
+
+      {/* ✅ Held auto-fade overlay */}
+      <HeldOverlay show={showHeld} />
     </main>
   );
 }
