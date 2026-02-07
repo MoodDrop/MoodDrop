@@ -133,7 +133,7 @@ export default function HomePage() {
 
         {/* Gentle Anchor */}
         <p className="mt-8 text-[13px] text-[rgba(35,28,28,0.48)] select-none">
-          "Your words belong only to you. Always private, always yours."
+          Your words belong only to you. Always private, always yours.
         </p>
       </section>
     </main>
