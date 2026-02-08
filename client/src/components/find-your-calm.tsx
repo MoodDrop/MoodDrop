@@ -84,8 +84,11 @@ export default function FindYourCalm() {
                 </h3>
 
                 <p className="text-warm-gray-600 leading-relaxed">
-                  The room is still taking shape.
-                </p>
+  The room is still taking shape.
+  <br />
+  Soft, calming visuals designed to offer lightness, comfort, and quiet moments of ease.
+</p>
+
               </div>
             </div>
           </div>
