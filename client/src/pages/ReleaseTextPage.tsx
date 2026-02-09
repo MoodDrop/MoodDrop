@@ -1,7 +1,10 @@
 // client/src/pages/ReleaseTextPage.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { saveEchoLocal } from "@/lib/EchoVaultLocal";
+
+// ✅ Droplet sound (make sure this file exists at: client/src/assets/sounds/moodDrop-droplet.m4a)
+import dropletSfx from "../assets/sounds/moodDrop-droplet.m4a";
 
 const MOODS = [
   { key: "Calm", hint: "Soft, steady, quieter inside." },
@@ -31,7 +34,38 @@ export default function ReleaseTextPage() {
   const goBack = () => setLocation("/");
   const goVoice = () => setLocation("/release/voice");
 
-  const onDrop = () => {
+  // ✅ Keep one Audio instance (prevents “multiple sounds” + reduces lag)
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const a = new Audio(dropletSfx);
+    a.preload = "auto";
+    a.volume = 0.45; // gentle by default
+    audioRef.current = a;
+
+    return () => {
+      audioRef.current = null;
+    };
+  }, []);
+
+  const playDropSound = async () => {
+    try {
+      const a = audioRef.current;
+      if (!a) return;
+
+      // rewind so repeat clicks still play cleanly
+      a.currentTime = 0;
+
+      const p = a.play();
+      if (p && typeof (p as Promise<void>).catch === "function") {
+        await (p as Promise<void>).catch(() => {});
+      }
+    } catch {
+      // ignore sound errors (autoplay restrictions / device quirks)
+    }
+  };
+
+  const onDrop = async () => {
     const trimmed = text.trim();
     if (!trimmed) return;
 
@@ -41,6 +75,9 @@ export default function ReleaseTextPage() {
       mood,
       content: trimmed,
     });
+
+    // ✅ Play droplet sound (best-effort)
+    await playDropSound();
 
     // ✅ Soft confirmation
     setReleased(true);
@@ -289,7 +326,7 @@ export default function ReleaseTextPage() {
               className="mt-2 text-[12px] italic"
               style={{ color: "rgba(35,28,28,0.52)" }}
             >
-              Your echo is waiting in the Vault.
+              Your echo is waiting in the vault.
             </div>
           </div>
         </div>

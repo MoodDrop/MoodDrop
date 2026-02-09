@@ -4,6 +4,9 @@ import { useLocation } from "wouter";
 import { saveVoiceEchoLocal } from "@/lib/EchoVaultLocal";
 import HeldOverlay from "@/components/HeldOverlay";
 
+// ✅ Update this filename to match your asset exactly
+import dropSound from "@/assets/sounds/moodDrop-droplet.m4a";
+
 const VOICE_MAX_MS = 120_000; // 2 minutes
 const HELD_MS = 2600;
 
@@ -56,19 +59,14 @@ export default function ReleaseVoicePage() {
   const [isRecording, setIsRecording] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
 
-  // Preview playback (blob URL)
   const [previewUrl, setPreviewUrl] = useState<string>("");
-
-  // ✅ Keep audio as Blob for saving (your “audioBlob” version)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-
   const [audioMime, setAudioMime] = useState<string>("audio/webm");
   const [audioDurationMs, setAudioDurationMs] = useState<number>(0);
 
   const [showCopy, setShowCopy] = useState(false);
   const [showActions, setShowActions] = useState(false);
 
-  // Held overlay
   const [showHeld, setShowHeld] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -79,8 +77,32 @@ export default function ReleaseVoicePage() {
   const tickTimerRef = useRef<number | null>(null);
   const hardLimitTimerRef = useRef<number | null>(null);
 
-  // Track whether we “released” (saved + navigated)
   const didReleaseRef = useRef(false);
+
+  // ✅ Drop sound (preloaded)
+  const dropAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // Preload the sound once so it’s ready instantly on tap
+    const a = new Audio(dropSound);
+    a.preload = "auto";
+    a.volume = 0.9;
+    dropAudioRef.current = a;
+    return () => {
+      dropAudioRef.current = null;
+    };
+  }, []);
+
+  const playDropSound = async () => {
+    const a = dropAudioRef.current;
+    if (!a) return;
+    try {
+      a.currentTime = 0;
+      await a.play();
+    } catch {
+      // If the browser blocks it (rare when triggered by tap), fail silently.
+    }
+  };
 
   const headline = useMemo(() => "Say it out loud.", []);
   const subline = useMemo(() => "You can keep it messy. The pond will hold it.", []);
@@ -101,7 +123,6 @@ export default function ReleaseVoicePage() {
 
   useEffect(() => {
     return () => {
-      // If we didn’t release it, cleanup preview blob URL.
       if (!didReleaseRef.current && previewUrl) URL.revokeObjectURL(previewUrl);
 
       stopAllTracks();
@@ -167,11 +188,8 @@ export default function ReleaseVoicePage() {
           type: mr.mimeType || mime || "audio/webm",
         });
 
-        // Preview URL
         const url = URL.createObjectURL(blob);
         setPreviewUrl(url);
-
-        // ✅ Save Blob for Echo Vault
         setAudioBlob(blob);
 
         setIsRecording(false);
@@ -219,19 +237,21 @@ export default function ReleaseVoicePage() {
   const onRelease = async () => {
     if (!canRelease || !audioBlob) return;
 
-    // Mark as released BEFORE navigation
+    // ✅ Play sound IMMEDIATELY on the tap (most important for mobile)
+    void playDropSound();
+
     didReleaseRef.current = true;
 
-    // ✅ Save to Echo Vault (Blob -> base64 happens inside saveVoiceEchoLocal)
+    // ✅ Save to Echo Vault
     await saveVoiceEchoLocal({
       mood,
-      content: note.trim() ? note.trim() : "Voice echo",
+      content: note,
       audioBlob,
       audioMime,
       audioDurationMs,
     });
 
-    // ✅ Held moment (auto-fade) then go to Echo Vault
+    // ✅ Held moment then route to Vault
     setShowHeld(true);
     window.setTimeout(() => {
       setShowHeld(false);
@@ -250,7 +270,6 @@ export default function ReleaseVoicePage() {
       }}
     >
       <div className="pointer-events-none absolute inset-0 mooddrop-grain opacity-20" />
-
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -315,7 +334,6 @@ export default function ReleaseVoicePage() {
           </p>
         </div>
 
-        {/* Mood + note */}
         <div
           className="mt-10 rounded-3xl px-5 py-5"
           style={{
@@ -335,35 +353,25 @@ export default function ReleaseVoicePage() {
             Choose a mood
           </div>
 
-          {/* ✅ Updated pill styling (matches your Write it out page) */}
           <div className="mt-3 flex flex-wrap gap-2">
             {MOODS.map((m) => {
-              const active = m === mood;
-
-              const pillStyle: React.CSSProperties = {
-                background: active ? "rgba(255,255,255,0.74)" : "rgba(255,255,255,0.34)",
-                border: active
-                  ? "1px solid rgba(210,160,170,0.46)"
-                  : "1px solid rgba(210,160,170,0.16)",
-                color: active ? "rgba(35,28,28,0.82)" : "rgba(35,28,28,0.60)",
-                backdropFilter: "blur(10px)",
-                WebkitBackdropFilter: "blur(10px)",
-                boxShadow: active
-                  ? "0 12px 28px rgba(210,160,170,0.20), 0 0 0 1px rgba(255,255,255,0.28) inset"
-                  : "none",
-                transform: active ? "scale(1.02)" : "scale(1)",
-                transition:
-                  "transform 200ms ease, box-shadow 250ms ease, background 250ms ease, border-color 250ms ease, color 250ms ease",
-              };
-
+              const selected = m === mood;
               return (
                 <button
                   key={m}
                   type="button"
                   onClick={() => setMood(m)}
-                  className="rounded-full px-4 py-2 text-[12px] focus:outline-none focus-visible:ring-2"
-                  style={pillStyle}
-                  aria-pressed={active}
+                  className="rounded-full px-4 py-2 text-[11px] uppercase"
+                  style={{
+                    letterSpacing: "0.20em",
+                    background: selected ? "rgba(255,255,255,0.70)" : "rgba(255,255,255,0.44)",
+                    border: selected
+                      ? "1px solid rgba(210,160,170,0.28)"
+                      : "1px solid rgba(210,160,170,0.14)",
+                    color: selected ? "rgba(35,28,28,0.72)" : "rgba(35,28,28,0.55)",
+                    backdropFilter: "blur(10px)",
+                    WebkitBackdropFilter: "blur(10px)",
+                  }}
                 >
                   {m}
                 </button>
@@ -393,7 +401,6 @@ export default function ReleaseVoicePage() {
           </div>
         </div>
 
-        {/* Recorder */}
         <div
           className="mt-6 rounded-3xl px-5 py-6"
           style={{
@@ -557,7 +564,6 @@ export default function ReleaseVoicePage() {
         </div>
       </section>
 
-      {/* ✅ Held auto-fade overlay */}
       <HeldOverlay show={showHeld} />
     </main>
   );
