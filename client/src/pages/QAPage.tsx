@@ -32,6 +32,58 @@ const SECTIONS: QASection[] = [
       },
     ],
   },
+
+  {
+    title: "Echo Room (Echo Vault)",
+    items: [
+      {
+        question: "What is the Echo Room?",
+        answer:
+          "The Echo Room is a private, reflective space inside MoodDrop where you can revisit what you’ve already released. Instead of a list or feed, your past drops appear as soft, glowing Echoes — gentle reminders you can return to when you need grounding or reassurance.",
+      },
+      {
+        question: "What is an Echo?",
+        answer:
+          "An Echo is a moment you’ve released — either through text or voice. Each Echo becomes a quiet point of memory, not something to analyze or perform, but something you can gently return to when you need it.",
+      },
+      {
+        question: "How do I use the Echo Room?",
+        answer:
+          "Enter the Echo Room and let your Echoes drift. Tap one to read a past text release or listen to a voice release. There’s no pressure to revisit everything — you choose what to open, when you’re ready.",
+      },
+      {
+        question: "Can I replay my voice Echo later?",
+        answer:
+          "Yes. If you recorded a voice Echo, you can return and listen to it again anytime inside the Echo Room. Your voice stays connected to that Echo so you can revisit it when you need grounding or reassurance.",
+      },
+      {
+        question: "Is my voice being recorded or stored?",
+        answer:
+          "Your voice Echoes are stored locally on your device as part of the Echo Vault. They are not posted publicly, shared with others, or turned into community audio. The Echo Room is designed to be private and personal — just you and your reflections.",
+      },
+      {
+        question: "Can anyone else see or hear my Echoes?",
+        answer:
+          "No. Echoes are visible only to you. There are no comments, reactions, followers, or outside voices in the Echo Room — it’s a space designed to stay quiet and non-performative.",
+      },
+      {
+        question: "How is the Echo Room different from My Drops?",
+        answer:
+          "My Drops is a private space for written entries saved on your device. The Echo Room (Echo Vault) is a more sensory space — your releases appear as visual Echoes, and may include both text and voice. It’s less about journaling and more about gentle reflection.",
+      },
+      {
+        question: "Can I delete or tuck away an Echo?",
+        answer:
+          "Yes. You’re in control. You can delete Echoes or tuck them away if you’re not ready to see them. Nothing is permanent unless you want it to be.",
+      },
+      {
+        question: "Is the Echo Room meant to reopen old pain?",
+        answer:
+          "No. The Echo Room isn’t about reliving difficult moments. It’s about remembering: “I’ve been here before — and I made it through.” You decide when, or if, you return to an Echo.",
+      },
+    ],
+  },
+
   {
     title: "Safety & Privacy",
     items: [
@@ -145,4 +197,3 @@ export default function QAPage() {
     </div>
   );
 }
-
