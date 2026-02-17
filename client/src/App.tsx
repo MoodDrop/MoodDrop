@@ -12,7 +12,6 @@ import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import ThankYou from "@/pages/thank-you";
 import CalmStudio from "@/pages/CalmStudio";
-import Garden from "@/pages/garden";
 import MyDropsPage from "@/pages/MyDropsPage";
 import DropItPage from "@/pages/DropItPage";
 import About from "@/pages/about";
@@ -23,7 +22,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import QAPage from "@/pages/QAPage";
 import ContactPage from "@/pages/ContactPage";
 
-// 🔓 Owner unlock page (NEW)
+// 🔓 Owner unlock page
 import OwnerUnlockPage from "@/pages/OwnerUnlockPage";
 
 // Soft Reads
@@ -48,10 +47,46 @@ import ReleaseVoicePage from "@/pages/ReleaseVoicePage";
 // Calm Studio sub-route
 import TakeABreath from "@/pages/take-a-breath";
 
+// ✅ Reflections
+import ReflectionsPage from "@/pages/ReflectionsPage";
+
 // Vercel Analytics
 import { Analytics } from "@vercel/analytics/react";
 
 console.log("[MoodDrop] App.tsx mounted");
+
+/**
+ * Global time-of-day atmosphere (device local time only)
+ * Morning (5-11): lighter cream
+ * Afternoon (12-17): baseline rose milk
+ * Evening (18-21): warmer blush
+ * Night (22-4): deeper soft rose
+ *
+ * NOTE:
+ * This uses existing Tailwind color tokens already in your app (blush/cream).
+ * No tracking, no storage, no timezone logic beyond device local time.
+ */
+function getAtmosphereGradient() {
+  const hour = new Date().getHours();
+
+  // Morning: lighter, airy
+  if (hour >= 5 && hour < 12) {
+    return "bg-gradient-to-br from-cream-50 via-blush-50 to-cream-100";
+  }
+
+  // Afternoon: current default baseline
+  if (hour >= 12 && hour < 18) {
+    return "bg-gradient-to-br from-blush-50 via-cream-50 to-blush-100";
+  }
+
+  // Evening: warmer, softer
+  if (hour >= 18 && hour < 22) {
+    return "bg-gradient-to-br from-blush-100 via-blush-50 to-cream-50";
+  }
+
+  // Night: deeper, quieter
+  return "bg-gradient-to-br from-blush-100 via-blush-100 to-blush-50";
+}
 
 function Router() {
   const flags = readFlags();
@@ -72,6 +107,9 @@ function Router() {
       {/* Echo Vault */}
       <Route path="/vault" component={EchoVaultPage} />
 
+      {/* ✅ Reflections */}
+      <Route path="/reflections" component={ReflectionsPage} />
+
       {/* 🚫 Collective Drop disabled */}
       <Route path="/community">
         {() => {
@@ -86,11 +124,18 @@ function Router() {
       {/* Dashboard */}
       <Route path="/dashboard" component={Dashboard} />
 
-      {/* Calm Studio + Garden */}
+      {/* Calm Studio */}
       <Route path="/comfort" component={CalmStudio} />
       <Route path="/calm-studio" component={CalmStudio} />
-      <Route path="/garden" component={Garden} />
       <Route path="/calm-studio/breathe" component={TakeABreath} />
+
+      {/* 🌿 Mood Garden (retired) → redirect to Reflections */}
+      <Route path="/garden">
+        {() => {
+          window.location.replace("/reflections");
+          return null;
+        }}
+      </Route>
 
       {/* Legacy Drops */}
       <Route path="/my-drops" component={MyDropsPage} />
@@ -124,20 +169,22 @@ function AppContent() {
   const [location] = useLocation();
   console.log("[MoodDrop] Current route:", location);
 
+  const atmosphereClass = getAtmosphereGradient();
+
   const isFullWidthPage =
-    location === "/garden" ||
     location === "/dashboard" ||
     location === "/calm-studio" ||
     location === "/comfort" ||
     location === "/soft-reads" ||
     location === "/playground" ||
     location === "/vault" ||
+    location === "/reflections" ||
     location.startsWith("/soft-reads/");
 
   const isHome = location === "/";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blush-50 via-cream-50 to-blush-100">
+    <div className={`min-h-screen ${atmosphereClass}`}>
       <GhostMenu />
       {!isHome && <Header />}
 

@@ -228,7 +228,7 @@ export default function SoftReadPostPage() {
   }
 
   /* ===============================
-     🌱 COMING SOON POSTS
+     🌱 STILL FORMING POSTS
      =============================== */
   if (
     slug === "crashout" ||
@@ -247,7 +247,18 @@ export default function SoftReadPostPage() {
 
     return (
       <PostLayout mood={titles[slug]} title={titles[slug]}>
-        <p>Coming soon. Softly.</p>
+        <div className="rounded-2xl border border-blush/40 bg-white/90 p-6">
+          <p className="text-base font-medium">Still forming.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            This space will open when it’s ready.
+          </p>
+        </div>
+
+        <div className="pt-6">
+          <Link href="/soft-reads" className="underline underline-offset-4">
+            Back to Soft Reads →
+          </Link>
+        </div>
       </PostLayout>
     );
   }
@@ -257,9 +268,7 @@ export default function SoftReadPostPage() {
      =============================== */
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-10">
-      <p className="text-muted-foreground">
-        That Soft Read couldn’t be found.
-      </p>
+      <p className="text-muted-foreground">That Soft Read couldn’t be found.</p>
       <Link href="/soft-reads" className="underline underline-offset-4">
         Back to Soft Reads →
       </Link>

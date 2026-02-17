@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { readFlags } from "@/lib/featureFlags";
-import dropletIcon from "../assets/droplet.png"; // your PNG logo
+import dropletIcon from "../assets/droplet.png";
 
 export default function Header() {
   const [location] = useLocation();
@@ -24,6 +24,7 @@ export default function Header() {
         </div>
 
         <nav className="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm">
+
           {/* Home */}
           <Link href="/">
             <button
@@ -40,7 +41,7 @@ export default function Header() {
 
           <span className="text-warm-gray-400">•</span>
 
-          {/* ✅ Echo Vault */}
+          {/* Echo Vault */}
           <Link href="/vault">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
@@ -56,7 +57,7 @@ export default function Header() {
 
           <span className="text-warm-gray-400">•</span>
 
-          {/* ✅ Take a Breath (correct route) */}
+          {/* Take a Breath */}
           <Link href="/calm-studio/breathe">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
@@ -72,17 +73,17 @@ export default function Header() {
 
           <span className="text-warm-gray-400">•</span>
 
-          {/* Mood Garden */}
-          <Link href="/garden">
+          {/* ✅ NEW: Reflections (replaces Mood Garden) */}
+          <Link href="/reflections">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                location === "/garden"
+                location === "/reflections"
                   ? "text-blush-400 font-medium"
                   : "text-warm-gray-600 hover:text-blush-300"
               }`}
-              data-testid="nav-garden"
+              data-testid="nav-reflections"
             >
-              Mood Garden
+              Reflections
             </button>
           </Link>
 
@@ -118,24 +119,6 @@ export default function Header() {
             </button>
           </Link>
 
-          {/* 🚫 The Collective Drop intentionally hidden for now (Supabase kept) */}
-          {/* {flags.communityEnabled && (
-            <>
-              <span className="text-warm-gray-400">•</span>
-              <Link href="/community">
-                <button
-                  className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                    location === "/community"
-                      ? "text-blush-400 font-medium"
-                      : "text-warm-gray-600 hover:text-blush-300"
-                  }`}
-                  data-testid="nav-community"
-                >
-                  The Collective Drop
-                </button>
-              </Link>
-            </>
-          )} */}
         </nav>
       </div>
     </header>

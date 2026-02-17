@@ -23,7 +23,14 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
   const items: MenuItem[] = useMemo(
     () => [
       { label: "Echoes", href: "/vault", sub: "Echo Vault" },
-      { label: "Explore", href: "/garden", sub: "Mood Garden" },
+
+      // ✅ Replaces Mood Garden
+      {
+        label: "Reflections",
+        href: "/reflections",
+        sub: "A quiet mirror of your journey",
+      },
+
       { label: "Rest", href: "/calm-studio", sub: "Calm Studio" },
       { label: "Read", href: "/soft-reads", sub: "Soft Reads" },
     ],
