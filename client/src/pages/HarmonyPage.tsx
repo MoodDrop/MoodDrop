@@ -22,20 +22,22 @@ export default function HarmonyPage() {
         </h1>
 
         <p className="mx-auto mt-4 max-w-[560px] text-[15px] leading-relaxed text-[#5a4c4c]/85">
-          A song shaped from your words.
+          A song shaped from your story.
           <br />
           <br />
-          Your words can remain exactly as they are.
-          Or they can find their way into melody.
+          Share what feels ready.
+          <br />
+          A memory. A name. A quiet truth.
           <br />
           <br />
-          Nothing is rewritten.
-          Nothing is forced.
-          Only a careful shaping of what you’ve already shared.
+          We’ll gently shape it into melody —
+          <br />
+          with care, warmth, and intention.
           <br />
           <br />
-          You’ll receive your short sample within 24 hours.
-          If it resonates, you may unlock the full version.
+          Your short sample arrives within 24 hours.
+          <br />
+          If it feels like home, you may unlock the full version.
           <br />
           <br />
           Limited weekly availability.
@@ -47,7 +49,7 @@ export default function HarmonyPage() {
 
       {/* Form Card (narrow + contained) */}
       <motion.div
-        className="mt-6 mx-auto rounded-[28px] border border-white/18 bg-white/16 p-4 backdrop-blur-2xl shadow-[0_18px_45px_-28px_rgba(20,10,20,0.45)] sm:p-5"
+        className="mx-auto mt-6 rounded-[28px] border border-white/18 bg-white/16 p-4 backdrop-blur-2xl shadow-[0_18px_45px_-28px_rgba(20,10,20,0.45)] sm:p-5"
         style={{ maxWidth: 600 }}
         initial={{ opacity: 0, y: reducedMotion ? 0 : 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -61,7 +63,7 @@ export default function HarmonyPage() {
         <div className="mx-auto max-w-[520px] rounded-2xl border border-white/16 bg-white/10 p-2 backdrop-blur-xl">
           <iframe
             src={TALLY_EMBED}
-            title="Harmony — Your Echo in Song"
+            title="Harmony — A Song Shaped From Your Story"
             className="w-full"
             style={{
               height: 980, // adjust if needed
