@@ -35,13 +35,16 @@ export default function HarmonyPage() {
           with care, warmth, and intention.
           <br />
           <br />
-        <br />
-<br />
-Once your Harmony is being shaped, your 30–45 second sample will arrive within 24 hours.
-<br />
-Each submission is reviewed personally.
-<br />
-If it feels like home, you may unlock the full version.
+          Once your Harmony is being shaped, your 30–45 second sample will arrive
+          within 24 hours.
+          <br />
+          Each submission is reviewed personally.
+          <br />
+          <br />
+          If it feels like home, you may choose to unlock the full version —
+          <br />
+          or preserve it as a keepsake, with a refined WAV file and a beautifully
+          formatted lyric sheet.
           <br />
           <br />
           Limited weekly availability.

@@ -69,7 +69,7 @@ const SECTIONS: QASection[] = [
       {
         question: "How is the Echo Room different from My Drops?",
         answer:
-          "My Drops is a private space for written entries saved on your device. The Echo Room (Echo Vault) is a more sensory space — your releases appear as visual Echoes, and may include both text and voice. It’s less about journaling and more about gentle reflection.",
+          "My Drops is a private space for written entries saved on your device. The Echo Room (Echo Vault) is a more sensory space — your releases appear as visual Echoes and may include both text and voice. It’s less about journaling and more about gentle reflection.",
       },
       {
         question: "Can I delete or tuck away an Echo?",
@@ -91,17 +91,21 @@ const SECTIONS: QASection[] = [
         question: "What is Harmony?",
         answer:
           "Harmony is a quiet offering inside MoodDrop where your story is carefully shaped into melody. It’s meant to feel intimate, thoughtful, and deeply personal.",
-
       },
       {
         question: "Is Harmony anonymous like Echoes?",
         answer:
-          "Harmony is private, but not anonymous. Your email is used only to deliver your song. It isn’t connected to your Echo Vault, releases, or anything you’ve shared elsewhere in MoodDrop. Your submission is handled with care and is never shared publicly.",
+          "Harmony is private, but not anonymous. Your email is used only to deliver your sample and any purchased version. It isn’t connected to your Echo Vault, releases, or anything you’ve shared elsewhere in MoodDrop. Your submission is handled with care and is never shared publicly.",
       },
       {
         question: "How does Harmony work?",
         answer:
           "You share what feels ready — a memory, a name, or a quiet truth — and choose the emotional tone. Within 24 hours, you’ll receive a 30–45 second sample. If it feels like home, you may unlock the full version. Each submission is reviewed personally.",
+      },
+      {
+        question: "How much does Harmony cost?",
+        answer:
+          "You’ll first receive a complimentary 30–45 second sample. If it resonates, you may unlock the full version: Full Version (2–3 minute MP3) — $21.99. Premium Keepsake (WAV + lyric sheet PDF) — $31.99. Payment is only required if you choose to receive the full version.",
       },
       {
         question: "Why is Harmony limited each week?",
@@ -116,12 +120,13 @@ const SECTIONS: QASection[] = [
       {
         question: "Will my words be stored or reused?",
         answer:
-          "No. Your submission is used only to create your requested sample. It is not shared, sold, or repurposed.",
-      },{
-  question: "Can I request changes to my song?",
-  answer:
-    "Harmony is created as an intimate, carefully crafted experience shaped from what you share. At this time, full revisions aren’t included. If there’s a small factual correction (such as a name ), you’re welcome to reply within 48 hours at contact@moodDrop.me", 
-},
+          "No. Your submission is used only to create your requested sample and any unlocked version. It is not shared, sold, or repurposed.",
+      },
+      {
+        question: "Can I request changes to my song?",
+        answer:
+          "Harmony is created as an intimate, carefully crafted experience shaped from what you share. At this time, full revisions aren’t included. If there’s a small factual correction (such as a name or pronunciation), you’re welcome to reply within 48 hours at contact@mooddrop.me.",
+      },
     ],
   },
 
@@ -145,6 +150,7 @@ const SECTIONS: QASection[] = [
       },
     ],
   },
+
   {
     title: "Voice Notes & Typing",
     items: [
@@ -176,7 +182,6 @@ export default function QAPage() {
 
   return (
     <div className="max-w-2xl mx-auto py-10 space-y-8">
-      {/* Header */}
       <div className="text-center space-y-3">
         <p className="text-xs tracking-[0.2em] text-[#A08B73] uppercase">
           MoodDrop Q&amp;A
@@ -186,15 +191,13 @@ export default function QAPage() {
         </h1>
         <p className="text-sm text-[#8B7355] max-w-xl mx-auto leading-relaxed">
           A gentle corner to understand how MoodDrop works, how your words are
-          kept safe, and how to get the most out of your drops — at your own
-          pace.
+          kept safe, and how to get the most out of your drops — at your own pace.
         </p>
         <p className="text-[11px] uppercase tracking-[0.25em] text-[#C0A489]">
           Breathe in • Breathe out
         </p>
       </div>
 
-      {/* Q&A Sections */}
       <div className="space-y-6">
         {SECTIONS.map((section, sectionIndex) => (
           <div
