@@ -21,7 +21,11 @@ export default function HarmonyPage() {
           Harmony
         </h1>
 
-        <p className="mx-auto mt-4 max-w-[560px] text-[15px] leading-relaxed text-[#5a4c4c]/85">
+        <p className="italic mt-2 text-[16px] text-[#6d5c5c]">
+          An Intimate Musical Reflection
+        </p>
+
+        <p className="mx-auto mt-6 max-w-[560px] text-[15px] leading-relaxed text-[#5a4c4c]/85">
           A song shaped from your story.
           <br />
           <br />
@@ -35,26 +39,28 @@ export default function HarmonyPage() {
           with care, warmth, and intention.
           <br />
           <br />
-          Once your Harmony is being shaped, your 30–45 second sample will arrive
-          within 24 hours.
+          Once your Harmony begins to take form,
           <br />
-          Each submission is reviewed personally.
-          <br />
-          <br />
-          If it feels like home, you may choose to unlock the full version —
-          <br />
-          or preserve it as a keepsake, with a refined WAV file and a beautifully
-          formatted lyric sheet.
+          your 30–45 second reflection will arrive within 24 hours.
           <br />
           <br />
-          Limited weekly availability.
+          If it feels like home, you may choose to complete the piece —
+          <br />
+          or preserve it as a keepsake, with a refined WAV file
+          <br />
+          and a beautifully formatted lyric sheet.
+          <br />
+          <br />
+          Each Harmony is shaped personally and in small, intentional batches
+          <br />
+          to protect the depth of the experience.
         </p>
       </div>
 
-      {/* Soft divider to reduce “dominates the page” feeling */}
+      {/* Soft divider */}
       <div className="mx-auto mt-8 h-px w-full max-w-[640px] bg-white/25" />
 
-      {/* Form Card (narrow + contained) */}
+      {/* Form Card */}
       <motion.div
         className="mx-auto mt-6 rounded-[28px] border border-white/18 bg-white/16 p-4 backdrop-blur-2xl shadow-[0_18px_45px_-28px_rgba(20,10,20,0.45)] sm:p-5"
         style={{ maxWidth: 600 }}
@@ -66,14 +72,13 @@ export default function HarmonyPage() {
           When you’re ready, begin below.
         </div>
 
-        {/* Extra containment: narrower inner width */}
         <div className="mx-auto max-w-[520px] rounded-2xl border border-white/16 bg-white/10 p-2 backdrop-blur-xl">
           <iframe
             src={TALLY_EMBED}
-            title="Harmony — A Song Shaped From Your Story"
+            title="Harmony — An Intimate Musical Reflection"
             className="w-full"
             style={{
-              height: 980, // adjust if needed
+              height: 980,
               border: 0,
             }}
           />
