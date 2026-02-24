@@ -47,8 +47,8 @@ import ReleaseVoicePage from "@/pages/ReleaseVoicePage";
 // Calm Studio sub-route
 import TakeABreath from "@/pages/take-a-breath";
 
-// ✅ Reflections
-import ReflectionsPage from "@/pages/ReflectionsPage";
+// 🎵 Harmony
+import HarmonyPage from "@/pages/HarmonyPage";
 
 // Vercel Analytics
 import { Analytics } from "@vercel/analytics/react";
@@ -107,8 +107,7 @@ function Router() {
       {/* Echo Vault */}
       <Route path="/vault" component={EchoVaultPage} />
 
-      {/* ✅ Reflections */}
-      <Route path="/reflections" component={ReflectionsPage} />
+      <Route path="/harmony" component={HarmonyPage} />
 
       {/* 🚫 Collective Drop disabled */}
       <Route path="/community">
@@ -129,10 +128,10 @@ function Router() {
       <Route path="/calm-studio" component={CalmStudio} />
       <Route path="/calm-studio/breathe" component={TakeABreath} />
 
-      {/* 🌿 Mood Garden (retired) → redirect to Reflections */}
+      {/* 🌿 Mood Garden (retired) → redirect to Harmony */}
       <Route path="/garden">
         {() => {
-          window.location.replace("/reflections");
+          window.location.replace("/harmony");
           return null;
         }}
       </Route>
@@ -178,7 +177,7 @@ function AppContent() {
     location === "/soft-reads" ||
     location === "/playground" ||
     location === "/vault" ||
-    location === "/reflections" ||
+    location === "/harmony" ||
     location.startsWith("/soft-reads/");
 
   const isHome = location === "/";

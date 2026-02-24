@@ -26,9 +26,9 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
 
       // ✅ Replaces Mood Garden
       {
-        label: "Reflections",
-        href: "/reflections",
-        sub: "A quiet mirror of your journey",
+        label: "Harmony",
+        href: "/harmony",
+        sub: "A song shaped into a melody",
       },
 
       { label: "Rest", href: "/calm-studio", sub: "Calm Studio" },
