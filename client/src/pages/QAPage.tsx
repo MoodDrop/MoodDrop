@@ -85,6 +85,47 @@ const SECTIONS: QASection[] = [
   },
 
   {
+    title: "Harmony 🌹 (Intimate Song Experience)",
+    items: [
+      {
+        question: "What is Harmony?",
+        answer:
+          "Harmony is a quiet offering inside MoodDrop where your story is carefully shaped into melody. It’s meant to feel intimate, thoughtful, and deeply personal.",
+
+      },
+      {
+        question: "Is Harmony anonymous like Echoes?",
+        answer:
+          "Harmony is private, but not anonymous. Your email is used only to deliver your song. It isn’t connected to your Echo Vault, releases, or anything you’ve shared elsewhere in MoodDrop. Your submission is handled with care and is never shared publicly.",
+      },
+      {
+        question: "How does Harmony work?",
+        answer:
+          "You share what feels ready — a memory, a name, or a quiet truth — and choose the emotional tone. Within 24 hours, you’ll receive a 30–45 second sample. If it feels like home, you may unlock the full version. Each submission is reviewed personally.",
+      },
+      {
+        question: "Why is Harmony limited each week?",
+        answer:
+          "Harmony is intentionally curated. To preserve quality, care, and emotional depth, only a limited number of sessions are available each week. When sessions are full, new openings return the following week.",
+      },
+      {
+        question: "Can I submit more than once?",
+        answer:
+          "Yes. Harmony is available for repeat submissions, and each request is treated as its own intentional studio session.",
+      },
+      {
+        question: "Will my words be stored or reused?",
+        answer:
+          "No. Your submission is used only to create your requested sample. It is not shared, sold, or repurposed.",
+      },{
+  question: "Can I request changes to my song?",
+  answer:
+    "Harmony is created as an intimate, carefully crafted experience shaped from what you share. At this time, full revisions aren’t included. If there’s a small factual correction (such as a name ), you’re welcome to reply within 48 hours at contact@moodDrop.me", 
+},
+    ],
+  },
+
+  {
     title: "Safety & Privacy",
     items: [
       {
