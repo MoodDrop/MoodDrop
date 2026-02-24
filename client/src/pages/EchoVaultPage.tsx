@@ -67,7 +67,9 @@ export default function EchoVaultPage() {
 
   const [echoes, setEchoes] = useState<EchoItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; id: string } | null>(null);
+  const [toast, setToast] = useState<{ message: string; id: string } | null>(
+    null
+  );
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [activeAudioUrl, setActiveAudioUrl] = useState<string | null>(null);
@@ -198,6 +200,34 @@ export default function EchoVaultPage() {
             );
           })}
         </div>
+
+        {/* --- Gentle Harmony card (always visible) --- */}
+        <motion.div
+          className="mx-auto mt-8 max-w-[520px] rounded-[22px] border border-white/25 bg-white/14 px-5 py-5 backdrop-blur-xl"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+        >
+          <div className="text-center">
+            <div className="text-[12px] uppercase tracking-widest text-warm-500/80">
+              Harmony
+            </div>
+            <div className="mt-2 text-[18px] italic font-serif text-warm-800">
+              If something here still lingers…
+            </div>
+            <p className="mx-auto mt-2 max-w-[420px] text-[12.5px] leading-relaxed text-warm-600/85">
+              You can gently shape it into melody — with care, warmth, and
+              intention. Only if it feels right.
+            </p>
+
+            <button
+              onClick={() => setLocation("/harmony")}
+              className="mt-4 inline-flex items-center justify-center rounded-full px-4 py-2 text-[10px] uppercase bg-white/55 border border-blush-200 text-warm-700 hover:bg-white/70 transition"
+            >
+              Explore Harmony →
+            </button>
+          </div>
+        </motion.div>
       </section>
 
       {/* ---------- OVERLAY ---------- */}
