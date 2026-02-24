@@ -6,7 +6,7 @@ export default function HarmonyPage() {
 
   // Direct embed URL (no script needed)
   const TALLY_EMBED =
-    "https://tally.so/embed/yP6a84?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1";
+  "https://tally.so/embed/yP6a84?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1";
 
   return (
     <div className="relative mx-auto w-full max-w-[860px] px-5 pb-16 pt-10 sm:px-8">
@@ -78,7 +78,7 @@ export default function HarmonyPage() {
             title="Harmony — An Intimate Musical Reflection"
             className="w-full"
             style={{
-              height: 980,
+              height: 1100,
               border: 0,
             }}
           />
