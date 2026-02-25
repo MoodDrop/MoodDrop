@@ -43,9 +43,10 @@ export default function HarmonyPage() {
           your 30–45 second reflection will arrive within 24 hours.
           <br />
           <br />
-          If it feels like home, you may choose to complete the piece —
+          If it resonates with you, you may unlock the full 2–3 minute version
+          (MP3) —
           <br />
-          or preserve it as a keepsake, with a refined WAV file
+          or choose the Premium Keepsake, which includes a refined WAV file
           <br />
           and a beautifully formatted lyric sheet.
           <br />
