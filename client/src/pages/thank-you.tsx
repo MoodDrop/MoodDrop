@@ -4,24 +4,23 @@ import { CheckCircle } from "lucide-react";
 export default function ThankYou() {
   return (
     <div className="text-center">
-      <div className="w-32 h-32 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
-        <CheckCircle className="text-green-500 text-4xl" size={48} />
+      <div className="w-32 h-32 mx-auto mb-6 bg-blush-100 rounded-full flex items-center justify-center">
+        <CheckCircle className="text-blush-400" size={48} />
       </div>
       
-      <h2 className="text-2xl font-semibold text-warm-gray-700 mb-4">Thank You for Sharing</h2>
-      <p className="text-warm-gray-600 leading-relaxed mb-8 px-4">
-        Your voice has been heard. Taking the step to express yourself takes courage, and we're proud of you for reaching out.
+      <h2 className="text-2xl font-semibold text-[#2e2424] mb-4">
+        Your Harmony Has Been Received
+      </h2>
+
+      <p className="text-[#5a4c4c]/85 leading-relaxed mb-8 px-6">
+        Thank you for sharing something meaningful.
+        <br /><br />
+        Your story is now being reviewed personally and shaped with care.
+        <br /><br />
+        You’ll receive your 30–45 second Soft Echo via email within 24 hours.
       </p>
       
-      <div className="bg-blush-50 rounded-2xl p-6 mb-6">
-        <h3 className="font-semibold text-warm-gray-700 mb-3">Remember:</h3>
-        <ul className="text-sm text-warm-gray-600 space-y-2 text-left">
-          <li>• You're not alone in this journey</li>
-          <li>• Your feelings are valid and important</li>
-          <li>• This is a step toward healing</li>
-          <li>• You can return anytime you need to express yourself</li>
-        </ul>
-      </div>
+
 
       <Link href="/">
         <button 

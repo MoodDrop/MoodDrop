@@ -48,7 +48,9 @@ export default function HarmonyPage() {
           or choose Signature Harmony — a keepsake-level version of your story.
           <br />
           <br />
-          Each Harmony is shaped slowly and intentionally — never rushed.
+          Each Harmony is shaped personally and in small, intentional batches
+          <br />
+          to protect the depth of the experience.
         </p>
       </div>
 
