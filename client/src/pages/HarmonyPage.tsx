@@ -43,17 +43,12 @@ export default function HarmonyPage() {
           your 30–45 second reflection will arrive within 24 hours.
           <br />
           <br />
-          If it resonates with you, you may unlock the full 2–3 minute version
-          (MP3) —
+          If it resonates, you may continue into the full 2–3 minute piece
           <br />
-          or choose the Premium Keepsake, which includes a refined WAV file
-          <br />
-          and a beautifully formatted lyric sheet.
+          or choose Signature Harmony — a keepsake-level version of your story.
           <br />
           <br />
-          Each Harmony is shaped personally and in small, intentional batches
-          <br />
-          to protect the depth of the experience.
+          Each Harmony is shaped slowly and intentionally — never rushed.
         </p>
       </div>
 
