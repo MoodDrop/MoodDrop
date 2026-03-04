@@ -26,19 +26,31 @@ export async function setupVite(app: Express, server: Server) {
     allowedHosts: true as const,
   };
 
-  const vite = await createViteServer({
-    ...viteConfig,
-    configFile: false,
-    customLogger: {
-      ...viteLogger,
-      error: (msg, options) => {
-        viteLogger.error(msg, options);
-        process.exit(1);
-      },
+ const vite = await createViteServer({
+  ...viteConfig,
+
+  // ✅ lock the client root (you already did this)
+  root: path.resolve(import.meta.dirname, "..", "client"),
+
+  // ✅ lock the alias so @/ resolves correctly no matter what viteConfig does
+  resolve: {
+    alias: {
+      "@": path.resolve(import.meta.dirname, "..", "client", "src"),
+      "@assets": path.resolve(import.meta.dirname, "..", "client", "src", "assets"),
     },
-    server: serverOptions,
-    appType: "custom",
-  });
+  },
+
+  configFile: false,
+  customLogger: {
+    ...viteLogger,
+    error: (msg, options) => {
+      viteLogger.error(msg, options);
+      process.exit(1);
+    },
+  },
+  server: serverOptions,
+  appType: "custom",
+});
 
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {

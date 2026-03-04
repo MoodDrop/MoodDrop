@@ -1,10 +1,13 @@
 import React from "react";
+import { useLocation } from "wouter";
 import { motion, useReducedMotion } from "framer-motion";
 
 export default function HarmonyPage() {
   const reducedMotion = useReducedMotion();
+  const [, setLocation] = useLocation();
 
-  const TALLY_EMBED =
+  // Optional: keep Tally available during transition (set to "" to hide entirely)
+  const TALLY_URL =
     "https://tally.so/embed/yP6a84?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1";
 
   return (
@@ -20,7 +23,7 @@ export default function HarmonyPage() {
           Harmony
         </h1>
 
-        <p className="italic mt-2 text-[16px] text-[#6d5c5c]">
+        <p className="mt-2 text-[16px] italic text-[#6d5c5c]">
           An Intimate Musical Reflection
         </p>
 
@@ -40,12 +43,12 @@ export default function HarmonyPage() {
           <br />
           Once your Harmony begins to take form,
           <br />
-          your 30–45 second reflection will arrive within 24 hours.
+          your preview reflection will arrive within 24 hours.
           <br />
           <br />
-          If it resonates, you may continue into the full 2–3 minute piece
+          If it resonates, you may continue into the full-length version of your song
           <br />
-          or choose Signature Harmony — a keepsake-level version of your story.
+          or choose Signature Harmony — a keepsake-level expression of your story.
           <br />
           <br />
           Each Harmony is shaped personally and in small, intentional batches
@@ -57,28 +60,44 @@ export default function HarmonyPage() {
       {/* Soft divider */}
       <div className="mx-auto mt-8 h-px w-full max-w-[560px] bg-white/25" />
 
-      {/* Form Card */}
+      {/* Start Card */}
       <motion.div
-        className="mx-auto mt-6 rounded-[28px] border border-white/18 bg-white/16 p-4 backdrop-blur-2xl shadow-[0_18px_45px_-28px_rgba(20,10,20,0.45)] sm:p-5"
+        className="mx-auto mt-6 rounded-[28px] border border-white/18 bg-white/16 p-5 backdrop-blur-2xl shadow-[0_18px_45px_-28px_rgba(20,10,20,0.45)]"
         style={{ maxWidth: 520 }}
         initial={{ opacity: 0, y: reducedMotion ? 0 : 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
       >
-        <div className="mb-3 text-center text-[12.5px] text-[#6a5a5a]/70">
+        <div className="text-center text-[12.5px] text-[#6a5a5a]/70">
           When you’re ready, begin below.
         </div>
 
-        <div className="mx-auto max-w-[480px] rounded-2xl border border-white/16 bg-white/10 p-2 backdrop-blur-xl">
-          <iframe
-            src={TALLY_EMBED}
-            title="Harmony — An Intimate Musical Reflection"
-            className="w-full"
-            style={{
-              height: 1050,
-              border: 0,
-            }}
-          />
+        <div className="mt-4 space-y-3">
+          <button
+            type="button"
+            className="w-full rounded-2xl bg-[#2e2424] px-4 py-3 text-[14px] font-medium text-white shadow-sm transition active:scale-[0.99]"
+            onClick={() => setLocation("/harmony/request")}
+          >
+            Start Harmony
+          </button>
+
+          <p className="text-center text-[12px] text-[#6a5a5a]/70">
+            Your answers save as you go. You’ll review everything before sending.
+          </p>
+
+          {/* Optional: keep Tally accessible during transition */}
+          {TALLY_URL ? (
+            <div className="pt-2 text-center">
+              <a
+                href={TALLY_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[12px] text-[#6a5a5a]/70 underline underline-offset-4 hover:text-[#5a4c4c]"
+              >
+                Prefer the old form for now? Open it here.
+              </a>
+            </div>
+          ) : null}
         </div>
       </motion.div>
     </div>

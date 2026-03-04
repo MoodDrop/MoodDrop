@@ -100,7 +100,7 @@ items: [
   {
     question: "How does Harmony work?",
     answer:
-      "You share what feels ready — a memory, a name, or a quiet truth — and choose the emotional tone. Within 24 hours, you’ll receive a 30–45 second Soft Echo via email. If it resonates, you may continue into the full piece. Each submission is reviewed personally.",
+      "You share what feels ready — a memory, a name, or a quiet truth — and choose the emotional tone. Within 24 hours, you’ll receive a 30 second Soft Echo via email. If it resonates, you may continue into the full piece. Each submission is reviewed personally.",
   },
   {
     question: "What are the Harmony options?",
