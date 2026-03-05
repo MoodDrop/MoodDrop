@@ -78,6 +78,9 @@ export default function HarmonyRequestPage() {
   }
 
   async function submitHarmony() {
+    console.log("[Harmony] submitHarmony fired ✅", form);
+    console.log("[Harmony] about to POST /api/harmony/submit");
+
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -88,14 +91,19 @@ export default function HarmonyRequestPage() {
         body: JSON.stringify(form),
       });
 
+      console.log("[Harmony] response status:", res.status);
+
       if (!res.ok) {
         const txt = await res.text().catch(() => "");
+        console.error("[Harmony] submit failed response body:", txt);
         throw new Error(`Submit failed (${res.status}). ${txt}`);
       }
 
       // success
+      console.log("[Harmony] submit success ✅ redirecting to /harmony/confirm");
       setLocation("/harmony/confirm");
     } catch (err: any) {
+      console.error("[Harmony] submitHarmony error:", err);
       setSubmitError(err?.message || "Submit failed. Please try again.");
     } finally {
       setIsSubmitting(false);
