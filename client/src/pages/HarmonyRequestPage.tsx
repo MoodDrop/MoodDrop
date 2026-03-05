@@ -36,10 +36,6 @@ const INITIAL_FORM: HarmonyForm = {
   email: "",
 };
 
-function isEmailLike(s: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((s ?? "").trim());
-}
-
 export default function HarmonyRequestPage() {
   const reducedMotion = useReducedMotion();
   const [, setLocation] = useLocation();
@@ -59,21 +55,21 @@ export default function HarmonyRequestPage() {
   const [stepIndex, setStepIndex] = useState(0);
   const [form, setForm] = useState<HarmonyForm>(INITIAL_FORM);
 
-  // NEW: submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const total = steps.length;
 
-  function setField<K extends keyof HarmonyForm>(key: K, value: HarmonyForm[K]) {
+  function setField<K extends keyof HarmonyForm>(
+    key: K,
+    value: HarmonyForm[K]
+  ) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  const showOtherField = form.whoCategory === "Other";
-  const showNameField = form.includeName === "yes";
-
   function goBack() {
     setSubmitError(null);
+
     if (stepIndex === 0) {
       setLocation("/harmony");
       return;
@@ -81,102 +77,26 @@ export default function HarmonyRequestPage() {
     setStepIndex((s) => s - 1);
   }
 
-  // NEW: step validation
-  function validateStep(index: number): string | null {
-    if (index === 0) {
-      if (!form.whoCategory) return "Please choose who this Harmony is for.";
-      if (form.whoCategory === "Other" && !form.whoOther.trim())
-        return "Please tell me who this Harmony is for.";
-      if (!form.moment) return "Please choose the moment you’re honoring.";
-    }
-
-    if (index === 2) {
-      if (!form.emotionalTone) return "Please choose an emotional tone.";
-      if (!form.soundStyle) return "Please choose a sound style.";
-    }
-
-    if (index === 3) {
-      if (!form.voicePreference) return "Please choose a voice preference.";
-      if (!form.includeName)
-        return "Please choose whether you want a name included.";
-      if (form.includeName === "yes" && !form.nameValue.trim())
-        return "Please enter the name you want included.";
-    }
-
-    if (index === 4) {
-      if (!form.email.trim()) return "Please enter your email.";
-      if (!isEmailLike(form.email)) return "Please enter a valid email address.";
-    }
-
-    // On review (step 5), validate all required fields again
-    if (index === 5) {
-      const checks = [0, 2, 3, 4];
-      for (const s of checks) {
-        const err = validateStep(s);
-        if (err) return err;
-      }
-    }
-
-    return null;
-  }
-
-  // NEW: submit handler
   async function submitHarmony() {
+    setIsSubmitting(true);
     setSubmitError(null);
 
-    const err = validateStep(total - 1);
-    if (err) {
-      setSubmitError(err);
-      return;
-    }
-
-    setIsSubmitting(true);
-
     try {
-      console.log("[Harmony UI] submit clicked");
-      console.log("[Harmony UI] POST /api/harmony/submit payload:", form);
-
-      const payload = {
-        whoCategory: form.whoCategory,
-        whoOther: form.whoCategory === "Other" ? form.whoOther : "",
-        moment: form.moment,
-        qualities: form.qualities,
-        memories: form.memories,
-        emotionalTone: form.emotionalTone,
-        soundStyle: form.soundStyle,
-        voicePreference: form.voicePreference,
-        includeName: form.includeName,
-        nameValue: form.includeName === "yes" ? form.nameValue : "",
-        email: form.email,
-      };
-
       const res = await fetch("/api/harmony/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(form),
       });
 
-      const text = await res.text();
-      let data: any = null;
-      try {
-        data = text ? JSON.parse(text) : null;
-      } catch {
-        data = { raw: text };
-      }
-
-      console.log("[Harmony UI] response:", res.status, data);
-
       if (!res.ok) {
-        throw new Error(
-          data?.error || `Submit failed (${res.status}). Please try again.`
-        );
+        const txt = await res.text().catch(() => "");
+        throw new Error(`Submit failed (${res.status}). ${txt}`);
       }
 
-      // Success → go to your confirm page
+      // success
       setLocation("/harmony/confirm");
-    } catch (e: any) {
-      console.error("[Harmony UI] submit error:", e);
-      setSubmitError(e?.message || "Something went wrong submitting your request.");
+    } catch (err: any) {
+      setSubmitError(err?.message || "Submit failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -185,22 +105,22 @@ export default function HarmonyRequestPage() {
   function goNext() {
     setSubmitError(null);
 
-    // if we are on final step, submit instead of navigating
+    // On last step, submit instead of navigating immediately
     if (stepIndex === total - 1) {
-      void submitHarmony();
+      if (!isSubmitting) void submitHarmony();
       return;
     }
 
-    // validate the current step before moving forward
-    const err = validateStep(stepIndex);
-    if (err) {
-      setSubmitError(err);
+    if (stepIndex === total - 2) {
+      setStepIndex((s) => s + 1); // go to review step
       return;
     }
 
-    // otherwise proceed
     setStepIndex((s) => s + 1);
   }
+
+  const showOtherField = form.whoCategory === "Other";
+  const showNameField = form.includeName === "yes";
 
   return (
     <div className="relative mx-auto w-full max-w-[720px] px-4 pb-16 pt-10 sm:px-6">
@@ -228,12 +148,11 @@ export default function HarmonyRequestPage() {
           {steps[stepIndex]}
         </h2>
 
-        {/* NEW: error banner */}
-        {submitError ? (
-          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 text-[13px] text-red-800">
+        {submitError && (
+          <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700">
             {submitError}
           </div>
-        ) : null}
+        )}
 
         <div className="mt-8 space-y-8">
           {/* STEP 1 */}
@@ -439,13 +358,6 @@ export default function HarmonyRequestPage() {
                 Once submitted, your 30-second reflection will arrive within 24
                 hours.
               </p>
-
-              {/* NEW: show loading hint on review */}
-              {isSubmitting ? (
-                <p className="text-center text-[13px] text-[#6a5a5a]">
-                  Sending your request…
-                </p>
-              ) : null}
             </div>
           )}
         </div>
@@ -453,7 +365,6 @@ export default function HarmonyRequestPage() {
         <div className="mt-10 flex items-center justify-between">
           <button
             onClick={goBack}
-            type="button"
             disabled={isSubmitting}
             className="rounded-2xl border border-white/18 bg-white/30 px-4 py-3 text-[14px] text-[#2e2424] disabled:opacity-60"
           >
@@ -462,7 +373,6 @@ export default function HarmonyRequestPage() {
 
           <button
             onClick={goNext}
-            type="button"
             disabled={isSubmitting}
             className="rounded-2xl bg-[#2e2424] px-5 py-3 text-[14px] font-medium text-white disabled:opacity-60"
           >
@@ -581,7 +491,6 @@ function ReviewLine({
       <div className="flex justify-between items-center">
         <span className="font-medium text-[#2e2424]">{label}</span>
         <button
-          type="button"
           onClick={onEdit}
           className="text-[11px] text-[#6a5a5a] hover:underline"
         >
