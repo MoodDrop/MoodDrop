@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { motion, useReducedMotion } from "framer-motion";
+import { supabase } from "@/lib/supabaseClient";
 
 /* ---------------- Types ---------------- */
 
@@ -54,7 +55,6 @@ export default function HarmonyRequestPage() {
 
   const [stepIndex, setStepIndex] = useState(0);
   const [form, setForm] = useState<HarmonyForm>(INITIAL_FORM);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -78,33 +78,38 @@ export default function HarmonyRequestPage() {
   }
 
   async function submitHarmony() {
-    console.log("[Harmony] submitHarmony fired ✅", form);
-    console.log("[Harmony] about to POST /api/harmony/submit");
+    console.log("[Harmony] saving request to Supabase", form.email);
 
     setIsSubmitting(true);
     setSubmitError(null);
 
     try {
-      const res = await fetch("/api/harmony/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+      const { error } = await supabase.from("harmony_requests").insert({
+        email: form.email,
+        who_category: form.whoCategory,
+        who_other: form.whoCategory === "Other" ? form.whoOther : null,
+        moment: form.moment,
+        qualities: form.qualities || null,
+        memories: form.memories || null,
+        emotional_tone: form.emotionalTone,
+        sound_style: form.soundStyle,
+        voice_preference: form.voicePreference,
+        include_name: form.includeName,
+        name_value: form.includeName === "yes" ? form.nameValue : null,
       });
 
-      console.log("[Harmony] response status:", res.status);
-
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "");
-        console.error("[Harmony] submit failed response body:", txt);
-        throw new Error(`Submit failed (${res.status}). ${txt}`);
+      if (error) {
+        console.error("[Harmony] Supabase insert failed:", error);
+        throw new Error(error.message);
       }
 
-      // success
-      console.log("[Harmony] submit success ✅ redirecting to /harmony/confirm");
+      console.log("[Harmony] Supabase insert success ✅");
       setLocation("/harmony/confirm");
     } catch (err: any) {
-      console.error("[Harmony] submitHarmony error:", err);
-      setSubmitError(err?.message || "Submit failed. Please try again.");
+      console.error("[Harmony] submit error:", err);
+      setSubmitError(
+        err?.message || "Something went wrong while submitting your request."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -113,14 +118,13 @@ export default function HarmonyRequestPage() {
   function goNext() {
     setSubmitError(null);
 
-    // On last step, submit instead of navigating immediately
     if (stepIndex === total - 1) {
       if (!isSubmitting) void submitHarmony();
       return;
     }
 
     if (stepIndex === total - 2) {
-      setStepIndex((s) => s + 1); // go to review step
+      setStepIndex((s) => s + 1);
       return;
     }
 
@@ -163,7 +167,6 @@ export default function HarmonyRequestPage() {
         )}
 
         <div className="mt-8 space-y-8">
-          {/* STEP 1 */}
           {stepIndex === 0 && (
             <>
               <RadioGroup
@@ -213,7 +216,6 @@ export default function HarmonyRequestPage() {
             </>
           )}
 
-          {/* STEP 2 */}
           {stepIndex === 1 && (
             <>
               <Textarea
@@ -232,7 +234,6 @@ export default function HarmonyRequestPage() {
             </>
           )}
 
-          {/* STEP 3 */}
           {stepIndex === 2 && (
             <>
               <RadioGroup
@@ -264,7 +265,6 @@ export default function HarmonyRequestPage() {
             </>
           )}
 
-          {/* STEP 4 */}
           {stepIndex === 3 && (
             <>
               <RadioGroup
@@ -293,7 +293,6 @@ export default function HarmonyRequestPage() {
             </>
           )}
 
-          {/* STEP 5 */}
           {stepIndex === 4 && (
             <TextInput
               label="Your email"
@@ -303,7 +302,6 @@ export default function HarmonyRequestPage() {
             />
           )}
 
-          {/* STEP 6 REVIEW */}
           {stepIndex === 5 && (
             <div className="space-y-6 text-[14px] text-[#2e2424]">
               <p className="text-center text-[#6a5a5a] italic">
