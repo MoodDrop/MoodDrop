@@ -104,6 +104,30 @@ export default function HarmonyRequestPage() {
       }
 
       console.log("[Harmony] Supabase insert success ✅");
+
+      // 🔔 Try to notify you by email, but do NOT block the user if it fails
+      try {
+        const notifyRes = await fetch(
+          "https://wsdtteefqzlbfochnurx.supabase.co/functions/v1/notify-harmony",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(form),
+          }
+        );
+
+        if (!notifyRes.ok) {
+          const notifyText = await notifyRes.text().catch(() => "");
+          console.error("[Harmony] notification response failed:", notifyText);
+        } else {
+          console.log("[Harmony] notification sent ✅");
+        }
+      } catch (notifyError) {
+        console.error("[Harmony] notification failed:", notifyError);
+      }
+
       setLocation("/harmony/confirm");
     } catch (err: any) {
       console.error("[Harmony] submit error:", err);
