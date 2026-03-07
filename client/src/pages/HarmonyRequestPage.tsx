@@ -59,6 +59,7 @@ export default function HarmonyRequestPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const total = steps.length;
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
   function setField<K extends keyof HarmonyForm>(
     key: K,
@@ -113,6 +114,8 @@ export default function HarmonyRequestPage() {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              apikey: anonKey,
+              Authorization: `Bearer ${anonKey}`,
             },
             body: JSON.stringify(form),
           }
