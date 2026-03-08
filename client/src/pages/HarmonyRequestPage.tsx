@@ -23,17 +23,23 @@ type HarmonyForm = {
   email: string;
 };
 
+type FieldErrors = Partial<Record<keyof HarmonyForm, string>>;
+
 const INITIAL_FORM: HarmonyForm = {
   whoCategory: "",
   whoOther: "",
   moment: "",
+
   qualities: "",
   memories: "",
+
   emotionalTone: "",
   soundStyle: "",
+
   voicePreference: "",
   includeName: "",
   nameValue: "",
+
   email: "",
 };
 
@@ -48,7 +54,7 @@ export default function HarmonyRequestPage() {
       "Tone & sound",
       "Personal touches",
       "Where should I send your preview?",
-      "Review your Harmony",
+      "Review Your Harmony",
     ],
     []
   );
@@ -57,6 +63,7 @@ export default function HarmonyRequestPage() {
   const [form, setForm] = useState<HarmonyForm>(INITIAL_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const total = steps.length;
   const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -66,16 +73,76 @@ export default function HarmonyRequestPage() {
     value: HarmonyForm[K]
   ) {
     setForm((prev) => ({ ...prev, [key]: value }));
+
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   }
 
   function goBack() {
     setSubmitError(null);
+    setFieldErrors({});
 
     if (stepIndex === 0) {
       setLocation("/harmony");
       return;
     }
     setStepIndex((s) => s - 1);
+  }
+
+  function isValidEmail(email: string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  }
+
+  function validateCurrentStep(): FieldErrors {
+    const errors: FieldErrors = {};
+
+    if (stepIndex === 0) {
+      if (!form.whoCategory.trim()) {
+        errors.whoCategory = "Please choose an option to continue.";
+      }
+
+      if (form.whoCategory === "Other" && !form.whoOther.trim()) {
+        errors.whoOther = "Please tell me who this Harmony is for.";
+      }
+
+      if (!form.moment.trim()) {
+        errors.moment = "Please choose an option to continue.";
+      }
+    }
+
+    if (stepIndex === 2) {
+      if (!form.emotionalTone.trim()) {
+        errors.emotionalTone = "Please choose an option to continue.";
+      }
+
+      if (!form.soundStyle.trim()) {
+        errors.soundStyle = "Please choose an option to continue.";
+      }
+    }
+
+    if (stepIndex === 3) {
+      if (!form.voicePreference.trim()) {
+        errors.voicePreference = "Please choose an option to continue.";
+      }
+
+      if (form.includeName === "yes" && !form.nameValue.trim()) {
+        errors.nameValue = "Please enter the name you'd like included.";
+      }
+    }
+
+    if (stepIndex === 4) {
+      if (!form.email.trim()) {
+        errors.email = "Please enter your email to continue.";
+      } else if (!isValidEmail(form.email)) {
+        errors.email = "Please enter a valid email address.";
+      }
+    }
+
+    return errors;
   }
 
   async function submitHarmony() {
@@ -106,7 +173,6 @@ export default function HarmonyRequestPage() {
 
       console.log("[Harmony] Supabase insert success ✅");
 
-      // 🔔 Try to notify you by email, but do NOT block the user if it fails
       try {
         const notifyRes = await fetch(
           "https://wsdtteefqzlbfochnurx.supabase.co/functions/v1/notify-harmony",
@@ -150,11 +216,14 @@ export default function HarmonyRequestPage() {
       return;
     }
 
-    if (stepIndex === total - 2) {
-      setStepIndex((s) => s + 1);
+    const errors = validateCurrentStep();
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
+    setFieldErrors({});
     setStepIndex((s) => s + 1);
   }
 
@@ -171,7 +240,17 @@ export default function HarmonyRequestPage() {
         <h1 className="font-serif text-[28px] text-[#2e2424] sm:text-[34px]">
           Harmony Request
         </h1>
-        <p className="mt-2 text-[13px] text-[#6a5a5a]/70">
+
+        <p className="mt-3 text-[15px] text-[#5f5050]">
+          Harmony is MoodDrop’s way of turning meaningful moments into music.
+        </p>
+
+        <p className="mt-2 text-[12px] text-[#6a5a5a]/75">
+          Each Harmony is shaped personally and created with care to protect the
+          depth of the experience.
+        </p>
+
+        <p className="mt-3 text-[13px] text-[#6a5a5a]/70">
           Step {stepIndex + 1} of {total}
         </p>
       </div>
@@ -213,6 +292,7 @@ export default function HarmonyRequestPage() {
                   "Child",
                   "Other",
                 ]}
+                error={fieldErrors.whoCategory}
               />
 
               {showOtherField && (
@@ -221,6 +301,7 @@ export default function HarmonyRequestPage() {
                   value={form.whoOther}
                   onChange={(v) => setField("whoOther", v)}
                   placeholder="Tell me who"
+                  error={fieldErrors.whoOther}
                 />
               )}
 
@@ -239,6 +320,7 @@ export default function HarmonyRequestPage() {
                   "Healing",
                   "In Memory Of",
                 ]}
+                error={fieldErrors.moment}
               />
             </>
           )}
@@ -253,16 +335,16 @@ export default function HarmonyRequestPage() {
               />
 
               <div className="space-y-2">
-  <Textarea
-    label="Which memories should be woven in?"
-    value={form.memories}
-    onChange={(v) => setField("memories", v)}
-    placeholder="A moment, phrase, inside joke, or something never said out loud…"
-  />
-  <p className="px-1 text-[12px] italic text-[#6a5a5a]/75">
-    Example: “She always sings while cooking on Sunday mornings.”
-  </p>
-</div>
+                <Textarea
+                  label="Which memories should be woven in?"
+                  value={form.memories}
+                  onChange={(v) => setField("memories", v)}
+                  placeholder="A moment, phrase, inside joke, or something never said out loud…"
+                />
+                <p className="px-1 text-[12px] italic text-[#6a5a5a]/75">
+                  Example: “She always sings while cooking on Sunday mornings.”
+                </p>
+              </div>
             </>
           )}
 
@@ -280,6 +362,7 @@ export default function HarmonyRequestPage() {
                   "Healing",
                   "Hopeful",
                 ]}
+                error={fieldErrors.emotionalTone}
               />
 
               <RadioGroup
@@ -293,6 +376,7 @@ export default function HarmonyRequestPage() {
                   "Gospel-inspired",
                   "I trust your direction",
                 ]}
+                error={fieldErrors.soundStyle}
               />
             </>
           )}
@@ -304,6 +388,7 @@ export default function HarmonyRequestPage() {
                 value={form.voicePreference}
                 onChange={(v) => setField("voicePreference", v)}
                 options={["Soft feminine vocal", "Warm masculine vocal"]}
+                error={fieldErrors.voicePreference}
               />
 
               <RadioGroup
@@ -320,6 +405,7 @@ export default function HarmonyRequestPage() {
                   value={form.nameValue}
                   onChange={(v) => setField("nameValue", v)}
                   placeholder="Enter the name exactly as you'd like it written"
+                  error={fieldErrors.nameValue}
                 />
               )}
             </>
@@ -331,18 +417,19 @@ export default function HarmonyRequestPage() {
               value={form.email}
               onChange={(v) => setField("email", v)}
               placeholder="you@example.com"
+              error={fieldErrors.email}
             />
           )}
 
           {stepIndex === 5 && (
             <div className="space-y-6 text-[14px] text-[#2e2424]">
               <p className="text-center text-[#6a5a5a] italic">
-  This is the meaning we'll gently shape into music.
-</p>
+                This is the meaning we&apos;ll gently shape into music.
+              </p>
 
-<p className="text-center text-[12px] text-[#6a5a5a]/70">
-  You can still go back and adjust anything before sending.
-</p>
+              <p className="text-center text-[12px] text-[#6a5a5a]/70">
+                You can still go back and adjust anything before sending.
+              </p>
 
               <ReviewLine
                 label="For"
@@ -395,8 +482,6 @@ export default function HarmonyRequestPage() {
                 value={form.email}
                 onEdit={() => setStepIndex(4)}
               />
-
-             
             </div>
           )}
         </div>
@@ -437,12 +522,14 @@ function RadioGroup({
   onChange,
   options,
   displayLabels,
+  error,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: string[];
   displayLabels?: string[];
+  error?: string;
 }) {
   return (
     <div className="space-y-3">
@@ -463,6 +550,9 @@ function RadioGroup({
           </button>
         ))}
       </div>
+      {error ? (
+        <p className="px-1 text-[12px] text-[#8a5c5c]">{error}</p>
+      ) : null}
     </div>
   );
 }
@@ -472,11 +562,13 @@ function TextInput({
   value,
   onChange,
   placeholder,
+  error,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  error?: string;
 }) {
   return (
     <div className="space-y-2">
@@ -485,8 +577,13 @@ function TextInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-2xl border border-white/18 bg-white/65 px-4 py-3 text-[14px] text-[#2e2424] shadow-sm placeholder:text-[#6a5a5a]/50"
+        className={`w-full rounded-2xl border bg-white/65 px-4 py-3 text-[14px] text-[#2e2424] shadow-sm placeholder:text-[#6a5a5a]/50 ${
+          error ? "border-[#d7a3a3]" : "border-white/18"
+        }`}
       />
+      {error ? (
+        <p className="px-1 text-[12px] text-[#8a5c5c]">{error}</p>
+      ) : null}
     </div>
   );
 }
@@ -496,11 +593,13 @@ function Textarea({
   value,
   onChange,
   placeholder,
+  error,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  error?: string;
 }) {
   return (
     <div className="space-y-2">
@@ -510,8 +609,13 @@ function Textarea({
         onChange={(e) => onChange(e.target.value)}
         rows={5}
         placeholder={placeholder}
-        className="w-full resize-none rounded-2xl border border-white/18 bg-white/65 px-4 py-3 text-[14px] text-[#2e2424] shadow-sm placeholder:text-[#6a5a5a]/50"
+        className={`w-full resize-none rounded-2xl border bg-white/65 px-4 py-3 text-[14px] text-[#2e2424] shadow-sm placeholder:text-[#6a5a5a]/50 ${
+          error ? "border-[#d7a3a3]" : "border-white/18"
+        }`}
       />
+      {error ? (
+        <p className="px-1 text-[12px] text-[#8a5c5c]">{error}</p>
+      ) : null}
     </div>
   );
 }
@@ -527,7 +631,7 @@ function ReviewLine({
 }) {
   return (
     <div className="border-b border-white/20 pb-3">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <span className="font-medium text-[#2e2424]">{label}</span>
         <button
           onClick={onEdit}
