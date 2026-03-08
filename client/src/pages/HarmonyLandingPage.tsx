@@ -6,10 +6,6 @@ export default function HarmonyPage() {
   const reducedMotion = useReducedMotion();
   const [, setLocation] = useLocation();
 
-  // Optional: keep Tally available during transition (set to "" to hide entirely)
-  const TALLY_URL =
-    "https://tally.so/embed/yP6a84?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1";
-
   return (
     <div className="relative mx-auto w-full max-w-[720px] px-4 pb-16 pt-10 sm:px-6">
       {/* Soft atmospheric background */}
@@ -46,12 +42,14 @@ export default function HarmonyPage() {
           your preview reflection will arrive within 24 hours.
           <br />
           <br />
-          If it resonates, you may continue into the full-length version of your song
+          If it resonates, you may continue into the full-length version of your
+          song
           <br />
-          or choose Signature Harmony — a keepsake-level expression of your story.
+          or choose Signature Harmony — a keepsake-level expression of your
+          story.
           <br />
           <br />
-          Each Harmony is shaped personally and in small, intentional batches
+          Each Harmony is shaped personally and created with care
           <br />
           to protect the depth of the experience.
         </p>
@@ -68,9 +66,14 @@ export default function HarmonyPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
       >
-        <div className="text-center text-[12.5px] text-[#6a5a5a]/70">
-          When you’re ready, begin below.
-        </div>
+        <div className="text-center">
+  <p className="text-[12px] uppercase tracking-[0.18em] text-[#6a5a5a]/60">
+    Begin
+  </p>
+  <p className="mt-2 text-[14px] text-[#5a4c4c]/85">
+    When you’re ready, begin your Harmony below.
+  </p>
+</div>
 
         <div className="mt-4 space-y-3">
           <button
@@ -84,20 +87,6 @@ export default function HarmonyPage() {
           <p className="text-center text-[12px] text-[#6a5a5a]/70">
             Your answers save as you go. You’ll review everything before sending.
           </p>
-
-          {/* Optional: keep Tally accessible during transition */}
-          {TALLY_URL ? (
-            <div className="pt-2 text-center">
-              <a
-                href={TALLY_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="text-[12px] text-[#6a5a5a]/70 underline underline-offset-4 hover:text-[#5a4c4c]"
-              >
-                Prefer the old form for now? Open it here.
-              </a>
-            </div>
-          ) : null}
         </div>
       </motion.div>
     </div>

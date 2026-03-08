@@ -252,12 +252,17 @@ export default function HarmonyRequestPage() {
                 placeholder="Their spirit, personality, what makes them them…"
               />
 
-              <Textarea
-                label="Which memories should be woven in?"
-                value={form.memories}
-                onChange={(v) => setField("memories", v)}
-                placeholder="A moment, phrase, inside joke, or something never said out loud…"
-              />
+              <div className="space-y-2">
+  <Textarea
+    label="Which memories should be woven in?"
+    value={form.memories}
+    onChange={(v) => setField("memories", v)}
+    placeholder="A moment, phrase, inside joke, or something never said out loud…"
+  />
+  <p className="px-1 text-[12px] italic text-[#6a5a5a]/75">
+    Example: “She always sings while cooking on Sunday mornings.”
+  </p>
+</div>
             </>
           )}
 
@@ -332,8 +337,12 @@ export default function HarmonyRequestPage() {
           {stepIndex === 5 && (
             <div className="space-y-6 text-[14px] text-[#2e2424]">
               <p className="text-center text-[#6a5a5a] italic">
-                This is the story we'll shape into a song…
-              </p>
+  This is the meaning we'll gently shape into music.
+</p>
+
+<p className="text-center text-[12px] text-[#6a5a5a]/70">
+  You can still go back and adjust anything before sending.
+</p>
 
               <ReviewLine
                 label="For"
@@ -387,10 +396,7 @@ export default function HarmonyRequestPage() {
                 onEdit={() => setStepIndex(4)}
               />
 
-              <p className="text-center text-[#6a5a5a]/80 mt-6 italic">
-                Once submitted, your 30-second reflection will arrive within 24
-                hours.
-              </p>
+             
             </div>
           )}
         </div>
@@ -412,9 +418,9 @@ export default function HarmonyRequestPage() {
             {isSubmitting
               ? "Sending…"
               : stepIndex === total - 1
-              ? "Send my Harmony"
+              ? "Begin My Harmony"
               : stepIndex === total - 2
-              ? "Review my Harmony"
+              ? "Review My Harmony"
               : "Next"}
           </button>
         </div>
