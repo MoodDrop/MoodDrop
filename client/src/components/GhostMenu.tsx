@@ -1,4 +1,3 @@
-// client/src/components/GhostMenu.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -24,7 +23,13 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
     () => [
       { label: "Echoes", href: "/vault", sub: "Echo Vault" },
 
-      // ✅ Replaces Mood Garden
+      // ✅ Living Gallery added
+      {
+        label: "Gallery",
+        href: "/living-gallery",
+        sub: "Living Gallery",
+      },
+
       {
         label: "Harmony",
         href: "/harmony",
@@ -37,7 +42,6 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
     []
   );
 
-  // Close on ESC
   useEffect(() => {
     if (!open) return;
 
@@ -49,7 +53,6 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  // Lock background scroll when open
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -66,7 +69,6 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
     setLocation(href);
   };
 
-  /* Motion: Gallery / Lobby */
   const overlayVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -157,7 +159,6 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
 
   return (
     <>
-      {/* Menu trigger */}
       <div className="fixed top-6 right-6 z-[60]">
         <button
           type="button"
@@ -178,7 +179,6 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
             exit="exit"
             variants={overlayVariants}
           >
-            {/* Atmosphere */}
             <button
               type="button"
               className="absolute inset-0 w-full h-full"
@@ -190,7 +190,6 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
               }}
             />
 
-            {/* Blur */}
             <motion.div
               className="absolute inset-0"
               variants={blurLayerVariants}
@@ -200,12 +199,10 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
               }}
             />
 
-            {/* Content */}
             <motion.div
               className="relative h-full w-full px-8 py-10 flex flex-col items-center justify-center text-center"
               variants={panelVariants}
             >
-              {/* Close */}
               <div className="absolute top-6 right-6">
                 <button
                   type="button"
@@ -217,7 +214,6 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
                 </button>
               </div>
 
-              {/* Menu */}
               <nav className="w-full max-w-sm">
                 <motion.ul
                   className="flex flex-col gap-5"
