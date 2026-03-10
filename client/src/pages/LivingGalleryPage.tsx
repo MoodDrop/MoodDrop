@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { SharedCanvas, getSharedDrops } from "@/lib/livingGallery";
 import EmotionField from "@/components/gallery/EmotionField";
+import CanvasViewer from "../components/gallery/CanvasViewer";
 
 const FALLBACK_MOODS = ["Healing", "CrashOut", "Hopeful", "Overwhelmed"];
 
@@ -58,11 +59,9 @@ function groupMoodCounts(canvases: SharedCanvas[]) {
     counts[mood] = (counts[mood] || 0) + 1;
   });
 
-  const sorted = Object.entries(counts)
+  return Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
-
-  return sorted;
 }
 
 export default function LivingGalleryPage() {
@@ -70,6 +69,7 @@ export default function LivingGalleryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCanvas, setActiveCanvas] = useState<SharedCanvas | null>(null);
+  const [activeMood, setActiveMood] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadGallery() {
@@ -101,6 +101,18 @@ export default function LivingGalleryPage() {
   }, [canvases]);
 
   const maxCount = Math.max(...moodBars.map(([, count]) => count), 1);
+
+  const filteredMoodCanvases = useMemo(() => {
+    if (!activeMood) return [];
+    return canvases.filter((item) => item.mood === activeMood);
+  }, [canvases, activeMood]);
+
+  const handleWitnessedUpdate = (updatedCanvas: SharedCanvas) => {
+    setCanvases((prev) =>
+      prev.map((item) => (item.id === updatedCanvas.id ? updatedCanvas : item))
+    );
+    setActiveCanvas(updatedCanvas);
+  };
 
   return (
     <main
@@ -135,9 +147,17 @@ export default function LivingGalleryPage() {
           <div className="space-y-4">
             {moodBars.map(([mood, count]) => {
               const widthPercent = Math.max((count / maxCount) * 100, 18);
+              const isActive = activeMood === mood;
 
               return (
-                <div key={mood} className="grid grid-cols-[110px_1fr] items-center gap-3">
+                <button
+                  key={mood}
+                  type="button"
+                  onClick={() => setActiveMood(mood)}
+                  className={`grid w-full grid-cols-[110px_1fr] items-center gap-3 rounded-xl px-2 py-1 text-left transition ${
+                    isActive ? "bg-white/60" : "hover:bg-white/40"
+                  }`}
+                >
                   <div className="text-sm text-slate-700">{mood}</div>
                   <div className="h-2.5 rounded-full bg-white/70">
                     <div
@@ -145,11 +165,62 @@ export default function LivingGalleryPage() {
                       style={{ width: `${widthPercent}%` }}
                     />
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
         </section>
+
+        {activeMood && (
+          <section className="mx-auto mb-8 max-w-3xl rounded-[28px] border border-white/70 bg-white/72 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl text-slate-800">All {activeMood}s</h2>
+                <p className="mt-1 text-sm italic text-slate-500">
+                  Browse everything floating through this feeling.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveMood(null)}
+                className="rounded-full border border-white/80 bg-white/80 px-4 py-2 text-sm text-slate-600 hover:bg-white"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-5 max-h-[340px] space-y-3 overflow-y-auto pr-1">
+              {filteredMoodCanvases.length === 0 ? (
+                <div className="rounded-2xl bg-white/70 px-4 py-5 text-sm text-slate-500">
+                  No shared moments here yet.
+                </div>
+              ) : (
+                filteredMoodCanvases.slice(0, 30).map((canvas) => (
+                  <button
+                    key={canvas.id}
+                    type="button"
+                    onClick={() => setActiveCanvas(canvas)}
+                    className="w-full rounded-2xl border border-white/80 bg-white/75 px-4 py-4 text-left shadow-sm hover:bg-white"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="rounded-full bg-white px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-600">
+                        {canvas.mood}
+                      </span>
+                      <span className="text-[11px] text-slate-400">
+                        Witnessed by {canvas.witness_count ?? 0}
+                      </span>
+                    </div>
+
+                    <p className="mt-3 line-clamp-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                      {canvas.text}
+                    </p>
+                  </button>
+                ))
+              )}
+            </div>
+          </section>
+        )}
 
         <section className="rounded-[32px] border border-white/60 bg-white/35 px-4 py-8 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur">
           <div className="mb-6 text-center">
@@ -176,14 +247,20 @@ export default function LivingGalleryPage() {
           ) : (
             <EmotionField
               canvases={canvases}
+              activeMood={activeMood}
               onOpen={(canvas) => {
                 setActiveCanvas(canvas);
-                console.log("[MoodDrop] Open canvas:", canvas);
               }}
             />
           )}
         </section>
       </div>
+
+      <CanvasViewer
+        canvas={activeCanvas}
+        onClose={() => setActiveCanvas(null)}
+        onWitnessed={handleWitnessedUpdate}
+      />
     </main>
   );
 }

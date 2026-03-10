@@ -42,10 +42,8 @@ export default function HomePage() {
           "radial-gradient(circle at 20% 15%, rgba(255, 240, 235, 0.95), rgba(252, 232, 225, 0.72), rgba(249, 244, 240, 0.98))",
       }}
     >
-      {/* Grain */}
       <div className="pointer-events-none absolute inset-0 mooddrop-grain" />
 
-      {/* Soft vignette */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -54,7 +52,6 @@ export default function HomePage() {
         }}
       />
 
-      {/* Wordmark */}
       <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20">
         <img
           src={moodDropText}
@@ -66,23 +63,19 @@ export default function HomePage() {
         />
       </div>
 
-      <section className="relative mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 text-center">
-        {/* Orb */}
+      <section className="relative mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 py-16 text-center">
         <div className={`${reducedMotion ? "" : "mooddrop-breathe"} mt-6`}>
           <Orb className="h-40 w-40" />
         </div>
 
-        {/* Primary Headline */}
         <h1 className="mt-10 text-[22px] leading-tight tracking-wide text-[rgba(35,28,28,0.9)]">
           A place to let go
         </h1>
 
-        {/* Permission Whisper (Anchor-style) */}
         <p className="mt-2 text-[13px] italic text-[rgba(35,28,28,0.48)] select-none">
           Nothing is expected of you here.
         </p>
 
-        {/* Choices — now immediate (Option A) */}
         <div className="mt-10 w-full max-w-xs">
           <div className="flex flex-col items-center gap-5">
             <button
@@ -111,14 +104,125 @@ export default function HomePage() {
               Say it out loud
             </button>
 
-            {/* Secondary Line */}
             <p className="pt-0.5 text-[13px] text-[rgba(35,28,28,0.48)] italic">
               Whenever you’re ready.
             </p>
           </div>
         </div>
 
-        {/* Gentle Anchor */}
+        <div
+          className="mt-8 w-full max-w-xs rounded-2xl px-4 py-4"
+          style={{
+            background: "rgba(255,255,255,0.28)",
+            border: "1px solid rgba(210,160,170,0.12)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <div
+            className="text-[10px] uppercase"
+            style={{
+              letterSpacing: "0.26em",
+              color: "rgba(35,28,28,0.46)",
+            }}
+          >
+            Inside MoodDrop
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2 text-left">
+            <button
+              type="button"
+              onClick={() => setLocation("/vault")}
+              className="rounded-xl px-3 py-2 text-left transition hover:bg-white/50"
+              style={{
+                background: "rgba(255,255,255,0.35)",
+                border: "1px solid rgba(210,160,170,0.10)",
+              }}
+            >
+              <div
+                className="text-[14px]"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Echoes
+              </div>
+              <div className="text-[11px] italic opacity-60">Echo Vault</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setLocation("/living-gallery")}
+              className="rounded-xl px-3 py-2 text-left transition hover:bg-white/50"
+              style={{
+                background: "rgba(255,255,255,0.35)",
+                border: "1px solid rgba(210,160,170,0.10)",
+              }}
+            >
+              <div
+                className="text-[14px]"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Gallery
+              </div>
+              <div className="text-[11px] italic opacity-60">Living Gallery</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setLocation("/comfort")}
+              className="rounded-xl px-3 py-2 text-left transition hover:bg-white/50"
+              style={{
+                background: "rgba(255,255,255,0.35)",
+                border: "1px solid rgba(210,160,170,0.10)",
+              }}
+            >
+              <div
+                className="text-[14px]"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Rest
+              </div>
+              <div className="text-[11px] italic opacity-60">Calm Studio</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setLocation("/soft-reads")}
+              className="rounded-xl px-3 py-2 text-left transition hover:bg-white/50"
+              style={{
+                background: "rgba(255,255,255,0.35)",
+                border: "1px solid rgba(210,160,170,0.10)",
+              }}
+            >
+              <div
+                className="text-[14px]"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Read
+              </div>
+              <div className="text-[11px] italic opacity-60">Soft Reads</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setLocation("/harmony")}
+              className="col-span-2 rounded-xl px-3 py-2 text-left transition hover:bg-white/50"
+              style={{
+                background: "rgba(255,255,255,0.35)",
+                border: "1px solid rgba(210,160,170,0.10)",
+              }}
+            >
+              <div
+                className="text-[14px]"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Harmony
+              </div>
+              <div className="text-[11px] italic opacity-60">
+                A song shaped into a melody
+              </div>
+            </button>
+          </div>
+        </div>
+
         <p className="mt-8 text-[13px] text-[rgba(35,28,28,0.48)] select-none">
           Your words belong only to you. Always private, always yours.
         </p>
