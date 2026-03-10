@@ -46,13 +46,19 @@ function getLetterTone(mood?: string | null) {
 }
 
 function getRotationClass(id: string) {
-  const rotations = ["rotate-[-1deg]", "rotate-[0.8deg]", "rotate-[-0.6deg]", "rotate-[1deg]", "rotate-0"];
+  const rotations = [
+    "rotate-[-1deg]",
+    "rotate-[0.8deg]",
+    "rotate-[-0.6deg]",
+    "rotate-[1deg]",
+    "rotate-0",
+  ];
   const index = id.charCodeAt(id.length - 1) % rotations.length;
   return rotations[index];
 }
 
 export function CanvasCard({ canvas, onOpen }: CanvasCardProps) {
-  const preview = getPreviewText(canvas.text, 135);
+  const preview = getPreviewText(canvas.text, 60);
   const stampClasses = getMoodStampClasses(canvas.mood);
   const toneClass = getLetterTone(canvas.mood);
   const rotationClass = getRotationClass(canvas.id);
@@ -61,7 +67,7 @@ export function CanvasCard({ canvas, onOpen }: CanvasCardProps) {
     <button
       type="button"
       onClick={() => onOpen?.(canvas)}
-      className={`group w-full rounded-[30px] border border-white/70 ${toneClass} ${rotationClass} p-5 text-left shadow-[0_16px_40px_rgba(120,90,90,0.08)] transition duration-300 hover:rotate-0 hover:shadow-[0_20px_50px_rgba(120,90,90,0.12)]`}
+      className={`group w-full rounded-[28px] border border-white/70 ${toneClass} ${rotationClass} p-3 text-left shadow-[0_16px_40px_rgba(120,90,90,0.08)] transition duration-300 hover:rotate-0 hover:shadow-[0_20px_50px_rgba(120,90,90,0.12)]`}
     >
       <div className="flex items-start justify-between gap-3">
         <span
@@ -71,18 +77,18 @@ export function CanvasCard({ canvas, onOpen }: CanvasCardProps) {
         </span>
       </div>
 
-      <div className="mt-5">
-        <p className="whitespace-pre-wrap text-[14px] leading-7 text-[#5b4d4d]">
+      <div className="mt-3">
+        <p className="line-clamp-1 whitespace-pre-wrap text-[13px] leading-6 text-[#5b4d4d]">
           {preview}
         </p>
       </div>
 
-      <div className="mt-6 flex items-center justify-between">
+      <div className="mt-5 flex items-center justify-between">
         <span className="text-[11px] italic text-[#9a8b8b]">
           left softly
         </span>
         <span className="text-[11px] uppercase tracking-[0.16em] text-[#b5a8a8] transition group-hover:text-[#8f7f7f]">
-          Witness
+          Witnessed by {canvas.witness_count ?? 0}
         </span>
       </div>
     </button>

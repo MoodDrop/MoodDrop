@@ -43,10 +43,22 @@ export async function getSharedDrops(selectedMood?: string) {
   return (data ?? []) as SharedCanvas[];
 }
 
-export async function incrementWitnessCount(dropId: string, currentCount: number) {
+export async function incrementWitnessCount(dropId: string) {
+  const { data: currentRow, error: readError } = await supabase
+    .from("drops")
+    .select("witness_count")
+    .eq("id", dropId)
+    .single();
+
+  if (readError) {
+    throw readError;
+  }
+
+  const nextCount = (currentRow?.witness_count ?? 0) + 1;
+
   const { data, error } = await supabase
     .from("drops")
-    .update({ witness_count: currentCount + 1 })
+    .update({ witness_count: nextCount })
     .eq("id", dropId)
     .select("id, witness_count")
     .single();

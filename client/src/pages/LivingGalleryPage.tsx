@@ -1,5 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { SharedCanvas, getSharedDrops } from "@/lib/livingGallery";
+import {
+  SharedCanvas,
+  getSharedDrops,
+  incrementWitnessCount,
+} from "@/lib/livingGallery";
 import EmotionField from "@/components/gallery/EmotionField";
 import CanvasViewer from "../components/gallery/CanvasViewer";
 
@@ -69,7 +73,6 @@ export default function LivingGalleryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCanvas, setActiveCanvas] = useState<SharedCanvas | null>(null);
-  const [activeMood, setActiveMood] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadGallery() {
@@ -94,7 +97,9 @@ export default function LivingGalleryPage() {
     const grouped = groupMoodCounts(canvases);
 
     if (grouped.length === 0) {
-      return FALLBACK_MOODS.map((mood, index) => [mood, 5 - index] as [string, number]);
+      return FALLBACK_MOODS.map(
+        (mood, index) => [mood, 5 - index] as [string, number]
+      );
     }
 
     return grouped;
@@ -102,21 +107,35 @@ export default function LivingGalleryPage() {
 
   const maxCount = Math.max(...moodBars.map(([, count]) => count), 1);
 
-  const filteredMoodCanvases = useMemo(() => {
-    if (!activeMood) return [];
-    return canvases.filter((item) => item.mood === activeMood);
-  }, [canvases, activeMood]);
+  async function handleOpenCanvas(canvas: SharedCanvas) {
+    setActiveCanvas(canvas);
 
-  const handleWitnessedUpdate = (updatedCanvas: SharedCanvas) => {
-    setCanvases((prev) =>
-      prev.map((item) => (item.id === updatedCanvas.id ? updatedCanvas : item))
-    );
-    setActiveCanvas(updatedCanvas);
-  };
+    try {
+      const updated = await incrementWitnessCount(canvas.id);
+
+      setCanvases((prev) =>
+        prev.map((item) =>
+          item.id === canvas.id
+            ? { ...item, witness_count: updated.witness_count }
+            : item
+        )
+      );
+
+      setActiveCanvas((prev) =>
+        prev && prev.id === canvas.id
+          ? { ...prev, witness_count: updated.witness_count }
+          : prev
+      );
+    } catch (err) {
+      console.error("[MoodDrop] Error incrementing witness count:", err);
+    }
+  }
 
   return (
     <main
-      className={`min-h-screen bg-gradient-to-b ${getMoodTint(activeCanvas?.mood)} px-4 py-8 sm:px-6`}
+      className={`min-h-screen bg-gradient-to-b ${getMoodTint(
+        activeCanvas?.mood
+      )} px-4 py-8 sm:px-6`}
     >
       <div className="pointer-events-none absolute inset-0 opacity-20">
         <div className="absolute left-[10%] top-[12%] h-40 w-40 rounded-full bg-pink-100 blur-3xl" />
@@ -133,94 +152,47 @@ export default function LivingGalleryPage() {
             A quiet mosaic of what hearts released today.
           </p>
           <p className="mt-2 text-sm italic text-slate-500">
-            Witness what was felt. Leave softly.
+            Tap a canvas to witness the full moment.
           </p>
         </section>
 
         <section className="mx-auto mb-10 max-w-2xl rounded-[28px] border border-white/70 bg-white/70 p-6 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur">
           <div className="mb-5 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-              Emotional Weather Today
+              Emotional Currents
+            </p>
+            <p className="mt-2 text-sm italic text-slate-500">
+              A soft view of what the gallery is holding today.
             </p>
           </div>
 
           <div className="space-y-4">
             {moodBars.map(([mood, count]) => {
               const widthPercent = Math.max((count / maxCount) * 100, 18);
-              const isActive = activeMood === mood;
+              const percent = canvases.length
+                ? Math.round((count / canvases.length) * 100)
+                : 0;
 
               return (
-                <button
+                <div
                   key={mood}
-                  type="button"
-                  onClick={() => setActiveMood(mood)}
-                  className={`grid w-full grid-cols-[110px_1fr] items-center gap-3 rounded-xl px-2 py-1 text-left transition ${
-                    isActive ? "bg-white/60" : "hover:bg-white/40"
-                  }`}
+                  className="grid w-full grid-cols-[110px_1fr_40px] items-center gap-3 rounded-xl px-2 py-1"
                 >
                   <div className="text-sm text-slate-700">{mood}</div>
+
                   <div className="h-2.5 rounded-full bg-white/70">
                     <div
                       className={`h-2.5 rounded-full ${getMoodColor(mood)}`}
                       style={{ width: `${widthPercent}%` }}
                     />
                   </div>
-                </button>
+
+                  <div className="text-xs text-slate-400">{percent}%</div>
+                </div>
               );
             })}
           </div>
         </section>
-
-        {activeMood && (
-          <section className="mx-auto mb-8 max-w-3xl rounded-[28px] border border-white/70 bg-white/72 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl text-slate-800">All {activeMood}s</h2>
-                <p className="mt-1 text-sm italic text-slate-500">
-                  Browse everything floating through this feeling.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setActiveMood(null)}
-                className="rounded-full border border-white/80 bg-white/80 px-4 py-2 text-sm text-slate-600 hover:bg-white"
-              >
-                Close
-              </button>
-            </div>
-
-            <div className="mt-5 max-h-[340px] space-y-3 overflow-y-auto pr-1">
-              {filteredMoodCanvases.length === 0 ? (
-                <div className="rounded-2xl bg-white/70 px-4 py-5 text-sm text-slate-500">
-                  No shared moments here yet.
-                </div>
-              ) : (
-                filteredMoodCanvases.slice(0, 30).map((canvas) => (
-                  <button
-                    key={canvas.id}
-                    type="button"
-                    onClick={() => setActiveCanvas(canvas)}
-                    className="w-full rounded-2xl border border-white/80 bg-white/75 px-4 py-4 text-left shadow-sm hover:bg-white"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="rounded-full bg-white px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-600">
-                        {canvas.mood}
-                      </span>
-                      <span className="text-[11px] text-slate-400">
-                        Witnessed by {canvas.witness_count ?? 0}
-                      </span>
-                    </div>
-
-                    <p className="mt-3 line-clamp-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">
-                      {canvas.text}
-                    </p>
-                  </button>
-                ))
-              )}
-            </div>
-          </section>
-        )}
 
         <section className="rounded-[32px] border border-white/60 bg-white/35 px-4 py-8 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur">
           <div className="mb-6 text-center">
@@ -245,13 +217,7 @@ export default function LivingGalleryPage() {
               No shared moments are floating through yet.
             </div>
           ) : (
-            <EmotionField
-              canvases={canvases}
-              activeMood={activeMood}
-              onOpen={(canvas) => {
-                setActiveCanvas(canvas);
-              }}
-            />
+            <EmotionField canvases={canvases} onOpen={handleOpenCanvas} />
           )}
         </section>
       </div>
@@ -259,7 +225,6 @@ export default function LivingGalleryPage() {
       <CanvasViewer
         canvas={activeCanvas}
         onClose={() => setActiveCanvas(null)}
-        onWitnessed={handleWitnessedUpdate}
       />
     </main>
   );

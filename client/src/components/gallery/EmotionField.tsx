@@ -151,12 +151,12 @@ function buildPositions(canvases: SharedCanvas[]): Record<string, OrbPos> {
 function getSizeClasses(size: OrbPos["size"]) {
   switch (size) {
     case "lg":
-      return "w-[160px] min-h-[108px]";
+      return "w-[152px] min-h-[88px]";
     case "md":
-      return "w-[148px] min-h-[100px]";
+      return "w-[142px] min-h-[82px]";
     case "sm":
     default:
-      return "w-[136px] min-h-[92px]";
+      return "w-[132px] min-h-[76px]";
   }
 }
 
@@ -171,11 +171,11 @@ export default function EmotionField({
   if (visibleCanvases.length === 0) return null;
 
   return (
-    <div className="relative h-[760px] w-full overflow-hidden rounded-[32px]">
+    <div className="relative h-[720px] w-full overflow-hidden rounded-[32px]">
       {visibleCanvases.map((canvas) => {
         const pos = positions[canvas.id];
         const mood = getMoodClasses(canvas.mood);
-        const preview = getPreviewText(canvas.text, pos.size === "lg" ? 44 : 34);
+        const preview = getPreviewText(canvas.text, pos.size === "lg" ? 42 : 34);
 
         const isHighlighted =
           !activeMood || canvas.mood === activeMood || activeMood === "All";
@@ -193,12 +193,12 @@ export default function EmotionField({
             <button
               type="button"
               onClick={() => onOpen(canvas)}
-              className={`group relative cursor-pointer rounded-[26px] border border-white/70 bg-white/72 p-3 text-left shadow-[0_14px_28px_rgba(90,70,70,0.08)] backdrop-blur transition duration-200 hover:shadow-[0_18px_36px_rgba(90,70,70,0.12)] ${getSizeClasses(
+              className={`group relative cursor-pointer rounded-[24px] border border-white/70 bg-white/72 p-3 text-left shadow-[0_12px_24px_rgba(90,70,70,0.08)] backdrop-blur transition duration-200 hover:shadow-[0_16px_30px_rgba(90,70,70,0.12)] ${getSizeClasses(
                 pos.size
               )} ${isHighlighted ? "opacity-100" : "opacity-45"}`}
             >
               <div
-                className={`pointer-events-none absolute inset-0 rounded-[26px] blur-2xl opacity-40 ${mood.glow}`}
+                className={`pointer-events-none absolute inset-0 rounded-[24px] blur-2xl opacity-40 ${mood.glow}`}
               />
 
               <div className="relative z-10">
@@ -210,7 +210,7 @@ export default function EmotionField({
                   </span>
                 </div>
 
-                <p className="line-clamp-2 whitespace-pre-wrap text-[11px] leading-5 text-slate-700">
+                <p className="line-clamp-1 whitespace-pre-wrap text-[11px] leading-5 text-slate-700">
                   {preview}
                 </p>
 
@@ -220,7 +220,7 @@ export default function EmotionField({
                   </div>
 
                   <div className="text-[9px] uppercase tracking-[0.14em] text-slate-400 group-hover:text-slate-500">
-                    Open
+                    Explore
                   </div>
                 </div>
               </div>

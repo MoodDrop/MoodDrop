@@ -4,26 +4,30 @@ import { SharedCanvas } from "@/lib/livingGallery";
 type CanvasViewerProps = {
   canvas: SharedCanvas | null;
   onClose: () => void;
-  onWitnessed: (canvas: SharedCanvas) => void;
 };
 
 export default function CanvasViewer({
   canvas,
   onClose,
-  onWitnessed,
 }: CanvasViewerProps) {
   if (!canvas) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="max-w-lg w-full rounded-3xl bg-white p-6 shadow-xl">
-
-        <div className="flex justify-between items-center mb-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center justify-between">
           <span className="text-xs uppercase tracking-widest text-slate-500">
             {canvas.mood}
           </span>
 
           <button
+            type="button"
             onClick={onClose}
             className="text-sm text-slate-500 hover:text-slate-800"
           >
@@ -31,28 +35,18 @@ export default function CanvasViewer({
           </button>
         </div>
 
-        <p className="text-slate-700 whitespace-pre-wrap leading-7">
+        <p className="whitespace-pre-wrap leading-7 text-slate-700">
           {canvas.text}
         </p>
 
-        <div className="mt-6 flex justify-between items-center">
+        <p className="mt-4 text-xs italic text-slate-400">
+          This moment was shared anonymously.
+        </p>
 
+        <div className="mt-6 flex items-center justify-between">
           <span className="text-xs text-slate-400">
             Witnessed by {canvas.witness_count ?? 0}
           </span>
-
-          <button
-            onClick={() =>
-              onWitnessed({
-                ...canvas,
-                witness_count: (canvas.witness_count ?? 0) + 1,
-              })
-            }
-            className="rounded-full bg-slate-900 text-white px-4 py-2 text-sm"
-          >
-            Witness
-          </button>
-
         </div>
       </div>
     </div>
