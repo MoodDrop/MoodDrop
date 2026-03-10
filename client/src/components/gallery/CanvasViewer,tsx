@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { SharedCanvas, getSharedDrops } from "@/lib/livingGallery";
 import EmotionField from "@/components/gallery/EmotionField";
+import CanvasViewer from "@/components/gallery/CanvasViewer";
 
 const FALLBACK_MOODS = ["Healing", "CrashOut", "Hopeful", "Overwhelmed"];
 
@@ -58,11 +59,9 @@ function groupMoodCounts(canvases: SharedCanvas[]) {
     counts[mood] = (counts[mood] || 0) + 1;
   });
 
-  const sorted = Object.entries(counts)
+  return Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
-
-  return sorted;
 }
 
 export default function LivingGalleryPage() {
@@ -101,6 +100,16 @@ export default function LivingGalleryPage() {
   }, [canvases]);
 
   const maxCount = Math.max(...moodBars.map(([, count]) => count), 1);
+
+  const handleWitnessedUpdate = (updatedCanvas: SharedCanvas) => {
+    setCanvases((prev) =>
+      prev.map((item) =>
+        item.id === updatedCanvas.id ? updatedCanvas : item
+      )
+    );
+
+    setActiveCanvas(updatedCanvas);
+  };
 
   return (
     <main
@@ -178,12 +187,17 @@ export default function LivingGalleryPage() {
               canvases={canvases}
               onOpen={(canvas) => {
                 setActiveCanvas(canvas);
-                console.log("[MoodDrop] Open canvas:", canvas);
               }}
             />
           )}
         </section>
       </div>
+
+      <CanvasViewer
+        canvas={activeCanvas}
+        onClose={() => setActiveCanvas(null)}
+        onWitnessed={handleWitnessedUpdate}
+      />
     </main>
   );
 }

@@ -1,0 +1,225 @@
+import React, { useMemo } from "react";
+import { SharedCanvas, getPreviewText } from "@/lib/livingGallery";
+
+type EmotionFieldProps = {
+  canvases: SharedCanvas[];
+  onOpen: (canvas: SharedCanvas) => void;
+};
+
+type OrbPos = {
+  left: number;
+  top: number;
+  size: "sm" | "md" | "lg";
+  duration: number;
+  delay: number;
+};
+
+function seedRng(seed: string) {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+
+  return () => {
+    h += 0x6d2b79f5;
+    let t = Math.imul(h ^ (h >>> 15), 1 | h);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function getMoodClasses(mood?: string | null) {
+  switch (mood) {
+    case "CrashOut":
+      return {
+        glow: "bg-rose-200/55",
+        pill: "bg-rose-50/90 text-rose-700 border border-rose-100",
+      };
+    case "Overwhelmed":
+      return {
+        glow: "bg-violet-200/55",
+        pill: "bg-violet-50/90 text-violet-700 border border-violet-100",
+      };
+    case "Healing":
+      return {
+        glow: "bg-emerald-200/55",
+        pill: "bg-emerald-50/90 text-emerald-700 border border-emerald-100",
+      };
+    case "Hopeful":
+      return {
+        glow: "bg-amber-200/55",
+        pill: "bg-amber-50/90 text-amber-700 border border-amber-100",
+      };
+    case "Reflective":
+      return {
+        glow: "bg-sky-200/55",
+        pill: "bg-sky-50/90 text-sky-700 border border-sky-100",
+      };
+    case "Lonely":
+      return {
+        glow: "bg-slate-200/55",
+        pill: "bg-slate-50/90 text-slate-600 border border-slate-100",
+      };
+    case "Grateful":
+      return {
+        glow: "bg-pink-200/55",
+        pill: "bg-pink-50/90 text-pink-700 border border-pink-100",
+      };
+    case "Calm":
+      return {
+        glow: "bg-teal-200/55",
+        pill: "bg-teal-50/90 text-teal-700 border border-teal-100",
+      };
+    case "Tense":
+      return {
+        glow: "bg-orange-200/55",
+        pill: "bg-orange-50/90 text-orange-700 border border-orange-100",
+      };
+    case "Grounded":
+      return {
+        glow: "bg-lime-200/55",
+        pill: "bg-lime-50/90 text-lime-700 border border-lime-100",
+      };
+    case "Joy":
+      return {
+        glow: "bg-yellow-200/55",
+        pill: "bg-yellow-50/90 text-yellow-700 border border-yellow-100",
+      };
+    default:
+      return {
+        glow: "bg-white/55",
+        pill: "bg-white/90 text-slate-600 border border-slate-100",
+      };
+  }
+}
+
+function getVisibleCanvases(canvases: SharedCanvas[], limit = 12) {
+  return canvases.slice(0, limit);
+}
+
+function buildPositions(canvases: SharedCanvas[]): Record<string, OrbPos> {
+  const rand = seedRng(canvases.map((c) => c.id).join("|") || "empty");
+  const positions: Record<string, OrbPos> = {};
+
+  const sizePool: OrbPos["size"][] = [
+    "lg",
+    "md",
+    "md",
+    "md",
+    "sm",
+    "sm",
+    "sm",
+    "md",
+    "lg",
+    "sm",
+    "md",
+    "sm",
+  ];
+
+  canvases.forEach((canvas, index) => {
+    const row = Math.floor(index / 3);
+    const col = index % 3;
+
+    const baseLeft = [18, 50, 82][col];
+    const baseTop = 15 + row * 22;
+
+    positions[canvas.id] = {
+      left: baseLeft + (rand() * 10 - 5),
+      top: baseTop + (rand() * 8 - 4),
+      size: sizePool[index % sizePool.length],
+      duration: 7 + rand() * 4,
+      delay: rand() * 2,
+    };
+  });
+
+  return positions;
+}
+
+function getSizeClasses(size: OrbPos["size"]) {
+  switch (size) {
+    case "lg":
+      return "w-[220px] min-h-[150px]";
+    case "md":
+      return "w-[190px] min-h-[135px]";
+    case "sm":
+    default:
+      return "w-[165px] min-h-[120px]";
+  }
+}
+
+export default function EmotionField({ canvases, onOpen }: EmotionFieldProps) {
+  const visibleCanvases = useMemo(() => getVisibleCanvases(canvases, 12), [canvases]);
+  const positions = useMemo(() => buildPositions(visibleCanvases), [visibleCanvases]);
+
+  if (visibleCanvases.length === 0) return null;
+
+  return (
+    <div className="relative h-[760px] w-full overflow-hidden rounded-[32px]">
+      {visibleCanvases.map((canvas) => {
+        const pos = positions[canvas.id];
+        const mood = getMoodClasses(canvas.mood);
+        const preview = getPreviewText(canvas.text, pos.size === "lg" ? 95 : 70);
+
+        return (
+          <div
+            key={canvas.id}
+            className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
+            style={{
+              left: `${pos.left}%`,
+              top: `${pos.top}%`,
+              animation: `mooddropFloat ${pos.duration}s ease-in-out ${pos.delay}s infinite`,
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                console.log("[MoodDrop] Orb clicked:", canvas.id);
+                onOpen(canvas);
+              }}
+              className={`group relative cursor-pointer rounded-[28px] border border-white/70 bg-white/70 p-4 text-left shadow-[0_16px_35px_rgba(90,70,70,0.08)] backdrop-blur transition hover:shadow-[0_22px_45px_rgba(90,70,70,0.12)] ${getSizeClasses(
+                pos.size
+              )}`}
+            >
+              <div
+                className={`pointer-events-none absolute inset-0 rounded-[28px] blur-2xl opacity-50 ${mood.glow}`}
+              />
+
+              <div className="relative z-10">
+                <div className="mb-3">
+                  <span
+                    className={`inline-flex rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.16em] ${mood.pill}`}
+                  >
+                    {canvas.mood || "Shared"}
+                  </span>
+                </div>
+
+                <p className="line-clamp-4 whitespace-pre-wrap text-[13px] leading-6 text-slate-700">
+                  {preview}
+                </p>
+
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <div className="text-[10px] text-slate-400">
+                    Witnessed by {canvas.witness_count ?? 0}
+                  </div>
+
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-slate-400 group-hover:text-slate-500">
+                    Open
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+        );
+      })}
+
+      <style>{`
+        @keyframes mooddropFloat {
+          0% { transform: translate(-50%, -50%) translateY(0px); }
+          50% { transform: translate(-50%, -50%) translateY(-10px); }
+          100% { transform: translate(-50%, -50%) translateY(0px); }
+        }
+      `}</style>
+    </div>
+  );
+}
