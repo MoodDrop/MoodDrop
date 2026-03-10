@@ -44,30 +44,17 @@ export async function getSharedDrops(selectedMood?: string) {
 }
 
 export async function incrementWitnessCount(dropId: string) {
-  const { data: currentRow, error: readError } = await supabase
-    .from("drops")
-    .select("witness_count")
-    .eq("id", dropId)
-    .single();
-
-  if (readError) {
-    throw readError;
-  }
-
-  const nextCount = (currentRow?.witness_count ?? 0) + 1;
-
-  const { data, error } = await supabase
-    .from("drops")
-    .update({ witness_count: nextCount })
-    .eq("id", dropId)
-    .select("id, witness_count")
-    .single();
+  const { data, error } = await supabase.rpc("increment_witness_count", {
+    drop_id: dropId,
+  });
 
   if (error) {
     throw error;
   }
 
-  return data as { id: string; witness_count: number };
+  const row = Array.isArray(data) ? data[0] : data;
+
+  return row as { id: string; witness_count: number };
 }
 
 export function getPreviewText(text: string, maxLength = 120) {
