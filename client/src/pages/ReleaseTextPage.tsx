@@ -1,9 +1,10 @@
-// client/src/pages/ReleaseTextPage.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
+import { X } from "lucide-react";
 import { saveEchoLocal } from "@/lib/EchoVaultLocal";
+import { supabase } from "@/lib/supabaseClient";
 
-// ✅ Droplet sound (make sure this file exists at: client/src/assets/sounds/moodDrop-droplet.m4a)
+// ✅ Droplet sound
 import dropletSfx from "../assets/sounds/moodDrop-droplet.m4a";
 
 const MOODS = [
@@ -12,8 +13,10 @@ const MOODS = [
   { key: "Overwhelmed", hint: "Too much at once. Too loud." },
   { key: "Grounded", hint: "Present. Here. In your body." },
   { key: "Joy", hint: "Lightness returning." },
-  { key: "Crash Out", hint: "Raw. Sharp. Unfiltered." },
+  { key: "CrashOut", hint: "Raw. Sharp. Unfiltered." },
 ];
+
+type ReleaseDestination = "vault" | "gallery" | null;
 
 export default function ReleaseTextPage() {
   const [, setLocation] = useLocation();
@@ -21,8 +24,11 @@ export default function ReleaseTextPage() {
   const [mood, setMood] = useState(MOODS[0].key);
   const [text, setText] = useState("");
 
-  // “It is released.” overlay
   const [released, setReleased] = useState(false);
+  const [showDestinationModal, setShowDestinationModal] = useState(false);
+  const [releaseDestination, setReleaseDestination] =
+    useState<ReleaseDestination>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const moodHint = useMemo(
     () => MOODS.find((m) => m.key === mood)?.hint ?? "",
@@ -34,13 +40,12 @@ export default function ReleaseTextPage() {
   const goBack = () => setLocation("/");
   const goVoice = () => setLocation("/release/voice");
 
-  // ✅ Keep one Audio instance (prevents “multiple sounds” + reduces lag)
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const a = new Audio(dropletSfx);
     a.preload = "auto";
-    a.volume = 0.45; // gentle by default
+    a.volume = 0.45;
     audioRef.current = a;
 
     return () => {
@@ -53,50 +58,111 @@ export default function ReleaseTextPage() {
       const a = audioRef.current;
       if (!a) return;
 
-      // rewind so repeat clicks still play cleanly
       a.currentTime = 0;
-
       const p = a.play();
       if (p && typeof (p as Promise<void>).catch === "function") {
         await (p as Promise<void>).catch(() => {});
       }
     } catch {
-      // ignore sound errors (autoplay restrictions / device quirks)
+      // ignore sound errors
     }
   };
 
-  const onDrop = async () => {
+  const openDestinationModal = () => {
+    if (!text.trim() || isSubmitting) return;
+    setShowDestinationModal(true);
+  };
+
+  const finishRelease = async (destination: "vault" | "gallery") => {
+    await playDropSound();
+    setReleaseDestination(destination);
+    setReleased(true);
+    setText("");
+    setShowDestinationModal(false);
+  };
+
+  const handleSendToVault = async () => {
     const trimmed = text.trim();
     if (!trimmed) return;
 
-    // ✅ Save to Echo Vault (localStorage)
-    saveEchoLocal({
-      type: "text",
-      mood,
-      content: trimmed,
-    });
+    try {
+      setIsSubmitting(true);
 
-    // ✅ Play droplet sound (best-effort)
-    await playDropSound();
+      saveEchoLocal({
+        type: "text",
+        mood,
+        content: trimmed,
+      });
 
-    // ✅ Soft confirmation
-    setReleased(true);
-    setText("");
+      await finishRelease("vault");
+    } catch (error) {
+      console.error("Error saving to Echo Vault:", error);
+      alert("Failed to save your release. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  // ✅ After “released” moment, go to Echo Vault
+  const handleShareToGallery = async () => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    try {
+      setIsSubmitting(true);
+
+      // Save privately too
+      saveEchoLocal({
+        type: "text",
+        mood,
+        content: trimmed,
+      });
+
+      const { error } = await supabase.from("drops").insert([
+        {
+          text: trimmed,
+          mood,
+          is_shared: true,
+        },
+      ]);
+
+      if (error) {
+        console.error("Error sharing to Living Gallery:", error);
+        alert(
+          "Your release was saved to Echo Vault, but it could not be shared to the Living Gallery."
+        );
+        await finishRelease("vault");
+        return;
+      }
+
+      await finishRelease("gallery");
+    } catch (error) {
+      console.error("Error sharing release:", error);
+      alert("Failed to share your release. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   useEffect(() => {
     if (!released) return;
+
     const t = window.setTimeout(() => {
       setReleased(false);
-      setLocation("/vault");
+
+      if (releaseDestination === "gallery") {
+        setLocation("/living-gallery");
+      } else {
+        setLocation("/vault");
+      }
+
+      setReleaseDestination(null);
     }, 1100);
+
     return () => window.clearTimeout(t);
-  }, [released, setLocation]);
+  }, [released, releaseDestination, setLocation]);
 
   return (
     <main className="relative min-h-screen overflow-hidden">
-      {/* Atmosphere */}
       <div
         className="absolute inset-0"
         style={{
@@ -107,7 +173,6 @@ export default function ReleaseTextPage() {
       <div className="pointer-events-none absolute inset-0 mooddrop-grain opacity-20" />
 
       <section className="relative mx-auto flex min-h-screen max-w-md flex-col px-6 pb-10 pt-10">
-        {/* Top bar */}
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -143,7 +208,6 @@ export default function ReleaseTextPage() {
           </div>
         </div>
 
-        {/* Mood select */}
         <div className="mt-8">
           <div
             className="rounded-3xl px-5 py-4"
@@ -213,7 +277,6 @@ export default function ReleaseTextPage() {
           </div>
         </div>
 
-        {/* Mode toggle */}
         <div className="mt-6 flex gap-2">
           <button
             type="button"
@@ -244,7 +307,6 @@ export default function ReleaseTextPage() {
           </button>
         </div>
 
-        {/* Text box */}
         <div className="mt-6 flex-1">
           <textarea
             value={text}
@@ -270,11 +332,10 @@ export default function ReleaseTextPage() {
           </div>
         </div>
 
-        {/* Drop button */}
         <button
           type="button"
-          disabled={!canDrop || released}
-          onClick={onDrop}
+          disabled={!canDrop || released || isSubmitting}
+          onClick={openDestinationModal}
           className="mt-6 w-full rounded-3xl px-6 py-4 text-[12px] uppercase transition-opacity"
           style={{
             letterSpacing: "0.28em",
@@ -300,7 +361,112 @@ export default function ReleaseTextPage() {
         </button>
       </section>
 
-      {/* ✅ Sanctuary receipt overlay */}
+      {showDestinationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 px-4 backdrop-blur-sm">
+          <div
+            className="w-full max-w-md rounded-[28px] p-6 shadow-xl"
+            style={{
+              background: "rgba(255,255,255,0.88)",
+              border: "1px solid rgba(210,160,170,0.18)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+            }}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2
+                  className="text-[22px] italic"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "rgba(35,28,28,0.84)",
+                  }}
+                >
+                  Where should this drop go?
+                </h2>
+                <p
+                  className="mt-2 text-[12px]"
+                  style={{ color: "rgba(35,28,28,0.58)" }}
+                >
+                  Choose what feels right for this moment.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowDestinationModal(false)}
+                className="rounded-full p-2"
+                style={{ color: "rgba(35,28,28,0.54)" }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mt-6 space-y-3">
+              <button
+                type="button"
+                onClick={handleSendToVault}
+                disabled={isSubmitting}
+                className="w-full rounded-3xl px-4 py-4 text-left transition"
+                style={{
+                  background: "rgba(255,255,255,0.62)",
+                  border: "1px solid rgba(210,160,170,0.18)",
+                  color: "rgba(35,28,28,0.80)",
+                }}
+              >
+                <div className="text-[13px] font-medium">Send to Echo Vault</div>
+                <div
+                  className="mt-1 text-[11px]"
+                  style={{ color: "rgba(35,28,28,0.52)" }}
+                >
+                  Private. Just for you.
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleShareToGallery}
+                disabled={isSubmitting}
+                className="w-full rounded-3xl px-4 py-4 text-left transition"
+                style={{
+                  background: "rgba(255,255,255,0.62)",
+                  border: "1px solid rgba(210,160,170,0.18)",
+                  color: "rgba(35,28,28,0.80)",
+                }}
+              >
+                <div className="text-[13px] font-medium">
+                  Share to Living Gallery
+                </div>
+                <div
+                  className="mt-1 text-[11px]"
+                  style={{ color: "rgba(35,28,28,0.52)" }}
+                >
+                  Anonymous. Witnessed softly.
+                </div>
+                <div
+                  className="mt-1 text-[10px]"
+                  style={{ color: "rgba(35,28,28,0.42)" }}
+                >
+                  No name. No profile. No replies.
+                </div>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowDestinationModal(false)}
+              className="mt-4 w-full rounded-3xl px-4 py-3 text-[12px]"
+              style={{
+                background: "rgba(255,255,255,0.40)",
+                border: "1px solid rgba(210,160,170,0.16)",
+                color: "rgba(35,28,28,0.66)",
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {released && (
         <div className="absolute inset-0 z-50 flex items-center justify-center">
           <div
@@ -326,7 +492,9 @@ export default function ReleaseTextPage() {
               className="mt-2 text-[12px] italic"
               style={{ color: "rgba(35,28,28,0.52)" }}
             >
-              Your echo is waiting in the vault.
+              {releaseDestination === "gallery"
+                ? "Your drop has joined the Living Gallery."
+                : "Your echo is waiting in the vault."}
             </div>
           </div>
         </div>

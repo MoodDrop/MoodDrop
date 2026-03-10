@@ -22,6 +22,7 @@ import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import QAPage from "@/pages/QAPage";
 import ContactPage from "@/pages/ContactPage";
+import LivingGalleryPage from "@/pages/LivingGalleryPage";
 
 // 🔓 Owner unlock page
 import OwnerUnlockPage from "@/pages/OwnerUnlockPage";
@@ -76,6 +77,9 @@ function Router() {
 
       {/* Echo Vault */}
       <Route path="/vault" component={EchoVaultPage} />
+
+      {/* Living Gallery */}
+      <Route path="/living-gallery" component={LivingGalleryPage} />
 
       {/* 🎵 Harmony */}
       <Route path="/harmony" component={HarmonyLandingPage} />
@@ -148,6 +152,7 @@ function AppContent() {
     location === "/soft-reads" ||
     location === "/playground" ||
     location === "/vault" ||
+    location === "/living-gallery" ||
     location === "/harmony" ||
     location.startsWith("/harmony/") ||
     location.startsWith("/soft-reads/");
