@@ -73,7 +73,7 @@ export default function HomePage() {
         </h1>
 
         <p className="mt-2 text-[13px] italic text-[rgba(35,28,28,0.48)] select-none">
-          Nothing is expected of you here.
+          Take a breath before you begin.
         </p>
 
         <div className="mt-10 w-full max-w-xs">
