@@ -152,16 +152,16 @@ export default function EchoVaultPage() {
       <div className="absolute inset-0 bg-gradient-to-br from-[#fff1ec] via-[#f9ece6] to-[#fff]" />
 
       <section className="relative mx-auto max-w-md px-6 pt-10 pb-10">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <button
             onClick={() => setLocation("/")}
-            className="h-10 w-10 rounded-full bg-white/50 border border-blush-200"
+            className="h-10 w-10 rounded-full border border-blush-200 bg-white/50"
           >
             ←
           </button>
 
           <div className="text-center">
-            <h1 className="text-[30px] italic font-serif text-warm-800">
+            <h1 className="font-serif text-[30px] italic text-warm-800">
               Your Echoes
             </h1>
             <p className="text-[12px] italic text-warm-500">
@@ -200,34 +200,6 @@ export default function EchoVaultPage() {
             );
           })}
         </div>
-
-        {/* --- Gentle Harmony card (always visible) --- */}
-        <motion.div
-          className="mx-auto mt-8 max-w-[520px] rounded-[22px] border border-white/25 bg-white/14 px-5 py-5 backdrop-blur-xl"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-        >
-          <div className="text-center">
-            <div className="text-[12px] uppercase tracking-widest text-warm-500/80">
-              Harmony
-            </div>
-            <div className="mt-2 text-[18px] italic font-serif text-warm-800">
-              If something here still lingers…
-            </div>
-            <p className="mx-auto mt-2 max-w-[420px] text-[12.5px] leading-relaxed text-warm-600/85">
-              You can gently shape it into melody — with care, warmth, and
-              intention. Only if it feels right.
-            </p>
-
-            <button
-              onClick={() => setLocation("/harmony")}
-              className="mt-4 inline-flex items-center justify-center rounded-full px-4 py-2 text-[10px] uppercase bg-white/55 border border-blush-200 text-warm-700 hover:bg-white/70 transition"
-            >
-              Explore Harmony →
-            </button>
-          </div>
-        </motion.div>
       </section>
 
       {/* ---------- OVERLAY ---------- */}
@@ -244,7 +216,7 @@ export default function EchoVaultPage() {
             }}
           >
             <motion.div
-              className="w-full max-w-md rounded-[28px] px-6 py-6 bg-white/70 border border-blush-200"
+              className="w-full max-w-md rounded-[28px] border border-blush-200 bg-white/70 px-6 py-6"
               initial={{ scale: 0.96, y: 8, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.98, y: 8, opacity: 0 }}
@@ -255,13 +227,13 @@ export default function EchoVaultPage() {
                   {active.mood}
                 </div>
 
-                <div className="mt-2 text-[22px] italic font-serif text-warm-800">
+                <div className="mt-2 font-serif text-[22px] italic text-warm-800">
                   {active.type === "voice" ? "Listening…" : "Reading…"}
                 </div>
               </div>
 
               {active.type === "text" && (
-                <div className="rounded-2xl p-4 bg-white/60 border border-blush-200 text-warm-700">
+                <div className="rounded-2xl border border-blush-200 bg-white/60 p-4 text-warm-700">
                   {active.content}
                 </div>
               )}
@@ -271,7 +243,7 @@ export default function EchoVaultPage() {
                   ref={audioRef}
                   src={activeAudioUrl}
                   controls
-                  className="w-full mt-4"
+                  className="mt-4 w-full"
                 />
               )}
 
@@ -279,14 +251,14 @@ export default function EchoVaultPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={onTuckAway}
-                    className="flex-1 rounded-full px-4 py-2 text-[10px] uppercase bg-white/60 border border-blush-200"
+                    className="flex-1 rounded-full border border-blush-200 bg-white/60 px-4 py-2 text-[10px] uppercase"
                   >
                     Tuck away
                   </button>
 
                   <button
                     onClick={onDelete}
-                    className="flex-1 rounded-full px-4 py-2 text-[10px] uppercase bg-white/60 border border-blush-200 text-rose-700"
+                    className="flex-1 rounded-full border border-blush-200 bg-white/60 px-4 py-2 text-[10px] uppercase text-rose-700"
                   >
                     Delete
                   </button>
@@ -294,13 +266,13 @@ export default function EchoVaultPage() {
 
                 <button
                   onClick={closeOverlay}
-                  className="rounded-full px-4 py-2 text-[10px] uppercase bg-white/60 border border-blush-200"
+                  className="rounded-full border border-blush-200 bg-white/60 px-4 py-2 text-[10px] uppercase"
                 >
                   Back to stillness
                 </button>
               </div>
 
-              <p className="mt-4 text-center text-[11px] italic text-warm-500 font-serif">
+              <p className="mt-4 text-center font-serif text-[11px] italic text-warm-500">
                 Nothing here needs to be fixed.
               </p>
             </motion.div>
