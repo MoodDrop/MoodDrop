@@ -3,9 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation } from "wouter";
-
 import HaloRippleEmber from "@/components/HaloRippleEmber";
-
 import {
   readEchoesLocal,
   purgeExpiredDeletesLocal,
@@ -16,9 +14,7 @@ import {
   base64ToBlob,
 } from "@/lib/EchoVaultLocal";
 
-/* ------------------------------------------------ */
-/* Helpers */
-/* ------------------------------------------------ */
+/* ---------- helpers ---------- */
 
 function seedRng(seed: string) {
   let h = 2166136261;
@@ -30,10 +26,8 @@ function seedRng(seed: string) {
 
   return () => {
     h += 0x6d2b79f5;
-
     let t = Math.imul(h ^ (h >>> 15), 1 | h);
     t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
-
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
@@ -42,6 +36,7 @@ type Pos = {
   x: number;
   y: number;
   dur: number;
+  delay: number;
 };
 
 function generatePositions(ids: string[]): Record<string, Pos> {
@@ -53,6 +48,7 @@ function generatePositions(ids: string[]): Record<string, Pos> {
       x: 10 + rand() * 80,
       y: 18 + rand() * 62,
       dur: 6 + rand() * 3,
+      delay: rand() * 2,
     };
   });
 
@@ -66,42 +62,22 @@ function formatShort(ts: number) {
   });
 }
 
-function formatLong(ts: number) {
-  return new Date(ts).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+function getEchoText(e: EchoItem) {
+  if (e.type === "text") return e.content || "";
+  return "voice echo";
 }
 
-/* Timeline grouping */
-
-function isToday(ts: number) {
-  return new Date(ts).toDateString() === new Date().toDateString();
+function getUniqueMoods(echoes: EchoItem[]) {
+  return Array.from(
+    new Set(
+      echoes
+        .map((e) => e.mood)
+        .filter((m): m is string => Boolean(m))
+    )
+  );
 }
 
-function isYesterday(ts: number) {
-  const y = new Date();
-  y.setDate(y.getDate() - 1);
-  return new Date(ts).toDateString() === y.toDateString();
-}
-
-function isThisWeek(ts: number) {
-  return Date.now() - ts < 1000 * 60 * 60 * 24 * 7;
-}
-
-function getTimelineLabel(ts: number) {
-  if (isToday(ts)) return "Today";
-  if (isYesterday(ts)) return "Yesterday";
-  if (isThisWeek(ts)) return "Earlier This Week";
-  return "Older";
-}
-
-/* ------------------------------------------------ */
-/* Page */
-/* ------------------------------------------------ */
+/* ---------- page ---------- */
 
 const UNDO_MS = 6000;
 
@@ -110,10 +86,8 @@ export default function EchoVaultPage() {
 
   const [echoes, setEchoes] = useState<EchoItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-
-  const [search, setSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [activeMood, setActiveMood] = useState("All");
-  const [reflectionMode, setReflectionMode] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -126,7 +100,6 @@ export default function EchoVaultPage() {
   useEffect(() => {
     refresh();
     window.addEventListener("focus", refresh);
-
     return () => window.removeEventListener("focus", refresh);
   }, []);
 
@@ -135,42 +108,30 @@ export default function EchoVaultPage() {
     [activeId, echoes]
   );
 
-  /* ------------------------------------------------ */
-  /* Filters */
-  /* ------------------------------------------------ */
-
   const visibleEchoes = useMemo(
     () => echoes.filter((e) => !e.deletedAt && !e.tuckedAt),
     [echoes]
   );
 
-  const moodOptions = useMemo(() => {
-    const moods = visibleEchoes
-      .map((e) => e.mood)
-      .filter(Boolean) as string[];
-
-    return ["All", ...Array.from(new Set(moods))];
-  }, [visibleEchoes]);
+  const moodOptions = useMemo(
+    () => ["All", ...getUniqueMoods(visibleEchoes)],
+    [visibleEchoes]
+  );
 
   const filtered = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+
     return visibleEchoes.filter((e) => {
-      const text = (e.content || "").toLowerCase();
+      const moodMatch = activeMood === "All" ? true : e.mood === activeMood;
 
-      const moodMatch =
-        activeMood === "All" ? true : e.mood === activeMood;
+      const text = getEchoText(e).toLowerCase();
+      const moodText = (e.mood || "").toLowerCase();
 
-      const searchMatch =
-        search.trim() === "" ||
-        text.includes(search.toLowerCase()) ||
-        (e.mood || "").toLowerCase().includes(search.toLowerCase());
+      const searchMatch = !q || text.includes(q) || moodText.includes(q);
 
       return moodMatch && searchMatch;
     });
-  }, [visibleEchoes, activeMood, search]);
-
-  /* ------------------------------------------------ */
-  /* Floating Pond */
-  /* ------------------------------------------------ */
+  }, [visibleEchoes, activeMood, searchTerm]);
 
   const pondEchoes = useMemo(() => filtered.slice(0, 12), [filtered]);
 
@@ -179,28 +140,7 @@ export default function EchoVaultPage() {
     [pondEchoes]
   );
 
-  /* ------------------------------------------------ */
-  /* Timeline */
-  /* ------------------------------------------------ */
-
-  const timelineGroups = useMemo(() => {
-    const grouped: Record<string, EchoItem[]> = {
-      Today: [],
-      Yesterday: [],
-      "Earlier This Week": [],
-      Older: [],
-    };
-
-    filtered.forEach((e) => {
-      grouped[getTimelineLabel(e.createdAt)].push(e);
-    });
-
-    return grouped;
-  }, [filtered]);
-
-  /* ------------------------------------------------ */
-  /* Audio */
-  /* ------------------------------------------------ */
+  /* ---------- audio ---------- */
 
   useEffect(() => {
     if (audioUrl) URL.revokeObjectURL(audioUrl);
@@ -218,15 +158,12 @@ export default function EchoVaultPage() {
     }
   }, [activeId]);
 
-  /* ------------------------------------------------ */
-  /* Actions */
-  /* ------------------------------------------------ */
+  /* ---------- actions ---------- */
 
   const closeOverlay = () => setActiveId(null);
 
   const onTuck = () => {
     if (!active) return;
-
     tuckEchoLocal(active.id);
     setActiveId(null);
     refresh();
@@ -236,6 +173,7 @@ export default function EchoVaultPage() {
     if (!active) return;
 
     softDeleteEchoLocal(active.id);
+    setActiveId(null);
 
     setTimeout(() => {
       finalizeDeleteEchoLocal(active.id);
@@ -243,24 +181,18 @@ export default function EchoVaultPage() {
     }, UNDO_MS);
 
     refresh();
-    setActiveId(null);
   };
 
-  /* ------------------------------------------------ */
-  /* Render */
-  /* ------------------------------------------------ */
+  /* ---------- render ---------- */
 
   return (
     <main className="relative min-h-screen overflow-hidden">
-
       <div className="absolute inset-0 bg-gradient-to-br from-[#fff1ec] via-[#f9ece6] to-[#fff]" />
 
       <section className="relative mx-auto max-w-5xl px-6 pt-10 pb-14">
-
         {/* Header */}
 
         <div className="mb-6 flex items-center justify-between">
-
           <button
             onClick={() => setLocation("/")}
             className="h-10 w-10 rounded-full border border-blush-200 bg-white/50"
@@ -269,43 +201,28 @@ export default function EchoVaultPage() {
           </button>
 
           <div className="text-center">
-            <h1 className="font-serif text-[30px] italic text-warm-800">
+            <h1 className="text-[30px] italic font-serif text-warm-800">
               Your Echoes
             </h1>
-
             <p className="text-[12px] italic text-warm-500">
               Drift through what you’ve released.
             </p>
           </div>
 
           <div className="w-10" />
-
         </div>
 
         {/* Controls */}
 
         <div className="mb-8 rounded-[26px] border border-white/50 bg-white/45 p-4 backdrop-blur-xl">
-
-          <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search your echoes..."
-              className="rounded-xl border border-blush-200 bg-white/70 px-4 py-3 text-sm"
-            />
-
-            <button
-              onClick={() => setReflectionMode(!reflectionMode)}
-              className="rounded-xl border border-blush-200 bg-white/70 px-4 py-3 text-sm"
-            >
-              {reflectionMode ? "Reflection Mode On" : "Reflection Mode Off"}
-            </button>
-
-          </div>
+          <input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search your echoes..."
+            className="w-full rounded-xl border border-blush-200 bg-white/70 px-4 py-3 text-sm"
+          />
 
           <div className="mt-4 flex flex-wrap gap-2">
-
             {moodOptions.map((m) => (
               <button
                 key={m}
@@ -315,111 +232,51 @@ export default function EchoVaultPage() {
                 {m}
               </button>
             ))}
-
           </div>
-
         </div>
 
-        {/* Floating Echo Pond */}
+        {/* Echo Pond */}
 
-        <div className="mb-10">
-
-          <div className="relative h-[420px]">
-
-            {pondEchoes.map((e) => {
-              const p = positions[e.id];
-
-              return (
-                <motion.div
-                  key={e.id}
-                  className="absolute"
-                  style={{
-                    left: `${p.x}%`,
-                    top: `${p.y}%`,
-                    transform: "translate(-50%, -50%)",
-                  }}
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{
-                    duration: p.dur,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                >
-                  <HaloRippleEmber
-                    type={e.type}
-                    dateLabel={formatShort(e.createdAt)}
-                    onClick={() => setActiveId(e.id)}
-                  />
-                </motion.div>
-              );
-            })}
-
-          </div>
-
-        </div>
-
-        {/* Timeline */}
-
-        <div className="space-y-8">
-
-          {Object.entries(timelineGroups).map(([label, items]) => {
-
-            if (items.length === 0) return null;
+        <div className="relative h-[56vh] min-h-[420px]">
+          {pondEchoes.map((e) => {
+            const p = positions[e.id];
 
             return (
-              <section key={label}>
-
-                <div className="mb-3 flex items-center gap-3">
-                  <div className="text-xs uppercase text-warm-500">
-                    {label}
-                  </div>
-                  <div className="h-px flex-1 bg-blush-200" />
-                </div>
-
-                <div className={reflectionMode ? "space-y-4" : "grid gap-3 sm:grid-cols-2"}>
-
-                  {items.map((e) => (
-
-                    <button
-                      key={e.id}
-                      onClick={() => setActiveId(e.id)}
-                      className="rounded-[22px] border border-white/60 bg-white/55 p-4 text-left"
-                    >
-
-                      <div className="text-xs text-warm-500">
-                        {e.mood}
-                      </div>
-
-                      <p className="mt-2 text-sm text-warm-700">
-                        {e.type === "voice"
-                          ? "Voice echo resting here."
-                          : e.content}
-                      </p>
-
-                      <div className="mt-3 text-xs text-warm-400">
-                        {formatLong(e.createdAt)}
-                      </div>
-
-                    </button>
-
-                  ))}
-
-                </div>
-
-              </section>
+              <motion.div
+                key={e.id}
+                className="absolute"
+                style={{
+                  left: `${p.x}%`,
+                  top: `${p.y}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+                animate={{
+                  y: [0, -10, 0],
+                  scale: [1, 1.05, 1],
+                  opacity: [0.9, 1, 0.9],
+                }}
+                transition={{
+                  duration: p.dur,
+                  delay: p.delay,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <HaloRippleEmber
+                  type={e.type}
+                  dateLabel={formatShort(e.createdAt)}
+                  onClick={() => setActiveId(e.id)}
+                />
+              </motion.div>
             );
           })}
-
         </div>
-
       </section>
 
       {/* Overlay */}
 
       <AnimatePresence>
-
         {active && (
-
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center px-4"
             initial={{ opacity: 0 }}
@@ -430,12 +287,13 @@ export default function EchoVaultPage() {
               backdropFilter: "blur(20px)",
             }}
           >
-
             <motion.div
               className="w-full max-w-md rounded-[28px] border border-blush-200 bg-white/70 px-6 py-6"
+              initial={{ scale: 0.96, y: 8, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.98, y: 8, opacity: 0 }}
             >
-
-              <div className="mb-4 text-xs text-warm-500">
+              <div className="mb-4 text-[11px] uppercase tracking-widest text-warm-500">
                 {active.mood}
               </div>
 
@@ -450,7 +308,6 @@ export default function EchoVaultPage() {
               )}
 
               <div className="mt-6 flex gap-2">
-
                 <button
                   onClick={onTuck}
                   className="flex-1 rounded-full border border-blush-200 bg-white/60 px-4 py-2 text-xs"
@@ -464,7 +321,6 @@ export default function EchoVaultPage() {
                 >
                   Delete
                 </button>
-
               </div>
 
               <button
@@ -473,15 +329,10 @@ export default function EchoVaultPage() {
               >
                 Back to stillness
               </button>
-
             </motion.div>
-
           </motion.div>
-
         )}
-
       </AnimatePresence>
-
     </main>
   );
 }
