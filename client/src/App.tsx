@@ -67,9 +67,9 @@ type LightPoint = {
   size: number;
 };
 
-type Bubble = {
+type BubbleInstance = {
   id: number;
-  left: string;
+  left: number;
   size: number;
   duration: number;
   delay: number;
@@ -85,7 +85,7 @@ type SandParticle = {
 
 function CalmStudioInlinePage() {
   const [activeSection, setActiveSection] = React.useState<string | null>(null);
-  const [activeGame, setActiveGame] = React.useState<GentlePlayMode>(null);
+  const [activeGame, setActiveGame] = React.useState<GentlePlayMode>("light-garden");
 
   // Light Garden
   const [lights, setLights] = React.useState<LightPoint[]>([]);
@@ -106,69 +106,44 @@ function CalmStudioInlinePage() {
   };
 
   // Bubble Drift
-  const bubbles = React.useMemo<Bubble[]>(
+  const bubblePalette = React.useMemo(
     () => [
-      {
-        id: 1,
-        left: "12%",
-        size: 38,
-        duration: 8,
-        delay: 0,
-        color: "rgba(255, 224, 230, 0.72)",
-      },
-      {
-        id: 2,
-        left: "28%",
-        size: 30,
-        duration: 7.4,
-        delay: 1.1,
-        color: "rgba(255, 239, 229, 0.72)",
-      },
-      {
-        id: 3,
-        left: "46%",
-        size: 44,
-        duration: 8.8,
-        delay: 0.7,
-        color: "rgba(255, 234, 244, 0.68)",
-      },
-      {
-        id: 4,
-        left: "63%",
-        size: 34,
-        duration: 7.1,
-        delay: 1.8,
-        color: "rgba(255, 248, 238, 0.74)",
-      },
-      {
-        id: 5,
-        left: "82%",
-        size: 28,
-        duration: 8.4,
-        delay: 1.4,
-        color: "rgba(255, 230, 215, 0.68)",
-      },
-      {
-        id: 6,
-        left: "38%",
-        size: 24,
-        duration: 6.7,
-        delay: 2.8,
-        color: "rgba(255, 243, 224, 0.66)",
-      },
+      "rgba(255, 199, 210, 0.88)", // blush pink
+      "rgba(255, 214, 222, 0.86)", // rose milk
+      "rgba(255, 228, 206, 0.86)", // peach nude
+      "rgba(255, 243, 224, 0.82)", // cream shimmer
+      "rgba(255, 230, 238, 0.86)", // soft rose
+      "rgba(255, 238, 214, 0.84)", // champagne cream
     ],
     []
   );
 
+  const createBubble = React.useCallback(
+    (id: number): BubbleInstance => ({
+      id,
+      left: 8 + Math.random() * 82,
+      size: 24 + Math.random() * 24,
+      duration: 6.6 + Math.random() * 2.8,
+      delay: Math.random() * 1.6,
+      color: bubblePalette[Math.floor(Math.random() * bubblePalette.length)],
+    }),
+    [bubblePalette]
+  );
+
+  const [bubbles, setBubbles] = React.useState<BubbleInstance[]>(
+    Array.from({ length: 14 }, (_, i) => createBubble(i + 1))
+  );
   const [poppedBubbles, setPoppedBubbles] = React.useState<number[]>([]);
 
   const handleBubblePop = (id: number) => {
     if (poppedBubbles.includes(id)) return;
+
     setPoppedBubbles((prev) => [...prev, id]);
 
     window.setTimeout(() => {
+      setBubbles((prev) => prev.map((bubble) => (bubble.id === id ? createBubble(id) : bubble)));
       setPoppedBubbles((prev) => prev.filter((bubbleId) => bubbleId !== id));
-    }, 850);
+    }, 520);
   };
 
   // Glow Trail
@@ -187,7 +162,7 @@ function CalmStudioInlinePage() {
     let drawing = false;
 
     const fade = () => {
-      ctx.fillStyle = "rgba(56, 39, 77, 0.045)";
+      ctx.fillStyle = "rgba(76, 54, 95, 0.05)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       requestAnimationFrame(fade);
     };
@@ -196,9 +171,9 @@ function CalmStudioInlinePage() {
 
     const drawGlow = (x: number, y: number) => {
       const gradient = ctx.createRadialGradient(x, y, 0, x, y, 24);
-      gradient.addColorStop(0, "rgba(255, 226, 214, 0.75)");
-      gradient.addColorStop(0.45, "rgba(255, 206, 196, 0.35)");
-      gradient.addColorStop(1, "rgba(255, 206, 196, 0)");
+      gradient.addColorStop(0, "rgba(255, 227, 214, 0.86)");
+      gradient.addColorStop(0.42, "rgba(255, 205, 195, 0.4)");
+      gradient.addColorStop(1, "rgba(255, 205, 195, 0)");
 
       ctx.fillStyle = gradient;
       ctx.beginPath();
@@ -206,7 +181,7 @@ function CalmStudioInlinePage() {
       ctx.fill();
     };
 
-    const getCoords = (e: MouseEvent | PointerEvent) => {
+    const getCoords = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
       return {
         x: e.clientX - rect.left,
@@ -234,12 +209,14 @@ function CalmStudioInlinePage() {
     canvas.addEventListener("pointermove", handleMove);
     canvas.addEventListener("pointerup", handleUp);
     canvas.addEventListener("pointerleave", handleUp);
+    canvas.addEventListener("pointercancel", handleUp);
 
     return () => {
       canvas.removeEventListener("pointerdown", handleDown);
       canvas.removeEventListener("pointermove", handleMove);
       canvas.removeEventListener("pointerup", handleUp);
       canvas.removeEventListener("pointerleave", handleUp);
+      canvas.removeEventListener("pointercancel", handleUp);
     };
   }, [activeGame]);
 
@@ -256,14 +233,12 @@ function CalmStudioInlinePage() {
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
 
-    const particleCount = 1200;
-    const particles: SandParticle[] = Array.from({ length: particleCount }).map(
-      () => {
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
-        return { x, y, baseX: x, baseY: y };
-      }
-    );
+    const particleCount = 1400;
+    const particles: SandParticle[] = Array.from({ length: particleCount }).map(() => {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      return { x, y, baseX: x, baseY: y };
+    });
 
     let mouseX = -9999;
     let mouseY = -9999;
@@ -276,23 +251,23 @@ function CalmStudioInlinePage() {
         const dy = p.y - mouseY;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (dist < 44) {
-          const force = (44 - dist) / 44;
-          p.x += (dx / (dist || 1)) * force * 6;
-          p.y += (dy / (dist || 1)) * force * 6;
+        if (dist < 46) {
+          const force = (46 - dist) / 46;
+          p.x += (dx / (dist || 1)) * force * 7;
+          p.y += (dy / (dist || 1)) * force * 7;
         }
 
-        p.x += (p.baseX - p.x) * 0.025;
-        p.y += (p.baseY - p.y) * 0.025;
+        p.x += (p.baseX - p.x) * 0.03;
+        p.y += (p.baseY - p.y) * 0.03;
 
-        ctx.fillStyle = "rgba(216, 177, 156, 0.68)";
+        ctx.fillStyle = "rgba(219, 179, 158, 0.72)";
         ctx.fillRect(p.x, p.y, 2, 2);
       });
 
       requestAnimationFrame(draw);
     };
 
-    const handleMove = (e: MouseEvent) => {
+    const handleMove = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
       mouseX = e.clientX - rect.left;
       mouseY = e.clientY - rect.top;
@@ -303,19 +278,26 @@ function CalmStudioInlinePage() {
       mouseY = -9999;
     };
 
-    canvas.addEventListener("mousemove", handleMove);
-    canvas.addEventListener("mouseleave", handleLeave);
+    canvas.addEventListener("pointermove", handleMove);
+    canvas.addEventListener("pointerleave", handleLeave);
+    canvas.addEventListener("pointerup", handleLeave);
+    canvas.addEventListener("pointercancel", handleLeave);
 
     draw();
 
     return () => {
-      canvas.removeEventListener("mousemove", handleMove);
-      canvas.removeEventListener("mouseleave", handleLeave);
+      canvas.removeEventListener("pointermove", handleMove);
+      canvas.removeEventListener("pointerleave", handleLeave);
+      canvas.removeEventListener("pointerup", handleLeave);
+      canvas.removeEventListener("pointercancel", handleLeave);
     };
   }, [activeGame]);
 
   const openSection = (section: string) => {
     setActiveSection(section);
+    if (section === "gentle-play" && !activeGame) {
+      setActiveGame("light-garden");
+    }
     if (section !== "gentle-play") {
       setActiveGame(null);
     }
@@ -330,13 +312,13 @@ function CalmStudioInlinePage() {
             opacity: 0;
           }
           10% {
-            opacity: 0.62;
+            opacity: 0.78;
           }
           70% {
-            opacity: 0.58;
+            opacity: 0.72;
           }
           100% {
-            transform: translateY(-260px) scale(1.08);
+            transform: translateY(-270px) scale(1.08);
             opacity: 0;
           }
         }
@@ -359,15 +341,15 @@ function CalmStudioInlinePage() {
         @keyframes previewBubbleFloat {
           0% {
             transform: translateY(0px);
-            opacity: 0.5;
+            opacity: 0.58;
           }
           50% {
             transform: translateY(-10px);
-            opacity: 0.75;
+            opacity: 0.82;
           }
           100% {
             transform: translateY(0px);
-            opacity: 0.5;
+            opacity: 0.58;
           }
         }
 
@@ -376,7 +358,7 @@ function CalmStudioInlinePage() {
             opacity: 0.45;
           }
           50% {
-            opacity: 0.85;
+            opacity: 0.86;
           }
           100% {
             opacity: 0.45;
@@ -393,6 +375,21 @@ function CalmStudioInlinePage() {
           100% {
             transform: translateX(0px);
           }
+        }
+
+        @keyframes gamePanelIn {
+          0% {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .game-panel-enter {
+          animation: gamePanelIn 260ms ease-out;
         }
       `}</style>
 
@@ -540,14 +537,185 @@ function CalmStudioInlinePage() {
               Quiet interactions for restless moments.
             </p>
 
-            {/* Game cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            {/* Active game area now ABOVE the cards */}
+            <div className="mb-6">
+              {activeGame === "light-garden" && (
+                <div className="rounded-2xl border border-blush-100 bg-white p-5 game-panel-enter">
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <div>
+                      <h4 className="text-base sm:text-lg font-semibold text-warm-gray-700">
+                        Light Garden
+                      </h4>
+                      <p className="mt-1 text-sm leading-6 text-warm-gray-600">
+                        Tap anywhere to place soft glowing lights and slowly fill the
+                        space with calm.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={handleLightGardenClick}
+                    className="relative overflow-hidden rounded-[28px] border border-blush-100 min-h-[360px] cursor-pointer bg-gradient-to-b from-[#231f3f] via-[#30295a] to-[#43346d]"
+                  >
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_45%)] pointer-events-none" />
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 text-xs tracking-wide text-white/80 uppercase z-10">
+                      Tap to place light
+                    </div>
+
+                    {lights.map((light) => (
+                      <span
+                        key={light.id}
+                        className="absolute rounded-full pointer-events-none animate-pulse"
+                        style={{
+                          left: light.x,
+                          top: light.y,
+                          width: `${light.size}px`,
+                          height: `${light.size}px`,
+                          transform: "translate(-50%, -50%)",
+                          background:
+                            "radial-gradient(circle, rgba(255,243,176,1) 0%, rgba(255,213,128,0.9) 40%, rgba(255,213,128,0.18) 72%, rgba(255,213,128,0) 100%)",
+                          boxShadow:
+                            "0 0 16px rgba(255,223,140,0.8), 0 0 34px rgba(255,223,140,0.35)",
+                          animationDuration: "2.8s",
+                        }}
+                      />
+                    ))}
+
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] text-white/75 z-10">
+                      A quiet little moment to build your own glow
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeGame === "bubble-drift" && (
+                <div className="rounded-2xl border border-blush-100 bg-white p-5 game-panel-enter">
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <div>
+                      <h4 className="text-base sm:text-lg font-semibold text-warm-gray-700">
+                        Bubble Drift
+                      </h4>
+                      <p className="mt-1 text-sm leading-6 text-warm-gray-600">
+                        Tap floating bubbles and watch them shimmer away.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="relative overflow-hidden rounded-[28px] border border-blush-100 min-h-[360px] bg-gradient-to-b from-[#f8eeef] via-[#f8f2ee] to-[#f5e8de]">
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 text-xs tracking-wide text-[#b38a8f] uppercase z-10">
+                      Tap a bubble
+                    </div>
+
+                    {bubbles.map((bubble) => {
+                      const isPopped = poppedBubbles.includes(bubble.id);
+
+                      return (
+                        <button
+                          key={bubble.id}
+                          type="button"
+                          onClick={() => handleBubblePop(bubble.id)}
+                          className={`absolute rounded-full border border-white/80 transition-all duration-500 ${
+                            isPopped ? "opacity-0 scale-125" : "opacity-100"
+                          }`}
+                          style={{
+                            left: `${bubble.left}%`,
+                            bottom: "-12px",
+                            width: `${bubble.size}px`,
+                            height: `${bubble.size}px`,
+                            background: bubble.color,
+                            boxShadow:
+                              "inset 0 0 14px rgba(255,255,255,0.52), 0 0 14px rgba(255,220,210,0.34)",
+                            animation: `bubbleRise ${bubble.duration}s linear infinite`,
+                            animationDelay: `${bubble.delay}s`,
+                          }}
+                        />
+                      );
+                    })}
+
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] text-[#b38a8f] z-10">
+                      A soft little shimmer pop
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeGame === "glow-trail" && (
+                <div className="rounded-2xl border border-blush-100 bg-white p-5 game-panel-enter">
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <div>
+                      <h4 className="text-base sm:text-lg font-semibold text-warm-gray-700">
+                        Glow Trail
+                      </h4>
+                      <p className="mt-1 text-sm leading-6 text-warm-gray-600">
+                        Drag across the canvas and leave a soft fading trail of light.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    className="relative overflow-hidden rounded-[28px] border border-blush-100 min-h-[360px] bg-gradient-to-b from-[#4c365f] via-[#573f6e] to-[#6a4a7e]"
+                    style={{ touchAction: "none" }}
+                  >
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 text-xs tracking-wide text-white/80 uppercase z-10">
+                      Drag to draw light
+                    </div>
+
+                    <canvas
+                      ref={glowCanvasRef}
+                      className="absolute inset-0 w-full h-full"
+                      style={{ touchAction: "none" }}
+                    />
+
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] text-white/75 z-10">
+                      A gentle trace that slowly fades away
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeGame === "sand-sweep" && (
+                <div className="rounded-2xl border border-blush-100 bg-white p-5 game-panel-enter">
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <div>
+                      <h4 className="text-base sm:text-lg font-semibold text-warm-gray-700">
+                        Sand Sweep
+                      </h4>
+                      <p className="mt-1 text-sm leading-6 text-warm-gray-600">
+                        Move across the surface and watch soft shimmer grains part and settle.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    className="relative overflow-hidden rounded-[28px] border border-blush-100 min-h-[360px] bg-gradient-to-b from-[#f0e0d8] via-[#edd9d0] to-[#e8d2c7]"
+                    style={{ touchAction: "none" }}
+                  >
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 text-xs tracking-wide text-[#a67c73] uppercase z-10">
+                      Move to sweep
+                    </div>
+
+                    <canvas
+                      ref={sandCanvasRef}
+                      className="absolute inset-0 w-full h-full"
+                      style={{ touchAction: "none" }}
+                    />
+
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] text-[#a67c73] z-10">
+                      A tactile little moment to clear the surface
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Game cards below as selectors */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
                 type="button"
                 onClick={() => setActiveGame("light-garden")}
                 className={`rounded-2xl border overflow-hidden text-left transition-all ${
                   activeGame === "light-garden"
-                    ? "border-blush-200 shadow-md bg-white"
+                    ? "border-blush-200 shadow-md bg-white ring-1 ring-blush-100"
                     : "border-blush-100 bg-white shadow-sm"
                 }`}
               >
@@ -590,15 +758,15 @@ function CalmStudioInlinePage() {
                 onClick={() => setActiveGame("bubble-drift")}
                 className={`rounded-2xl border overflow-hidden text-left transition-all ${
                   activeGame === "bubble-drift"
-                    ? "border-blush-200 shadow-md bg-white"
+                    ? "border-blush-200 shadow-md bg-white ring-1 ring-blush-100"
                     : "border-blush-100 bg-white shadow-sm"
                 }`}
               >
-                <div className="relative h-28 bg-gradient-to-b from-[#f6e9eb] via-[#f7efec] to-[#f6e6dc] overflow-hidden">
+                <div className="relative h-28 bg-gradient-to-b from-[#f6e5e9] via-[#f7eeeb] to-[#f6e2d7] overflow-hidden">
                   {[
-                    { left: "18%", bottom: "22%", size: 18, delay: "0s", color: "rgba(255,228,230,.78)" },
-                    { left: "44%", bottom: "16%", size: 24, delay: "0.8s", color: "rgba(255,243,224,.72)" },
-                    { left: "72%", bottom: "26%", size: 20, delay: "1.2s", color: "rgba(255,234,244,.74)" },
+                    { left: "18%", bottom: "22%", size: 18, delay: "0s", color: "rgba(255, 199, 210, 0.88)" },
+                    { left: "44%", bottom: "16%", size: 24, delay: "0.8s", color: "rgba(255, 228, 206, 0.84)" },
+                    { left: "72%", bottom: "26%", size: 20, delay: "1.2s", color: "rgba(255, 214, 222, 0.86)" },
                   ].map((bubble, index) => (
                     <span
                       key={index}
@@ -622,7 +790,7 @@ function CalmStudioInlinePage() {
                     Bubble Drift
                   </h4>
                   <p className="mt-1 text-sm leading-6 text-warm-gray-600">
-                    Tap floating bubbles and watch them gently disappear.
+                    Tap floating bubbles and watch them shimmer away.
                   </p>
                 </div>
               </button>
@@ -632,7 +800,7 @@ function CalmStudioInlinePage() {
                 onClick={() => setActiveGame("glow-trail")}
                 className={`rounded-2xl border overflow-hidden text-left transition-all ${
                   activeGame === "glow-trail"
-                    ? "border-blush-200 shadow-md bg-white"
+                    ? "border-blush-200 shadow-md bg-white ring-1 ring-blush-100"
                     : "border-blush-100 bg-white shadow-sm"
                 }`}
               >
@@ -644,7 +812,10 @@ function CalmStudioInlinePage() {
                       stroke="rgba(255,220,214,0.65)"
                       strokeWidth="2.2"
                       strokeLinecap="round"
-                      style={{ filter: "drop-shadow(0 0 8px rgba(255,210,200,0.45))", animation: "previewTrailGlow 3.2s ease-in-out infinite" }}
+                      style={{
+                        filter: "drop-shadow(0 0 8px rgba(255,210,200,0.45))",
+                        animation: "previewTrailGlow 3.2s ease-in-out infinite",
+                      }}
                     />
                   </svg>
                 </div>
@@ -663,7 +834,7 @@ function CalmStudioInlinePage() {
                 onClick={() => setActiveGame("sand-sweep")}
                 className={`rounded-2xl border overflow-hidden text-left transition-all ${
                   activeGame === "sand-sweep"
-                    ? "border-blush-200 shadow-md bg-white"
+                    ? "border-blush-200 shadow-md bg-white ring-1 ring-blush-100"
                     : "border-blush-100 bg-white shadow-sm"
                 }`}
               >
@@ -699,196 +870,6 @@ function CalmStudioInlinePage() {
                 </div>
               </button>
             </div>
-
-            {/* Expanded game area */}
-            {activeGame === "light-garden" && (
-              <div className="rounded-2xl border border-blush-100 bg-white p-5">
-                <div className="flex items-center justify-between gap-4 mb-4">
-                  <div>
-                    <h4 className="text-base sm:text-lg font-semibold text-warm-gray-700">
-                      Light Garden
-                    </h4>
-                    <p className="mt-1 text-sm leading-6 text-warm-gray-600">
-                      Tap anywhere to place soft glowing lights and slowly fill the
-                      space with calm.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setActiveGame(null)}
-                    className="text-sm text-warm-gray-500 hover:text-warm-gray-700"
-                  >
-                    Close
-                  </button>
-                </div>
-
-                <div
-                  onClick={handleLightGardenClick}
-                  className="relative overflow-hidden rounded-[28px] border border-blush-100 min-h-[360px] cursor-pointer bg-gradient-to-b from-[#231f3f] via-[#30295a] to-[#43346d]"
-                >
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_45%)] pointer-events-none" />
-
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 text-xs tracking-wide text-white/80 uppercase z-10">
-                    Tap to place light
-                  </div>
-
-                  {lights.map((light) => (
-                    <span
-                      key={light.id}
-                      className="absolute rounded-full pointer-events-none animate-pulse"
-                      style={{
-                        left: light.x,
-                        top: light.y,
-                        width: `${light.size}px`,
-                        height: `${light.size}px`,
-                        transform: "translate(-50%, -50%)",
-                        background:
-                          "radial-gradient(circle, rgba(255,243,176,1) 0%, rgba(255,213,128,0.9) 40%, rgba(255,213,128,0.18) 72%, rgba(255,213,128,0) 100%)",
-                        boxShadow:
-                          "0 0 16px rgba(255,223,140,0.8), 0 0 34px rgba(255,223,140,0.35)",
-                        animationDuration: "2.8s",
-                      }}
-                    />
-                  ))}
-
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] text-white/75 z-10">
-                    A quiet little moment to build your own glow
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeGame === "bubble-drift" && (
-              <div className="rounded-2xl border border-blush-100 bg-white p-5">
-                <div className="flex items-center justify-between gap-4 mb-4">
-                  <div>
-                    <h4 className="text-base sm:text-lg font-semibold text-warm-gray-700">
-                      Bubble Drift
-                    </h4>
-                    <p className="mt-1 text-sm leading-6 text-warm-gray-600">
-                      Tap floating bubbles and watch them shimmer away.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setActiveGame(null)}
-                    className="text-sm text-warm-gray-500 hover:text-warm-gray-700"
-                  >
-                    Close
-                  </button>
-                </div>
-
-                <div className="relative overflow-hidden rounded-[28px] border border-blush-100 min-h-[360px] bg-gradient-to-b from-[#f8eeef] via-[#f8f2ee] to-[#f5e8de]">
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 text-xs tracking-wide text-[#b38a8f] uppercase z-10">
-                    Tap a bubble
-                  </div>
-
-                  {bubbles.map((bubble) => {
-                    const isPopped = poppedBubbles.includes(bubble.id);
-
-                    return (
-                      <button
-                        key={bubble.id}
-                        type="button"
-                        onClick={() => handleBubblePop(bubble.id)}
-                        className={`absolute rounded-full border border-white/80 transition-all duration-700 ${
-                          isPopped ? "scale-125 opacity-0" : "opacity-100"
-                        }`}
-                        style={{
-                          left: bubble.left,
-                          bottom: "-10px",
-                          width: `${bubble.size}px`,
-                          height: `${bubble.size}px`,
-                          background: bubble.color,
-                          boxShadow:
-                            "inset 0 0 12px rgba(255,255,255,0.45), 0 0 12px rgba(255,220,210,0.28)",
-                          animation: `bubbleRise ${bubble.duration}s linear infinite`,
-                          animationDelay: `${bubble.delay}s`,
-                        }}
-                      />
-                    );
-                  })}
-
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] text-[#b38a8f] z-10">
-                    A soft little shimmer pop
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeGame === "glow-trail" && (
-              <div className="rounded-2xl border border-blush-100 bg-white p-5">
-                <div className="flex items-center justify-between gap-4 mb-4">
-                  <div>
-                    <h4 className="text-base sm:text-lg font-semibold text-warm-gray-700">
-                      Glow Trail
-                    </h4>
-                    <p className="mt-1 text-sm leading-6 text-warm-gray-600">
-                      Drag across the canvas and leave a soft fading trail of light.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setActiveGame(null)}
-                    className="text-sm text-warm-gray-500 hover:text-warm-gray-700"
-                  >
-                    Close
-                  </button>
-                </div>
-
-                <div className="relative overflow-hidden rounded-[28px] border border-blush-100 min-h-[360px] bg-gradient-to-b from-[#4c365f] via-[#573f6e] to-[#6a4a7e]">
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 text-xs tracking-wide text-white/80 uppercase z-10">
-                    Drag to draw light
-                  </div>
-
-                  <canvas
-                    ref={glowCanvasRef}
-                    className="absolute inset-0 w-full h-full"
-                  />
-
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] text-white/75 z-10">
-                    A gentle trace that slowly fades away
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeGame === "sand-sweep" && (
-              <div className="rounded-2xl border border-blush-100 bg-white p-5">
-                <div className="flex items-center justify-between gap-4 mb-4">
-                  <div>
-                    <h4 className="text-base sm:text-lg font-semibold text-warm-gray-700">
-                      Sand Sweep
-                    </h4>
-                    <p className="mt-1 text-sm leading-6 text-warm-gray-600">
-                      Move across the surface and watch soft shimmer grains part and settle.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setActiveGame(null)}
-                    className="text-sm text-warm-gray-500 hover:text-warm-gray-700"
-                  >
-                    Close
-                  </button>
-                </div>
-
-                <div className="relative overflow-hidden rounded-[28px] border border-blush-100 min-h-[360px] bg-gradient-to-b from-[#f0e0d8] via-[#edd9d0] to-[#e8d2c7]">
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 text-xs tracking-wide text-[#a67c73] uppercase z-10">
-                    Move to sweep
-                  </div>
-
-                  <canvas
-                    ref={sandCanvasRef}
-                    className="absolute inset-0 w-full h-full"
-                  />
-
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] text-[#a67c73] z-10">
-                    A tactile little moment to clear the surface
-                  </div>
-                </div>
-              </div>
-            )}
           </section>
         )}
       </div>
