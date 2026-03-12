@@ -54,6 +54,26 @@ import HarmonyConfirmPage from "@/pages/HarmonyConfirmPage";
 import { Analytics } from "@vercel/analytics/react";
 
 function CalmStudioInlinePage() {
+  const [activeSection, setActiveSection] = React.useState<string | null>(null);
+  const [lights, setLights] = React.useState<
+    { id: number; x: number; y: number; size: number }[]
+  >([]);
+
+  const handleLightGardenClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const newLight = {
+      id: Date.now() + Math.random(),
+      x,
+      y,
+      size: 28 + Math.random() * 24,
+    };
+
+    setLights((prev) => [...prev, newLight]);
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 pb-10">
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-blush-100 mb-6">
@@ -81,81 +101,153 @@ function CalmStudioInlinePage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        <div className="rounded-2xl border border-blush-100 bg-white p-5 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setActiveSection("breath")}
+          className={`rounded-2xl border p-5 shadow-sm text-left transition-all ${
+            activeSection === "breath"
+              ? "border-blush-200 bg-white shadow-md"
+              : "border-blush-100 bg-white"
+          }`}
+        >
           <h2 className="text-base sm:text-lg font-semibold text-warm-gray-700">
             Take a Breath
           </h2>
           <p className="mt-2 text-sm leading-6 text-warm-gray-600">
             A small pause for your body and mind.
           </p>
-        </div>
+        </button>
 
-        <div className="rounded-2xl border border-blush-100 bg-white p-5 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setActiveSection("visuals")}
+          className={`rounded-2xl border p-5 shadow-sm text-left transition-all ${
+            activeSection === "visuals"
+              ? "border-blush-200 bg-white shadow-md"
+              : "border-blush-100 bg-white"
+          }`}
+        >
           <h2 className="text-base sm:text-lg font-semibold text-warm-gray-700">
             Soft Visuals
           </h2>
           <p className="mt-2 text-sm leading-6 text-warm-gray-600">
             Gentle moments for when your mind needs less noise.
           </p>
-        </div>
+        </button>
 
-        <div className="rounded-2xl border border-blush-100 bg-white p-5 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setActiveSection("sounds")}
+          className={`rounded-2xl border p-5 shadow-sm text-left transition-all ${
+            activeSection === "sounds"
+              ? "border-blush-200 bg-white shadow-md"
+              : "border-blush-100 bg-white"
+          }`}
+        >
           <h2 className="text-base sm:text-lg font-semibold text-warm-gray-700">
             Soothing Sounds
           </h2>
           <p className="mt-2 text-sm leading-6 text-warm-gray-600">
             Let the room soften around you.
           </p>
-        </div>
+        </button>
 
-        <div className="rounded-2xl border border-blush-100 bg-white p-5 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setActiveSection("gentle-play")}
+          className={`rounded-2xl border p-5 shadow-sm text-left transition-all ${
+            activeSection === "gentle-play"
+              ? "border-blush-200 bg-white shadow-md"
+              : "border-blush-100 bg-white"
+          }`}
+        >
           <h2 className="text-base sm:text-lg font-semibold text-warm-gray-700">
             Gentle Play
           </h2>
           <p className="mt-2 text-sm leading-6 text-warm-gray-600">
             Quiet interaction for restless moments.
           </p>
-        </div>
+        </button>
       </div>
 
-      <section className="bg-white rounded-2xl p-6 shadow-sm border border-blush-100 mb-10">
-        <h3 className="text-lg font-semibold text-warm-gray-700 mb-2">
-          Gentle Play
-        </h3>
-        <p className="text-warm-gray-600 text-sm leading-6 max-w-2xl mb-5">
-          These are calming interactions, not traditional games.
-        </p>
+      {activeSection === "breath" && (
+        <section className="bg-white rounded-2xl p-6 shadow-sm border border-blush-100 mb-8">
+          <h3 className="text-lg font-semibold text-warm-gray-700 mb-2">
+            Take a Breath
+          </h3>
+          <p className="text-warm-gray-600 text-sm leading-6">
+            A breathing orb will live here next.
+          </p>
+        </section>
+      )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="rounded-2xl border border-blush-100 bg-blush-50/40 p-5">
-            <h4 className="text-sm font-semibold text-warm-gray-700">
-              Release Ripples
-            </h4>
-            <p className="mt-2 text-sm leading-6 text-warm-gray-600">
-              Tap the water and let a soft ripple carry a gentle reminder.
-            </p>
-          </div>
+      {activeSection === "visuals" && (
+        <section className="bg-white rounded-2xl p-6 shadow-sm border border-blush-100 mb-8">
+          <h3 className="text-lg font-semibold text-warm-gray-700 mb-2">
+            Soft Visuals
+          </h3>
+          <p className="text-warm-gray-600 text-sm leading-6">
+            Gentle calming visuals will live here next.
+          </p>
+        </section>
+      )}
 
-          <div className="rounded-2xl border border-blush-100 bg-blush-50/40 p-5">
-            <h4 className="text-sm font-semibold text-warm-gray-700">
-              Firefly Garden
-            </h4>
-            <p className="mt-2 text-sm leading-6 text-warm-gray-600">
-              Touch drifting lights and watch them glow brighter before floating
-              away.
-            </p>
-          </div>
+      {activeSection === "sounds" && (
+        <section className="bg-white rounded-2xl p-6 shadow-sm border border-blush-100 mb-8">
+          <h3 className="text-lg font-semibold text-warm-gray-700 mb-2">
+            Soothing Sounds
+          </h3>
+          <p className="text-warm-gray-600 text-sm leading-6">
+            Ambient sound experiences will live here next.
+          </p>
+        </section>
+      )}
 
-          <div className="rounded-2xl border border-blush-100 bg-blush-50/40 p-5">
-            <h4 className="text-sm font-semibold text-warm-gray-700">
-              Light Garden
-            </h4>
-            <p className="mt-2 text-sm leading-6 text-warm-gray-600">
-              Place soft points of light and slowly fill the space with calm.
-            </p>
+      {activeSection === "gentle-play" && (
+        <section className="bg-white rounded-2xl p-6 shadow-sm border border-blush-100 mb-10">
+          <h3 className="text-lg font-semibold text-warm-gray-700 mb-2">
+            Light Garden
+          </h3>
+          <p className="text-warm-gray-600 text-sm leading-6 mb-5 max-w-2xl">
+            Tap anywhere to place soft glowing lights and slowly fill the space
+            with calm.
+          </p>
+
+          <div
+            onClick={handleLightGardenClick}
+            className="relative overflow-hidden rounded-[28px] border border-blush-100 min-h-[360px] cursor-pointer bg-gradient-to-b from-[#231f3f] via-[#30295a] to-[#43346d]"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_45%)] pointer-events-none" />
+
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 text-xs tracking-wide text-white/80 uppercase z-10">
+              Tap to place light
+            </div>
+
+            {lights.map((light) => (
+              <span
+                key={light.id}
+                className="absolute rounded-full pointer-events-none animate-pulse"
+                style={{
+                  left: light.x,
+                  top: light.y,
+                  width: `${light.size}px`,
+                  height: `${light.size}px`,
+                  transform: "translate(-50%, -50%)",
+                  background:
+                    "radial-gradient(circle, rgba(255,243,176,1) 0%, rgba(255,213,128,0.9) 40%, rgba(255,213,128,0.18) 72%, rgba(255,213,128,0) 100%)",
+                  boxShadow:
+                    "0 0 16px rgba(255,223,140,0.8), 0 0 34px rgba(255,223,140,0.35)",
+                  animationDuration: "2.8s",
+                }}
+              />
+            ))}
+
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] text-white/75 z-10">
+              A quiet little moment to build your own glow
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }
