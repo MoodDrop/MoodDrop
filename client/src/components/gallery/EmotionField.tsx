@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { SharedCanvas, getPreviewText } from "@/lib/livingGallery";
 
 type EmotionFieldProps = {
@@ -190,7 +191,6 @@ export default function EmotionField({
       ...canvases.slice(startIndex),
       ...canvases.slice(0, startIndex),
     ];
-
     return rotated.slice(0, limit);
   }, [canvases, startIndex, isMobile]);
 
@@ -207,63 +207,69 @@ export default function EmotionField({
         isMobile ? "h-[300px]" : "h-[500px]"
       }`}
     >
-      {visibleCanvases.map((canvas) => {
-        const pos = positions[canvas.id];
-        const mood = getMoodClasses(canvas.mood);
-        const preview = getPreviewText(canvas.text, isMobile ? 34 : 40);
+      <AnimatePresence mode="popLayout">
+        {visibleCanvases.map((canvas) => {
+          const pos = positions[canvas.id];
+          const mood = getMoodClasses(canvas.mood);
+          const preview = getPreviewText(canvas.text, isMobile ? 34 : 40);
 
-        const isHighlighted =
-          !activeMood || canvas.mood === activeMood || activeMood === "All";
+          const isHighlighted =
+            !activeMood || canvas.mood === activeMood || activeMood === "All";
 
-        return (
-          <div
-            key={`${canvas.id}-${startIndex}`}
-            className="absolute z-10 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-500"
-            style={{
-              left: `${pos.left}%`,
-              top: `${pos.top}%`,
-              animation: `mooddropFloat ${pos.duration}s ease-in-out ${pos.delay}s infinite`,
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => onOpen(canvas)}
-              className={`group relative cursor-pointer rounded-[24px] border border-white/70 bg-white/72 p-3 text-left shadow-[0_10px_20px_rgba(90,70,70,0.07)] backdrop-blur transition duration-300 hover:shadow-[0_14px_28px_rgba(90,70,70,0.11)] ${getSizeClasses(
-                pos.size,
-                isMobile
-              )} ${isHighlighted ? "opacity-100" : "opacity-45"}`}
+          return (
+            <motion.div
+              key={canvas.id}
+              className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
+              style={{
+                left: `${pos.left}%`,
+                top: `${pos.top}%`,
+                animation: `mooddropFloat ${pos.duration}s ease-in-out ${pos.delay}s infinite`,
+              }}
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 10 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
             >
-              <div
-                className={`pointer-events-none absolute inset-0 rounded-[24px] blur-2xl opacity-35 ${mood.glow}`}
-              />
+              <button
+                type="button"
+                onClick={() => onOpen(canvas)}
+                className={`group relative cursor-pointer rounded-[24px] border border-white/70 bg-white/72 p-3 text-left shadow-[0_10px_20px_rgba(90,70,70,0.07)] backdrop-blur transition duration-300 hover:shadow-[0_14px_28px_rgba(90,70,70,0.11)] ${getSizeClasses(
+                  pos.size,
+                  isMobile
+                )} ${isHighlighted ? "opacity-100" : "opacity-45"}`}
+              >
+                <div
+                  className={`pointer-events-none absolute inset-0 rounded-[24px] blur-2xl opacity-35 ${mood.glow}`}
+                />
 
-              <div className="relative z-10">
-                <div className="mb-2">
-                  <span
-                    className={`inline-flex rounded-full px-2.5 py-1 text-[9px] uppercase tracking-[0.14em] ${mood.pill}`}
-                  >
-                    {canvas.mood || "Shared"}
-                  </span>
-                </div>
-
-                <p className="line-clamp-1 whitespace-pre-wrap text-[11px] leading-5 text-slate-700">
-                  {preview}
-                </p>
-
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <div className="text-[9px] text-slate-400">
-                    Witnessed by {canvas.witness_count ?? 0}
+                <div className="relative z-10">
+                  <div className="mb-2">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-[9px] uppercase tracking-[0.14em] ${mood.pill}`}
+                    >
+                      {canvas.mood || "Shared"}
+                    </span>
                   </div>
 
-                  <div className="text-[9px] uppercase tracking-[0.14em] text-slate-400 group-hover:text-slate-500">
-                    Open
+                  <p className="line-clamp-1 whitespace-pre-wrap text-[11px] leading-5 text-slate-700">
+                    {preview}
+                  </p>
+
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    <div className="text-[9px] text-slate-400">
+                      Witnessed by {canvas.witness_count ?? 0}
+                    </div>
+
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-slate-400 group-hover:text-slate-500">
+                      Open
+                    </div>
                   </div>
                 </div>
-              </div>
-            </button>
-          </div>
-        );
-      })}
+              </button>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
 
       <style>{`
         @keyframes mooddropFloat {
