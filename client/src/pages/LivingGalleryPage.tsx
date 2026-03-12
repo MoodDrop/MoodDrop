@@ -217,7 +217,18 @@ export default function LivingGalleryPage() {
               No shared moments are floating through yet.
             </div>
           ) : (
-            <EmotionField canvases={canvases} onOpen={handleOpenCanvas} />
+            <>
+              <EmotionField canvases={canvases} onOpen={handleOpenCanvas} />
+
+              <div className="mt-6 text-center">
+                <p className="text-sm italic text-slate-500">
+                  A glimpse of today&apos;s shared moments.
+                </p>
+                <p className="mt-1 text-sm italic text-slate-400">
+                  More are drifting beneath the surface.
+                </p>
+              </div>
+            </>
           )}
         </section>
       </div>

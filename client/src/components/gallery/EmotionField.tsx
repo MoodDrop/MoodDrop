@@ -95,7 +95,7 @@ function getMoodClasses(mood?: string | null) {
   }
 }
 
-function getVisibleCanvases(canvases: SharedCanvas[], limit = 12) {
+function getVisibleCanvases(canvases: SharedCanvas[], limit = 6) {
   return canvases.slice(0, limit);
 }
 
@@ -104,18 +104,14 @@ function buildPositions(canvases: SharedCanvas[]): Record<string, OrbPos> {
   const positions: Record<string, OrbPos> = {};
 
   const layout = [
-    { left: 16, top: 14 },
-    { left: 50, top: 12 },
-    { left: 84, top: 16 },
-    { left: 22, top: 32 },
-    { left: 52, top: 34 },
-    { left: 80, top: 31 },
-    { left: 14, top: 53 },
-    { left: 44, top: 54 },
-    { left: 76, top: 52 },
-    { left: 24, top: 73 },
-    { left: 56, top: 74 },
-    { left: 86, top: 71 },
+    { left: 20, top: 18 },
+    { left: 50, top: 16 },
+    { left: 80, top: 20 },
+    { left: 18, top: 46 },
+    { left: 52, top: 48 },
+    { left: 82, top: 44 },
+    { left: 30, top: 72 },
+    { left: 70, top: 74 },
   ];
 
   const sizePool: OrbPos["size"][] = [
@@ -124,10 +120,6 @@ function buildPositions(canvases: SharedCanvas[]): Record<string, OrbPos> {
     "md",
     "sm",
     "lg",
-    "sm",
-    "md",
-    "sm",
-    "md",
     "sm",
     "md",
     "sm",
@@ -165,13 +157,13 @@ export default function EmotionField({
   onOpen,
   activeMood,
 }: EmotionFieldProps) {
-  const visibleCanvases = useMemo(() => getVisibleCanvases(canvases, 12), [canvases]);
+  const visibleCanvases = useMemo(() => getVisibleCanvases(canvases, 6), [canvases]);
   const positions = useMemo(() => buildPositions(visibleCanvases), [visibleCanvases]);
 
   if (visibleCanvases.length === 0) return null;
 
   return (
-    <div className="relative h-[720px] w-full overflow-hidden rounded-[32px]">
+    <div className="relative h-[760px] w-full overflow-hidden rounded-[32px]">
       {visibleCanvases.map((canvas) => {
         const pos = positions[canvas.id];
         const mood = getMoodClasses(canvas.mood);
@@ -220,7 +212,7 @@ export default function EmotionField({
                   </div>
 
                   <div className="text-[9px] uppercase tracking-[0.14em] text-slate-400 group-hover:text-slate-500">
-                    Explore
+                    Open
                   </div>
                 </div>
               </div>

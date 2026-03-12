@@ -12,7 +12,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import ThankYou from "@/pages/thank-you";
-import CalmStudio from "@/pages/CalmStudio";
+import CalmStudioPage from "@/pages/CalmStudioPage";
 import MyDropsPage from "@/pages/MyDropsPage";
 import DropItPage from "@/pages/DropItPage";
 import About from "@/pages/about";
@@ -24,7 +24,7 @@ import QAPage from "@/pages/QAPage";
 import ContactPage from "@/pages/ContactPage";
 import LivingGalleryPage from "@/pages/LivingGalleryPage";
 
-// 🔓 Owner unlock page
+// Owner unlock
 import OwnerUnlockPage from "@/pages/OwnerUnlockPage";
 
 // Soft Reads
@@ -46,96 +46,59 @@ import EchoVaultPage from "@/pages/EchoVaultPage";
 import ReleaseTextPage from "@/pages/ReleaseTextPage";
 import ReleaseVoicePage from "@/pages/ReleaseVoicePage";
 
-// Calm Studio sub-route
-import TakeABreath from "@/pages/take-a-breath";
-
-// 🎵 Harmony
+// Harmony
 import HarmonyLandingPage from "@/pages/HarmonyLandingPage";
 import HarmonyRequestPage from "@/pages/HarmonyRequestPage";
 import HarmonyConfirmPage from "@/pages/HarmonyConfirmPage";
 
-// Vercel Analytics
+// Analytics
 import { Analytics } from "@vercel/analytics/react";
-
-console.log("[MoodDrop] App.tsx mounted");
 
 function Router() {
   const flags = readFlags();
-  console.log("[MoodDrop] Router initialized — feature flags:", flags);
 
   return (
     <Switch>
-      {/* Home */}
       <Route path="/" component={Home} />
 
-      {/* 🔓 Owner unlock */}
       <Route path="/owner-unlock" component={OwnerUnlockPage} />
 
-      {/* Release Ritual */}
       <Route path="/release/text" component={ReleaseTextPage} />
       <Route path="/release/voice" component={ReleaseVoicePage} />
 
-      {/* Echo Vault */}
       <Route path="/vault" component={EchoVaultPage} />
 
-      {/* Living Gallery */}
       <Route path="/living-gallery" component={LivingGalleryPage} />
 
-      {/* 🎵 Harmony */}
       <Route path="/harmony" component={HarmonyLandingPage} />
       <Route path="/harmony/request" component={HarmonyRequestPage} />
       <Route path="/harmony/confirm" component={HarmonyConfirmPage} />
 
-      {/* 🚫 Collective Drop disabled */}
-      <Route path="/community">
-        {() => {
-          window.location.replace("/vault");
-          return null;
-        }}
-      </Route>
-
-      {/* Playground */}
       <Route path="/playground" component={CanvasPlayground} />
 
-      {/* Dashboard */}
       <Route path="/dashboard" component={Dashboard} />
 
       {/* Calm Studio */}
-      <Route path="/comfort" component={CalmStudio} />
-      <Route path="/calm-studio" component={CalmStudio} />
-      <Route path="/calm-studio/breathe" component={TakeABreath} />
+      <Route path="/comfort" component={CalmStudioPage} />
+      <Route path="/calm-studio" component={CalmStudioPage} />
 
-      {/* 🌿 Mood Garden (retired) → redirect to Harmony */}
-      <Route path="/garden">
-        {() => {
-          window.location.replace("/harmony");
-          return null;
-        }}
-      </Route>
-
-      {/* Legacy Drops */}
       <Route path="/my-drops" component={MyDropsPage} />
       <Route path="/drop-it" component={DropItPage} />
 
-      {/* Soft Reads */}
       <Route path="/soft-reads" component={SoftReadsPage} />
       <Route path="/soft-reads/:slug" component={SoftReadPostPage} />
 
-      {/* Static Pages */}
       <Route path="/about" component={About} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/qa" component={QAPage} />
       <Route path="/contact" component={ContactPage} />
 
-      {/* Admin */}
       <Route path="/admin" component={AdminPage} />
       <Route path="/admin-legacy" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
 
-      {/* Thank You */}
       <Route path="/thank-you" component={ThankYou} />
 
-      {/* 404 */}
       <Route component={NotFound} />
     </Switch>
   );
@@ -143,7 +106,6 @@ function Router() {
 
 function AppContent() {
   const [location] = useLocation();
-  console.log("[MoodDrop] Current route:", location);
 
   const isFullWidthPage =
     location === "/dashboard" ||
@@ -162,9 +124,10 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blush-50 via-cream-50 to-blush-100">
       <GhostMenu />
+
       {!isHome && <Header />}
 
-      <main className={isFullWidthPage ? "" : "max-w-lg mx-auto px-6 py-8"}>
+      <main className={isFullWidthPage ? "px-6 py-8" : "max-w-lg mx-auto px-6 py-8"}>
         <Router />
       </main>
 
@@ -175,7 +138,6 @@ function AppContent() {
 }
 
 function App() {
-  console.log("[MoodDrop] App() rendering...");
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
