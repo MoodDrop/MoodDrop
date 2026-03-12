@@ -12,7 +12,6 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import ThankYou from "@/pages/thank-you";
-import CalmStudioPage from "@/pages/CalmStudioPage";
 import MyDropsPage from "@/pages/MyDropsPage";
 import DropItPage from "@/pages/DropItPage";
 import About from "@/pages/about";
@@ -54,6 +53,113 @@ import HarmonyConfirmPage from "@/pages/HarmonyConfirmPage";
 // Analytics
 import { Analytics } from "@vercel/analytics/react";
 
+function CalmStudioInlinePage() {
+  return (
+    <div className="max-w-5xl mx-auto px-4 pb-10">
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-blush-100 mb-6">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-warm-gray-700">
+          Calm Studio
+        </h1>
+        <p className="text-warm-gray-600 text-sm sm:text-base mt-2 leading-6">
+          This space is currently being prepared.
+        </p>
+      </div>
+
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-blush-100 mb-8">
+        <div className="rounded-xl border border-blush-100 bg-blush-50/60 p-4">
+          <p className="text-warm-gray-700 font-semibold">
+            Calm Studio is on the way 🌿
+          </p>
+          <p className="text-warm-gray-600 text-sm leading-6 mt-2">
+            We&apos;re building a quiet space for breathing, soothing sounds,
+            gentle visuals, and calming interactions.
+          </p>
+          <p className="text-warm-gray-500 text-xs italic mt-3">
+            Quietly being crafted.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <div className="rounded-2xl border border-blush-100 bg-white p-5 shadow-sm">
+          <h2 className="text-base sm:text-lg font-semibold text-warm-gray-700">
+            Take a Breath
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-warm-gray-600">
+            A small pause for your body and mind.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-blush-100 bg-white p-5 shadow-sm">
+          <h2 className="text-base sm:text-lg font-semibold text-warm-gray-700">
+            Soft Visuals
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-warm-gray-600">
+            Gentle moments for when your mind needs less noise.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-blush-100 bg-white p-5 shadow-sm">
+          <h2 className="text-base sm:text-lg font-semibold text-warm-gray-700">
+            Soothing Sounds
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-warm-gray-600">
+            Let the room soften around you.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-blush-100 bg-white p-5 shadow-sm">
+          <h2 className="text-base sm:text-lg font-semibold text-warm-gray-700">
+            Gentle Play
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-warm-gray-600">
+            Quiet interaction for restless moments.
+          </p>
+        </div>
+      </div>
+
+      <section className="bg-white rounded-2xl p-6 shadow-sm border border-blush-100 mb-10">
+        <h3 className="text-lg font-semibold text-warm-gray-700 mb-2">
+          Gentle Play
+        </h3>
+        <p className="text-warm-gray-600 text-sm leading-6 max-w-2xl mb-5">
+          These are calming interactions, not traditional games.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="rounded-2xl border border-blush-100 bg-blush-50/40 p-5">
+            <h4 className="text-sm font-semibold text-warm-gray-700">
+              Release Ripples
+            </h4>
+            <p className="mt-2 text-sm leading-6 text-warm-gray-600">
+              Tap the water and let a soft ripple carry a gentle reminder.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-blush-100 bg-blush-50/40 p-5">
+            <h4 className="text-sm font-semibold text-warm-gray-700">
+              Firefly Garden
+            </h4>
+            <p className="mt-2 text-sm leading-6 text-warm-gray-600">
+              Touch drifting lights and watch them glow brighter before floating
+              away.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-blush-100 bg-blush-50/40 p-5">
+            <h4 className="text-sm font-semibold text-warm-gray-700">
+              Light Garden
+            </h4>
+            <p className="mt-2 text-sm leading-6 text-warm-gray-600">
+              Place soft points of light and slowly fill the space with calm.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function Router() {
   const flags = readFlags();
 
@@ -79,8 +185,8 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
 
       {/* Calm Studio */}
-      <Route path="/comfort" component={CalmStudioPage} />
-      <Route path="/calm-studio" component={CalmStudioPage} />
+      <Route path="/comfort" component={CalmStudioInlinePage} />
+      <Route path="/calm-studio" component={CalmStudioInlinePage} />
 
       <Route path="/my-drops" component={MyDropsPage} />
       <Route path="/drop-it" component={DropItPage} />
@@ -127,7 +233,9 @@ function AppContent() {
 
       {!isHome && <Header />}
 
-      <main className={isFullWidthPage ? "px-6 py-8" : "max-w-lg mx-auto px-6 py-8"}>
+      <main
+        className={isFullWidthPage ? "px-6 py-8" : "max-w-lg mx-auto px-6 py-8"}
+      >
         <Router />
       </main>
 

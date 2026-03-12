@@ -3,8 +3,26 @@
 export default function CalmStudioPage() {
   return (
     <div style={{ padding: "40px", background: "white", color: "black" }}>
+      
+      {/* Coming Soon Notice */}
+      <div
+        style={{
+          background: "#f8f1ec",
+          border: "1px solid #eadbd2",
+          borderRadius: "12px",
+          padding: "16px",
+          marginBottom: "24px"
+        }}
+      >
+        <strong>Calm Studio is on the way 🌿</strong>
+        <p style={{ marginTop: "6px", fontSize: "14px" }}>
+          We're building a quiet space for breathing, soothing sounds, gentle visuals,
+          and calming interactions. A soft reset for your mind and body.
+        </p>
+      </div>
+
       <h1>Calm Studio</h1>
-      <p>This is the new Calm Studio page.</p>
+      <p>This space is currently being prepared.</p>
 
       <div style={{ marginTop: "30px" }}>
         <h2>Take a Breath</h2>
