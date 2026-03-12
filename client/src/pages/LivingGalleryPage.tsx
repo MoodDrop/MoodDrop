@@ -194,8 +194,8 @@ export default function LivingGalleryPage() {
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-white/60 bg-white/35 px-4 py-8 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur">
-          <div className="mb-6 text-center">
+        <section className="rounded-[32px] border border-white/60 bg-white/35 px-4 py-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur sm:px-5 sm:py-7">
+          <div className="mb-5 text-center">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
               Emotional Field
             </p>
@@ -205,22 +205,22 @@ export default function LivingGalleryPage() {
           </div>
 
           {loading ? (
-            <div className="py-16 text-center text-slate-500">
+            <div className="py-12 text-center text-slate-500">
               Gathering today’s shared moments...
             </div>
           ) : error ? (
-            <div className="rounded-3xl border border-red-200 bg-red-50 p-10 text-center text-red-700">
+            <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-700">
               {error}
             </div>
           ) : canvases.length === 0 ? (
-            <div className="rounded-3xl border border-slate-200 bg-white/80 p-10 text-center text-slate-500">
+            <div className="rounded-3xl border border-slate-200 bg-white/80 p-8 text-center text-slate-500">
               No shared moments are floating through yet.
             </div>
           ) : (
             <>
               <EmotionField canvases={canvases} onOpen={handleOpenCanvas} />
 
-              <div className="mt-6 text-center">
+              <div className="mt-4 pb-1 text-center">
                 <p className="text-sm italic text-slate-500">
                   A glimpse of today&apos;s shared moments.
                 </p>

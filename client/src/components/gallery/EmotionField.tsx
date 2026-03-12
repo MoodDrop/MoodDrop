@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { SharedCanvas, getPreviewText } from "@/lib/livingGallery";
 
 type EmotionFieldProps = {
@@ -10,7 +10,7 @@ type EmotionFieldProps = {
 type OrbPos = {
   left: number;
   top: number;
-  size: "sm" | "md" | "lg";
+  size: "sm" | "md";
   duration: number;
   delay: number;
 };
@@ -34,105 +34,107 @@ function getMoodClasses(mood?: string | null) {
   switch (mood) {
     case "CrashOut":
       return {
-        glow: "bg-rose-200/45",
+        glow: "bg-rose-200/35",
         pill: "bg-rose-50/90 text-rose-700 border border-rose-100",
       };
     case "Overwhelmed":
       return {
-        glow: "bg-violet-200/45",
+        glow: "bg-violet-200/35",
         pill: "bg-violet-50/90 text-violet-700 border border-violet-100",
       };
     case "Healing":
       return {
-        glow: "bg-emerald-200/45",
+        glow: "bg-emerald-200/35",
         pill: "bg-emerald-50/90 text-emerald-700 border border-emerald-100",
       };
     case "Hopeful":
       return {
-        glow: "bg-amber-200/45",
+        glow: "bg-amber-200/35",
         pill: "bg-amber-50/90 text-amber-700 border border-amber-100",
       };
     case "Reflective":
       return {
-        glow: "bg-sky-200/45",
+        glow: "bg-sky-200/35",
         pill: "bg-sky-50/90 text-sky-700 border border-sky-100",
       };
     case "Lonely":
       return {
-        glow: "bg-slate-200/45",
+        glow: "bg-slate-200/35",
         pill: "bg-slate-50/90 text-slate-600 border border-slate-100",
       };
     case "Grateful":
       return {
-        glow: "bg-pink-200/45",
+        glow: "bg-pink-200/35",
         pill: "bg-pink-50/90 text-pink-700 border border-pink-100",
       };
     case "Calm":
       return {
-        glow: "bg-teal-200/45",
+        glow: "bg-teal-200/35",
         pill: "bg-teal-50/90 text-teal-700 border border-teal-100",
       };
     case "Tense":
       return {
-        glow: "bg-orange-200/45",
+        glow: "bg-orange-200/35",
         pill: "bg-orange-50/90 text-orange-700 border border-orange-100",
       };
     case "Grounded":
       return {
-        glow: "bg-lime-200/45",
+        glow: "bg-lime-200/35",
         pill: "bg-lime-50/90 text-lime-700 border border-lime-100",
       };
     case "Joy":
       return {
-        glow: "bg-yellow-200/45",
+        glow: "bg-yellow-200/35",
         pill: "bg-yellow-50/90 text-yellow-700 border border-yellow-100",
       };
     default:
       return {
-        glow: "bg-white/45",
+        glow: "bg-white/35",
         pill: "bg-white/90 text-slate-600 border border-slate-100",
       };
   }
 }
 
-function getVisibleCanvases(canvases: SharedCanvas[], limit = 6) {
-  return canvases.slice(0, limit);
+function getVisibleCanvases(
+  canvases: SharedCanvas[],
+  isMobile: boolean
+) {
+  return canvases.slice(0, isMobile ? 4 : 6);
 }
 
-function buildPositions(canvases: SharedCanvas[]): Record<string, OrbPos> {
+function buildPositions(
+  canvases: SharedCanvas[],
+  isMobile: boolean
+): Record<string, OrbPos> {
   const rand = seedRng(canvases.map((c) => c.id).join("|") || "empty");
   const positions: Record<string, OrbPos> = {};
 
-  const layout = [
-    { left: 20, top: 18 },
-    { left: 50, top: 16 },
-    { left: 80, top: 20 },
-    { left: 18, top: 46 },
-    { left: 52, top: 48 },
-    { left: 82, top: 44 },
-    { left: 30, top: 72 },
-    { left: 70, top: 74 },
+  const mobileLayout = [
+    { left: 30, top: 24 },
+    { left: 70, top: 28 },
+    { left: 32, top: 56 },
+    { left: 68, top: 60 },
   ];
 
-  const sizePool: OrbPos["size"][] = [
-    "md",
-    "sm",
-    "md",
-    "sm",
-    "lg",
-    "sm",
-    "md",
-    "sm",
+  const desktopLayout = [
+    { left: 20, top: 24 },
+    { left: 50, top: 20 },
+    { left: 80, top: 24 },
+    { left: 22, top: 56 },
+    { left: 52, top: 60 },
+    { left: 80, top: 56 },
   ];
+
+  const layout = isMobile ? mobileLayout : desktopLayout;
 
   canvases.forEach((canvas, index) => {
     const slot = layout[index % layout.length];
 
     positions[canvas.id] = {
-      left: slot.left + (rand() * 4 - 2),
-      top: slot.top + (rand() * 4 - 2),
-      size: sizePool[index % sizePool.length],
-      duration: 7 + rand() * 4,
+      left: slot.left + (rand() * 3 - 1.5),
+      top: slot.top + (rand() * 3 - 1.5),
+      size: index % 2 === 0 ? "md" : "sm",
+      duration: 7 + rand() * 3,
       delay: rand() * 2,
     };
   });
@@ -140,15 +142,23 @@ function buildPositions(canvases: SharedCanvas[]): Record<string, OrbPos> {
   return positions;
 }
 
-function getSizeClasses(size: OrbPos["size"]) {
+function getSizeClasses(size: OrbPos["size"], isMobile: boolean) {
+  if (isMobile) {
+    switch (size) {
+      case "md":
+        return "w-[126px] min-h-[84px]";
+      case "sm":
+      default:
+        return "w-[118px] min-h-[78px]";
+    }
+  }
+
   switch (size) {
-    case "lg":
-      return "w-[152px] min-h-[88px]";
     case "md":
-      return "w-[142px] min-h-[82px]";
+      return "w-[142px] min-h-[90px]";
     case "sm":
     default:
-      return "w-[132px] min-h-[76px]";
+      return "w-[132px] min-h-[84px]";
   }
 }
 
@@ -157,17 +167,44 @@ export default function EmotionField({
   onOpen,
   activeMood,
 }: EmotionFieldProps) {
-  const visibleCanvases = useMemo(() => getVisibleCanvases(canvases, 6), [canvases]);
-  const positions = useMemo(() => buildPositions(visibleCanvases), [visibleCanvases]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+
+  const visibleCanvases = useMemo(
+    () => getVisibleCanvases(canvases, isMobile),
+    [canvases, isMobile]
+  );
+
+  const positions = useMemo(
+    () => buildPositions(visibleCanvases, isMobile),
+    [visibleCanvases, isMobile]
+  );
 
   if (visibleCanvases.length === 0) return null;
 
   return (
-    <div className="relative h-[760px] w-full overflow-hidden rounded-[32px]">
+    <div
+      className={`relative w-full overflow-hidden rounded-[32px] ${
+        isMobile ? "h-[420px]" : "h-[560px]"
+      }`}
+    >
       {visibleCanvases.map((canvas) => {
         const pos = positions[canvas.id];
         const mood = getMoodClasses(canvas.mood);
-        const preview = getPreviewText(canvas.text, pos.size === "lg" ? 42 : 34);
+        const preview = getPreviewText(
+          canvas.text,
+          isMobile ? 34 : 40
+        );
 
         const isHighlighted =
           !activeMood || canvas.mood === activeMood || activeMood === "All";
@@ -185,12 +222,13 @@ export default function EmotionField({
             <button
               type="button"
               onClick={() => onOpen(canvas)}
-              className={`group relative cursor-pointer rounded-[24px] border border-white/70 bg-white/72 p-3 text-left shadow-[0_12px_24px_rgba(90,70,70,0.08)] backdrop-blur transition duration-200 hover:shadow-[0_16px_30px_rgba(90,70,70,0.12)] ${getSizeClasses(
-                pos.size
+              className={`group relative cursor-pointer rounded-[24px] border border-white/70 bg-white/72 p-3 text-left shadow-[0_10px_20px_rgba(90,70,70,0.07)] backdrop-blur transition duration-200 hover:shadow-[0_14px_28px_rgba(90,70,70,0.11)] ${getSizeClasses(
+                pos.size,
+                isMobile
               )} ${isHighlighted ? "opacity-100" : "opacity-45"}`}
             >
               <div
-                className={`pointer-events-none absolute inset-0 rounded-[24px] blur-2xl opacity-40 ${mood.glow}`}
+                className={`pointer-events-none absolute inset-0 rounded-[24px] blur-2xl opacity-35 ${mood.glow}`}
               />
 
               <div className="relative z-10">
