@@ -95,13 +95,6 @@ function getMoodClasses(mood?: string | null) {
   }
 }
 
-function getVisibleCanvases(
-  canvases: SharedCanvas[],
-  isMobile: boolean
-) {
-  return canvases.slice(0, isMobile ? 4 : 6);
-}
-
 function buildPositions(
   canvases: SharedCanvas[],
   isMobile: boolean
@@ -168,6 +161,7 @@ export default function EmotionField({
   activeMood,
 }: EmotionFieldProps) {
   const [isMobile, setIsMobile] = useState(false);
+  const [startIndex, setStartIndex] = useState(0);
 
   useEffect(() => {
     const checkScreen = () => {
@@ -180,10 +174,25 @@ export default function EmotionField({
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
 
-  const visibleCanvases = useMemo(
-    () => getVisibleCanvases(canvases, isMobile),
-    [canvases, isMobile]
-  );
+  useEffect(() => {
+    if (canvases.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setStartIndex((prev) => (prev + 1) % canvases.length);
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [canvases.length]);
+
+  const visibleCanvases = useMemo(() => {
+    const limit = isMobile ? 4 : 6;
+    const rotated = [
+      ...canvases.slice(startIndex),
+      ...canvases.slice(0, startIndex),
+    ];
+
+    return rotated.slice(0, limit);
+  }, [canvases, startIndex, isMobile]);
 
   const positions = useMemo(
     () => buildPositions(visibleCanvases, isMobile),
@@ -201,18 +210,15 @@ export default function EmotionField({
       {visibleCanvases.map((canvas) => {
         const pos = positions[canvas.id];
         const mood = getMoodClasses(canvas.mood);
-        const preview = getPreviewText(
-          canvas.text,
-          isMobile ? 34 : 40
-        );
+        const preview = getPreviewText(canvas.text, isMobile ? 34 : 40);
 
         const isHighlighted =
           !activeMood || canvas.mood === activeMood || activeMood === "All";
 
         return (
           <div
-            key={canvas.id}
-            className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
+            key={`${canvas.id}-${startIndex}`}
+            className="absolute z-10 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-500"
             style={{
               left: `${pos.left}%`,
               top: `${pos.top}%`,
@@ -222,7 +228,7 @@ export default function EmotionField({
             <button
               type="button"
               onClick={() => onOpen(canvas)}
-              className={`group relative cursor-pointer rounded-[24px] border border-white/70 bg-white/72 p-3 text-left shadow-[0_10px_20px_rgba(90,70,70,0.07)] backdrop-blur transition duration-200 hover:shadow-[0_14px_28px_rgba(90,70,70,0.11)] ${getSizeClasses(
+              className={`group relative cursor-pointer rounded-[24px] border border-white/70 bg-white/72 p-3 text-left shadow-[0_10px_20px_rgba(90,70,70,0.07)] backdrop-blur transition duration-300 hover:shadow-[0_14px_28px_rgba(90,70,70,0.11)] ${getSizeClasses(
                 pos.size,
                 isMobile
               )} ${isHighlighted ? "opacity-100" : "opacity-45"}`}
