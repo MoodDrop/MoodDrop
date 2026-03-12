@@ -110,10 +110,10 @@ function buildPositions(
   const positions: Record<string, OrbPos> = {};
 
   const mobileLayout = [
-    { left: 30, top: 24 },
-    { left: 70, top: 28 },
-    { left: 32, top: 56 },
-    { left: 68, top: 60 },
+    { left: 30, top: 30 },
+    { left: 70, top: 34 },
+    { left: 32, top: 64 },
+    { left: 68, top: 68 },
   ];
 
   const desktopLayout = [
@@ -195,7 +195,7 @@ export default function EmotionField({
   return (
     <div
       className={`relative w-full overflow-hidden rounded-[32px] ${
-        isMobile ? "h-[420px]" : "h-[560px]"
+        isMobile ? "h-[300px]" : "h-[500px]"
       }`}
     >
       {visibleCanvases.map((canvas) => {
