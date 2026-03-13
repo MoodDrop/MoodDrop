@@ -59,12 +59,12 @@ export default function CalmStudioPage() {
 
     window.setTimeout(() => {
       setShowStudio(true);
-    }, 620);
+    }, 760);
 
     window.setTimeout(() => {
       setShowEntry(false);
       sessionStorage.setItem("calmStudioEntered", "true");
-    }, 1450);
+    }, 1180);
   };
 
   // Light Garden
@@ -385,38 +385,37 @@ export default function CalmStudioPage() {
         @keyframes dropletBreathe {
           0% {
             transform: scale(1);
-            box-shadow: 0 0 0 rgba(255, 212, 212, 0);
           }
           50% {
-            transform: scale(1.05);
-            box-shadow: 0 0 28px rgba(255, 212, 212, 0.22);
+            transform: scale(1.04);
           }
           100% {
             transform: scale(1);
-            box-shadow: 0 0 0 rgba(255, 212, 212, 0);
           }
         }
 
         @keyframes dropletFall {
           0% {
             transform: translateY(0) scale(1);
+            opacity: 1;
           }
-          30% {
-            transform: translateY(6px) scale(0.96, 1.04);
+          20% {
+            transform: translateY(10px) scale(0.97, 1.03);
+            opacity: 1;
           }
           100% {
-            transform: translateY(64px) scale(0.88);
-            opacity: 0.92;
+            transform: translateY(165px) scale(0.82);
+            opacity: 0.96;
           }
         }
 
         @keyframes rippleExpand {
           0% {
-            transform: translate(-50%, -50%) scale(0.3);
+            transform: translate(-50%, -50%) scale(0.35);
             opacity: 0.55;
           }
           100% {
-            transform: translate(-50%, -50%) scale(16);
+            transform: translate(-50%, -50%) scale(7.5);
             opacity: 0;
           }
         }
@@ -437,30 +436,30 @@ export default function CalmStudioPage() {
         @keyframes floatParticleA {
           0% {
             transform: translateY(0px) translateX(0px);
-            opacity: 0.14;
+            opacity: 0.18;
           }
           50% {
             transform: translateY(-14px) translateX(6px);
-            opacity: 0.24;
+            opacity: 0.34;
           }
           100% {
             transform: translateY(-28px) translateX(-4px);
-            opacity: 0.1;
+            opacity: 0.14;
           }
         }
 
         @keyframes floatParticleB {
           0% {
             transform: translateY(0px) translateX(0px);
-            opacity: 0.1;
+            opacity: 0.14;
           }
           50% {
             transform: translateY(-10px) translateX(-6px);
-            opacity: 0.2;
+            opacity: 0.28;
           }
           100% {
             transform: translateY(-22px) translateX(4px);
-            opacity: 0.08;
+            opacity: 0.1;
           }
         }
 
@@ -478,7 +477,7 @@ export default function CalmStudioPage() {
       `}</style>
 
       {showEntry && entryReady && (
-        <div className="min-h-[70vh] flex items-center justify-center overflow-hidden relative">
+        <div className="min-h-[92vh] flex items-center justify-center overflow-hidden relative">
           <div className="absolute inset-0 pointer-events-none">
             {[
               { top: "18%", left: "20%", size: 8, anim: "floatParticleA 10s ease-in-out infinite" },
@@ -498,8 +497,8 @@ export default function CalmStudioPage() {
                   left: particle.left,
                   width: `${particle.size}px`,
                   height: `${particle.size}px`,
-                  background: "rgba(255, 241, 236, 0.7)",
-                  boxShadow: "0 0 12px rgba(255, 228, 220, 0.25)",
+                  background: "rgba(255, 255, 255, 0.92)",
+                  opacity: 0.7,
                   animation: particle.anim,
                 }}
               />
@@ -529,20 +528,20 @@ export default function CalmStudioPage() {
                       "radial-gradient(circle at 35% 28%, rgba(255,255,255,0.92) 0%, rgba(255,224,228,0.88) 26%, rgba(247,196,205,0.96) 64%, rgba(231,173,184,0.98) 100%)",
                     clipPath:
                       "path('M42 4 C28 24 14 38 14 56 C14 73 26 84 42 84 C58 84 70 73 70 56 C70 38 56 24 42 4 Z')",
-                    filter: "drop-shadow(0 10px 18px rgba(227, 171, 181, 0.28))",
                   }}
                 />
               </div>
 
               {isEntering && (
                 <span
-                  className="absolute rounded-full border border-white/70 pointer-events-none"
+                  className="absolute rounded-full pointer-events-none border border-white/80"
                   style={{
                     left: "50%",
-                    top: "64%",
-                    width: "28px",
-                    height: "28px",
-                    animation: "rippleExpand 860ms ease-out forwards",
+                    top: "94%",
+                    width: "34px",
+                    height: "34px",
+                    transform: "translate(-50%, -50%)",
+                    animation: "rippleExpand 900ms ease-out forwards",
                   }}
                 />
               )}
