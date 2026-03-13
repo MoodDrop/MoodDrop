@@ -5,7 +5,7 @@ import {
   incrementWitnessCount,
 } from "@/lib/livingGallery";
 import EmotionField from "@/components/gallery/EmotionField";
-import CanvasViewer from "../components/gallery/CanvasViewer";
+import CanvasViewer from "@/components/gallery/CanvasViewer";
 
 const FALLBACK_MOODS = ["Healing", "CrashOut", "Hopeful", "Overwhelmed"];
 
@@ -133,10 +133,11 @@ export default function LivingGalleryPage() {
 
   return (
     <main
-      className={`min-h-screen bg-gradient-to-b ${getMoodTint(
+      className={`relative min-h-screen bg-gradient-to-b ${getMoodTint(
         activeCanvas?.mood
       )} px-4 py-8 sm:px-6`}
     >
+      {/* Ambient background glow */}
       <div className="pointer-events-none absolute inset-0 opacity-20">
         <div className="absolute left-[10%] top-[12%] h-40 w-40 rounded-full bg-pink-100 blur-3xl" />
         <div className="absolute right-[12%] top-[28%] h-48 w-48 rounded-full bg-amber-50 blur-3xl" />
@@ -144,23 +145,28 @@ export default function LivingGalleryPage() {
       </div>
 
       <div className="relative mx-auto max-w-5xl">
+        {/* Page Title */}
         <section className="mb-10 text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
             Living Gallery
           </h1>
+
           <p className="mt-3 text-base text-slate-600 sm:text-lg">
             A quiet mosaic of what hearts released today.
           </p>
+
           <p className="mt-2 text-sm italic text-slate-500">
             Tap a canvas to witness the full moment.
           </p>
         </section>
 
+        {/* Emotional Currents */}
         <section className="mx-auto mb-10 max-w-2xl rounded-[28px] border border-white/70 bg-white/70 p-6 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur">
           <div className="mb-5 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
               Emotional Currents
             </p>
+
             <p className="mt-2 text-sm italic text-slate-500">
               A soft view of what the gallery is holding today.
             </p>
@@ -169,6 +175,7 @@ export default function LivingGalleryPage() {
           <div className="space-y-4">
             {moodBars.map(([mood, count]) => {
               const widthPercent = Math.max((count / maxCount) * 100, 18);
+
               const percent = canvases.length
                 ? Math.round((count / canvases.length) * 100)
                 : 0;
@@ -194,11 +201,13 @@ export default function LivingGalleryPage() {
           </div>
         </section>
 
+        {/* Emotional Field */}
         <section className="rounded-[32px] border border-white/60 bg-white/35 px-4 py-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur sm:px-5 sm:py-7">
           <div className="mb-5 text-center">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
               Emotional Field
             </p>
+
             <p className="mt-2 text-sm italic text-slate-500">
               Drift through what the day is holding.
             </p>
@@ -206,7 +215,7 @@ export default function LivingGalleryPage() {
 
           {loading ? (
             <div className="py-12 text-center text-slate-500">
-              Gathering today’s shared moments...
+              Gathering today's shared moments...
             </div>
           ) : error ? (
             <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-700">
@@ -222,8 +231,9 @@ export default function LivingGalleryPage() {
 
               <div className="mt-4 pb-1 text-center">
                 <p className="text-sm italic text-slate-500">
-                  A glimpse of today&apos;s shared moments.
+                  A glimpse of today's shared moments.
                 </p>
+
                 <p className="mt-1 text-sm italic text-slate-400">
                   More are drifting beneath the surface.
                 </p>

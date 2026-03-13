@@ -25,7 +25,6 @@ export default function Header() {
         </div>
 
         <nav className="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm">
-
           {/* Home */}
           <Link href="/">
             <button
@@ -58,23 +57,23 @@ export default function Header() {
 
           <span className="text-warm-gray-400">•</span>
 
-          {/* Take a Breath */}
-          <Link href="/calm-studio/breathe">
+          {/* Living Gallery */}
+          <Link href="/living-gallery">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                location === "/calm-studio/breathe"
+                location === "/living-gallery"
                   ? "text-blush-400 font-medium"
                   : "text-warm-gray-600 hover:text-blush-300"
               }`}
-              data-testid="nav-breathe"
+              data-testid="nav-living-gallery"
             >
-              Take a Breath
+              Living Gallery
             </button>
           </Link>
 
           <span className="text-warm-gray-400">•</span>
 
-          {/* ✅ NEW: Harmony (replaces Reflections / Mood Garden) */}
+          {/* Harmony */}
           <Link href="/harmony">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
@@ -94,7 +93,7 @@ export default function Header() {
           <Link href="/calm-studio">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                location === "/calm-studio"
+                location === "/calm-studio" || location === "/comfort"
                   ? "text-blush-400 font-medium"
                   : "text-warm-gray-600 hover:text-blush-300"
               }`}
@@ -119,7 +118,6 @@ export default function Header() {
               Soft Reads
             </button>
           </Link>
-
         </nav>
       </div>
     </header>
