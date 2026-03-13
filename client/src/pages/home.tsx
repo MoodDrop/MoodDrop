@@ -88,7 +88,7 @@ export default function HomePage() {
                 backdropFilter: "blur(10px)",
               }}
             >
-              Write it out
+              Type it out
             </button>
 
             <button
@@ -101,7 +101,7 @@ export default function HomePage() {
                 backdropFilter: "blur(10px)",
               }}
             >
-              Say it out loud
+              Voice it 
             </button>
 
             <p className="pt-0.5 text-[13px] text-[rgba(35,28,28,0.48)] italic">
