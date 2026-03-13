@@ -477,7 +477,7 @@ export default function CalmStudioPage() {
       `}</style>
 
       {showEntry && entryReady && (
-        <div className="min-h-[68vh] sm:min-h-[78vh] lg:min-h-[92vh] flex items-center justify-center overflow-hidden relative">
+        <div className="min-h-[62vh] sm:min-h-[78vh] lg:min-h-[92vh] flex items-center justify-center overflow-hidden relative">
           <div className="absolute inset-0 pointer-events-none">
             {[
               { top: "18%", left: "20%", size: 8, anim: "floatParticleA 10s ease-in-out infinite" },
