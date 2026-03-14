@@ -23,6 +23,7 @@ import QAPage from "@/pages/QAPage";
 import ContactPage from "@/pages/ContactPage";
 import LivingGalleryPage from "@/pages/LivingGalleryPage";
 import CalmStudioPage from "@/pages/CalmStudioPage";
+import CareSupportPage from "@/pages/CareSupportPage"; // NEW
 
 // Owner unlock
 import OwnerUnlockPage from "@/pages/OwnerUnlockPage";
@@ -92,6 +93,7 @@ function Router() {
       <Route path="/privacy" component={Privacy} />
       <Route path="/qa" component={QAPage} />
       <Route path="/contact" component={ContactPage} />
+      <Route path="/care-support" component={CareSupportPage} /> {/* NEW */}
 
       <Route path="/admin" component={AdminPage} />
       <Route path="/admin-legacy" component={AdminLogin} />

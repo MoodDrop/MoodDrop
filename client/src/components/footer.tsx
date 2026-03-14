@@ -60,7 +60,7 @@ export default function Footer() {
             id={panelId}
             className={[
               "overflow-hidden transition-all duration-500 ease-out",
-              open ? "max-h-[520px] opacity-100 mt-5" : "max-h-0 opacity-0 mt-0",
+              open ? "max-h-[560px] opacity-100 mt-5" : "max-h-0 opacity-0 mt-0",
             ].join(" ")}
           >
             <div className="relative mx-auto max-w-2xl">
@@ -68,6 +68,11 @@ export default function Footer() {
               <div className="absolute left-0 top-0 h-full w-[2px] rounded-full bg-[#F1AEB8]/40" />
 
               <div className="pl-6 pr-2 space-y-3">
+                {/* Section label */}
+                <p className="text-xs tracking-[0.18em] uppercase text-[#C0A489]">
+                  Support Resources
+                </p>
+
                 <p className="text-sm leading-relaxed text-[#6D5E61]">
                   MoodDrop is a quiet space for emotional release and reflection.
                   It isn’t a substitute for professional mental health care.
@@ -106,6 +111,16 @@ export default function Footer() {
                 <p className="pt-1 text-xs text-[#8B7B7E]">
                   You don’t have to hold everything alone.
                 </p>
+
+                {/* Link to full support page */}
+                <div className="pt-2">
+                  <Link
+                    href="/care-support"
+                    className="text-xs text-[#6D5E61] underline underline-offset-4 decoration-[#F4CBD2]/70 hover:text-[#4A3F41]"
+                  >
+                    Visit the full Care &amp; Support page →
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -121,14 +136,22 @@ export default function Footer() {
                 About
               </Link>
               <span className="opacity-30">•</span>
+
               <Link href="/qa" className="hover:text-[#4A3F41]">
                 Q&amp;A
               </Link>
               <span className="opacity-30">•</span>
+
+              <Link href="/care-support" className="hover:text-[#4A3F41]">
+                Care &amp; Support
+              </Link>
+              <span className="opacity-30">•</span>
+
               <Link href="/privacy" className="hover:text-[#4A3F41]">
                 Privacy
               </Link>
               <span className="opacity-30">•</span>
+
               <Link href="/contact" className="hover:text-[#4A3F41]">
                 Contact
               </Link>
