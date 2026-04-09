@@ -1,6 +1,8 @@
 import React from "react";
 import { useLocation } from "wouter";
 import moodDropText from "../assets/mooddrop-text.png";
+import typeIcon from "../assets/icons/type.png";
+import micIcon from "../assets/icons/mic.png";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -26,7 +28,6 @@ export default function Home() {
         }
       `}</style>
 
-      {/* Soft background glow only */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -37,7 +38,6 @@ export default function Home() {
         }}
       />
 
-      {/* Tiny sparkle haze */}
       <div
         className="pointer-events-none absolute inset-0 opacity-30"
         style={{
@@ -51,7 +51,6 @@ export default function Home() {
       />
 
       <section className="relative mx-auto flex min-h-screen w-full max-w-md flex-col items-center px-6 pb-16 pt-10 text-center">
-        {/* Wordmark */}
         <img
           src={moodDropText}
           alt="MoodDrop"
@@ -61,52 +60,49 @@ export default function Home() {
           }}
         />
 
-        {/* Orb */}
-        <div className="relative mt-6 sm:mt-8 flex items-center justify-center">
-  <div
-    className="absolute rounded-full"
-    style={{
-      width: "min(300px, 70vw)",
-      height: "min(300px, 70vw)",
-      background:
-        "radial-gradient(circle, rgba(255,255,255,0.22) 0%, rgba(246,205,220,0.10) 42%, rgba(255,255,255,0) 72%)",
-      filter: "blur(18px)",
-    }}
-  />
+        <div className="relative mt-6 flex items-center justify-center sm:mt-8">
+          <div
+            className="absolute rounded-full"
+            style={{
+              width: "min(300px, 70vw)",
+              height: "min(300px, 70vw)",
+              background:
+                "radial-gradient(circle, rgba(255,255,255,0.22) 0%, rgba(246,205,220,0.10) 42%, rgba(255,255,255,0) 72%)",
+              filter: "blur(18px)",
+            }}
+          />
 
-  <div
-    className="relative rounded-full"
-    style={{
-      width: "min(240px, 55vw)",
-      height: "min(240px, 55vw)",
-      animation: "orbBreath 6.5s ease-in-out infinite",
-      background:
-        "radial-gradient(circle at 38% 28%, rgba(255,255,255,0.88) 0%, rgba(252,233,243,0.98) 24%, rgba(244,196,221,0.94) 72%, rgba(235,171,207,0.96) 100%)",
-      boxShadow:
-        "0 24px 60px rgba(212, 160, 184, 0.20), inset 0 10px 30px rgba(255,255,255,0.30)",
-    }}
-  />
-</div>
+          <div
+            className="relative rounded-full"
+            style={{
+              width: "min(240px, 55vw)",
+              height: "min(240px, 55vw)",
+              animation: "orbBreath 6.5s ease-in-out infinite",
+              background:
+                "radial-gradient(circle at 38% 28%, rgba(255,255,255,0.88) 0%, rgba(252,233,243,0.98) 24%, rgba(244,196,221,0.94) 72%, rgba(235,171,207,0.96) 100%)",
+              boxShadow:
+                "0 24px 60px rgba(212, 160, 184, 0.20), inset 0 10px 30px rgba(255,255,255,0.30)",
+            }}
+          />
+        </div>
 
-        {/* Headline */}
-        <h1 className="mt-8 sm:mt-12 text-[28px] sm:text-[34px] leading-tight text-[rgba(66,50,56,0.92)]"
+        <h1
+          className="mt-8 text-[28px] leading-tight text-[rgba(66,50,56,0.92)] sm:mt-12 sm:text-[34px]"
           style={{ fontFamily: "'Playfair Display', serif" }}
         >
           You can release it here
         </h1>
 
-        {/* Intro */}
-        <p className="mt-4 sm:mt-5 max-w-[620px] text-[16px] sm:text-[18px] leading-[1.6] text-[rgba(99,79,87,0.72)]">
+        <p className="mt-4 max-w-[620px] text-[16px] leading-[1.6] text-[rgba(99,79,87,0.72)] sm:mt-5 sm:text-[18px]">
           MoodDrop is a quiet space to release what you’re feeling — through
           words or voice, without pressure or judgment.
         </p>
 
-        {/* CTA buttons */}
         <div className="mt-10 flex w-full max-w-[540px] flex-col gap-5">
           <button
             type="button"
             onClick={() => setLocation("/release/text")}
-            className="flex items-center justify-center gap-4 rounded-full px-8 py-5 text-[18px] text-[rgba(79,62,68,0.94)] transition active:scale-[0.99]"
+            className="flex items-center justify-center rounded-full px-8 py-5 text-[18px] text-[rgba(79,62,68,0.94)] transition active:scale-[0.99]"
             style={{
               background:
                 "linear-gradient(90deg, rgba(255,255,255,0.78) 0%, rgba(255,244,248,0.72) 58%, rgba(246,214,228,0.44) 100%)",
@@ -116,14 +112,20 @@ export default function Home() {
               backdropFilter: "blur(12px)",
             }}
           >
-            <span className="text-[28px] leading-none">✍🏽</span>
-            <span>Type it out</span>
+            <div className="flex items-center justify-center gap-4">
+              <img
+                src={typeIcon}
+                alt="Type"
+                className="h-12 w-12 object-contain opacity-90"
+              />
+              <span>Type it out</span>
+            </div>
           </button>
 
           <button
             type="button"
             onClick={() => setLocation("/release/voice")}
-            className="flex items-center justify-center gap-4 rounded-full px-8 py-5 text-[18px] text-[rgba(79,62,68,0.94)] transition active:scale-[0.99]"
+            className="flex items-center justify-center rounded-full px-8 py-5 text-[18px] text-[rgba(79,62,68,0.94)] transition active:scale-[0.99]"
             style={{
               background:
                 "linear-gradient(90deg, rgba(255,255,255,0.78) 0%, rgba(255,244,248,0.72) 58%, rgba(246,214,228,0.44) 100%)",
@@ -133,12 +135,17 @@ export default function Home() {
               backdropFilter: "blur(12px)",
             }}
           >
-            <span className="text-[26px] leading-none">🎙️</span>
-            <span>Voice it out</span>
+            <div className="flex items-center justify-center gap-4">
+              <img
+                src={micIcon}
+                alt="Voice"
+                className="h-12 w-12 object-contain opacity-90"
+              />
+              <span>Voice it out</span>
+            </div>
           </button>
         </div>
 
-        {/* Section label */}
         <div className="mt-16 flex w-full max-w-[640px] items-center gap-5">
           <div className="h-px flex-1 bg-[rgba(170,140,150,0.18)]" />
           <p
@@ -150,7 +157,6 @@ export default function Home() {
           <div className="h-px flex-1 bg-[rgba(170,140,150,0.18)]" />
         </div>
 
-        {/* Cards */}
         <div className="mt-8 grid w-full grid-cols-2 gap-4">
           <button
             type="button"
@@ -268,7 +274,6 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Privacy line */}
         <p className="mt-10 max-w-[420px] text-[14px] leading-7 text-[rgba(120,92,101,0.78)]">
           Your words belong only to you. Always private, always yours.
         </p>
