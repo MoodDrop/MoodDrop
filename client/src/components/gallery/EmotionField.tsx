@@ -41,8 +41,8 @@ function buildPositions(
 
   canvases.forEach((canvas) => {
     positions[canvas.id] = {
-      left: isMobile ? 16 + rand() * 68 : 14 + rand() * 72,
-      top: isMobile ? 18 + rand() * 62 : 16 + rand() * 66,
+      left: isMobile ? 20 + rand() * 60 : 14 + rand() * 72,
+      top: isMobile ? 20 + rand() * 58 : 16 + rand() * 66,
       size: rand() > 0.62 ? "md" : "sm",
       duration: 10 + rand() * 4,
       delay: rand() * 3,
@@ -55,13 +55,13 @@ function buildPositions(
 function getSizeClasses(size: OrbPos["size"], isMobile: boolean) {
   if (isMobile) {
     return size === "md"
-      ? "w-[104px] h-[92px]"
-      : "w-[86px] h-[78px]";
+      ? "w-[92px] h-[82px]"
+      : "w-[76px] h-[68px]";
   }
 
   return size === "md"
-    ? "w-[124px] h-[108px]"
-    : "w-[102px] h-[92px]";
+    ? "w-[118px] h-[102px]"
+    : "w-[96px] h-[86px]";
 }
 
 export default function EmotionField({
@@ -112,7 +112,7 @@ export default function EmotionField({
   return (
     <div
       className={`relative w-full overflow-hidden rounded-[32px] ${
-        isMobile ? "h-[320px]" : "h-[520px]"
+        isMobile ? "h-[360px]" : "h-[520px]"
       }`}
     >
       <AnimatePresence mode="sync">
