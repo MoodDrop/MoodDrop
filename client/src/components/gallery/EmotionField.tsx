@@ -81,13 +81,13 @@ function buildPositions(
 function getSizeClasses(size: OrbPos["size"], isMobile: boolean) {
   if (isMobile) {
     return size === "md"
-      ? "w-[88px] h-[78px]"
-      : "w-[72px] h-[64px]";
+      ? "w-[96px] h-[86px]"
+      : "w-[82px] h-[74px]";
   }
 
   return size === "md"
-    ? "w-[118px] h-[102px]"
-    : "w-[96px] h-[86px]";
+    ? "w-[122px] h-[106px]"
+    : "w-[100px] h-[90px]";
 }
 
 export default function EmotionField({
