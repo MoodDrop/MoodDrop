@@ -81,7 +81,7 @@ export default function Home() {
         }}
       />
 
-      <section className="relative mx-auto flex min-h-screen w-full max-w-md flex-col items-center px-6 pb-16 pt-10 text-center">
+      <section className="relative mx-auto flex min-h-screen w-full max-w-md flex-col items-center px-6 pb-14 pt-10 text-center">
         <img
           src={moodDropText}
           alt="MoodDrop"
@@ -265,7 +265,7 @@ export default function Home() {
               Rest
             </div>
             <div className="mt-2 text-[13px] italic text-[rgba(110,89,96,0.7)]">
-              Pause & unwind
+              Pause &amp; unwind
             </div>
           </button>
 
@@ -319,6 +319,57 @@ export default function Home() {
         <p className="mt-10 max-w-[420px] text-[14px] leading-7 text-[rgba(120,92,101,0.78)]">
           Your words belong only to you. Always private, always yours.
         </p>
+
+        <div className="mt-5 flex flex-col items-center text-center">
+          <p className="text-[11px] tracking-[0.02em] text-[rgba(120,92,101,0.64)]">
+            Need a little more information?
+          </p>
+
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[13px] text-[rgba(99,79,87,0.82)]">
+            <span
+              onClick={() => setLocation("/about")}
+              className="cursor-pointer transition-colors hover:text-[rgba(79,62,68,0.95)]"
+            >
+              About
+            </span>
+            <span className="opacity-20">•</span>
+
+            <span
+              onClick={() => setLocation("/qa")}
+              className="cursor-pointer transition-colors hover:text-[rgba(79,62,68,0.95)]"
+            >
+              Q&amp;A
+            </span>
+            <span className="opacity-20">•</span>
+
+            <span
+              onClick={() => setLocation("/privacy")}
+              className="cursor-pointer transition-colors hover:text-[rgba(79,62,68,0.95)]"
+            >
+              Privacy
+            </span>
+            <span className="opacity-20">•</span>
+
+            <span
+              onClick={() => setLocation("/contact")}
+              className="cursor-pointer transition-colors hover:text-[rgba(79,62,68,0.95)]"
+            >
+              Contact
+            </span>
+            <span className="opacity-20">•</span>
+
+            <span
+              onClick={() => setLocation("/care-support")}
+              className="cursor-pointer font-medium transition-colors hover:text-[rgba(79,62,68,0.95)]"
+            >
+              Care &amp; Support
+            </span>
+          </div>
+
+          <p className="mt-3 text-[11px] text-[rgba(120,92,101,0.58)]">
+            MoodDrop © {new Date().getFullYear()}
+          </p>
+        </div>
       </section>
     </div>
   );
