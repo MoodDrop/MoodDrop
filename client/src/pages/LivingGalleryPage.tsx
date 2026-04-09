@@ -149,7 +149,6 @@ export default function LivingGalleryPage() {
 
   const selectedMoodEntries = useMemo(() => {
     if (!selectedMood) return [];
-
     return canvases.filter((canvas) => canvas.mood === selectedMood);
   }, [canvases, selectedMood]);
 
@@ -239,11 +238,11 @@ export default function LivingGalleryPage() {
                   type="button"
                   onClick={() => handleMoodSelect(mood)}
                   className={[
-                    "grid w-full grid-cols-[110px_1fr_40px] items-center gap-3 rounded-2xl px-3 py-2 text-left transition duration-300",
+                    "grid w-full grid-cols-[110px_1fr_40px] items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition duration-300",
                     "focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-0",
                     isActive
-                      ? "bg-white/75 shadow-[0_8px_22px_rgba(15,23,42,0.05)] scale-[1.01]"
-                      : "bg-white/30 hover:bg-white/50",
+                      ? "bg-white/55 shadow-[0_8px_18px_rgba(15,23,42,0.03)]"
+                      : "bg-white/18 hover:bg-white/32",
                     isDimmed ? "opacity-55" : "opacity-100",
                   ].join(" ")}
                   aria-pressed={isActive}
@@ -257,15 +256,15 @@ export default function LivingGalleryPage() {
                     {mood}
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     {Array.from({ length: dotCount }).map((_, index) => (
                       <span
                         key={`${mood}-${index}`}
                         className={[
-                          "h-2 w-2 rounded-full transition",
+                          "h-2.5 w-2.5 rounded-full transition",
                           getMoodDotColor(mood),
                           getDotOpacity(index),
-                          isActive ? "scale-110" : "",
+                          isActive ? "scale-105" : "",
                         ].join(" ")}
                       />
                     ))}
@@ -338,7 +337,7 @@ export default function LivingGalleryPage() {
           <>
             <motion.div
               key="mood-overlay-backdrop"
-              className="fixed inset-0 z-30 bg-[rgba(255,250,247,0.42)] backdrop-blur-[6px]"
+              className="fixed inset-0 z-30 bg-[rgba(255,248,246,0.34)] backdrop-blur-[8px]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -347,14 +346,20 @@ export default function LivingGalleryPage() {
 
             <motion.section
               key={`mood-overlay-${selectedMood}`}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.32, ease: "easeOut" }}
-              className="fixed inset-x-4 top-5 bottom-5 z-40 overflow-hidden rounded-[32px] border border-white/70 bg-white/55 shadow-[0_22px_70px_rgba(15,23,42,0.10)] backdrop-blur-xl sm:inset-x-10 sm:top-8 sm:bottom-8 lg:left-1/2 lg:right-auto lg:w-[min(760px,calc(100vw-6rem))] lg:-translate-x-1/2"
+              initial={{ opacity: 0, y: 16, scale: 0.992 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.996 }}
+              transition={{ duration: 0.34, ease: "easeOut" }}
+              className="fixed inset-x-4 top-5 bottom-5 z-40 overflow-hidden rounded-[34px] border border-white/75 bg-[rgba(255,255,255,0.50)] shadow-[0_24px_80px_rgba(15,23,42,0.10)] backdrop-blur-2xl sm:inset-x-8 sm:top-7 sm:bottom-7 lg:left-1/2 lg:right-auto lg:w-[min(760px,calc(100vw-6rem))] lg:-translate-x-1/2"
             >
-              <div className="flex h-full flex-col">
-                <div className="border-b border-white/55 px-5 py-5 sm:px-7">
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute left-[10%] top-[8%] h-24 w-24 rounded-full bg-white/26 blur-3xl" />
+                <div className="absolute right-[14%] top-[18%] h-20 w-20 rounded-full bg-pink-100/30 blur-3xl" />
+                <div className="absolute bottom-[18%] left-[18%] h-24 w-24 rounded-full bg-amber-50/25 blur-3xl" />
+              </div>
+
+              <div className="relative flex h-full flex-col">
+                <div className="border-b border-white/50 px-5 pb-5 pt-6 sm:px-7 sm:pb-6 sm:pt-7">
                   <div className="text-center">
                     <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
                       {formatSelectedMoodTitle(selectedMood)}
@@ -374,34 +379,34 @@ export default function LivingGalleryPage() {
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+                <div className="flex-1 overflow-y-auto px-4 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
                   {selectedMoodEntries.length === 0 ? (
-                    <div className="rounded-3xl border border-slate-200 bg-white/75 p-8 text-center text-slate-500">
+                    <div className="rounded-[28px] border border-white/70 bg-white/65 p-8 text-center text-slate-500 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
                       <p>Nothing has been shared here just yet.</p>
                       <p className="mt-2">
                         Try another feeling, or return to the full space.
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-3.5">
                       {selectedMoodEntries.map((canvas) => (
                         <button
                           key={canvas.id}
                           type="button"
                           onClick={() => handleOpenCanvas(canvas)}
-                          className="w-full rounded-[24px] border border-white/75 bg-white/72 px-4 py-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] backdrop-blur transition duration-300 hover:bg-white/88 focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-0"
+                          className="w-full rounded-[26px] border border-white/75 bg-[rgba(255,255,255,0.62)] px-4 py-4 text-left shadow-[0_8px_20px_rgba(15,23,42,0.03)] backdrop-blur-md transition duration-300 hover:bg-[rgba(255,255,255,0.78)] focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-0 sm:px-5 sm:py-4"
                         >
                           <div className="flex items-center justify-between gap-3">
                             <span className="text-[11px] uppercase tracking-[0.14em] text-slate-400">
                               {canvas.mood || "Shared"}
                             </span>
 
-                            <span className="text-[11px] text-slate-400">
+                            <span className="text-[11px] italic text-slate-350">
                               Witnessed by {canvas.witness_count ?? 0}
                             </span>
                           </div>
 
-                          <p className="mt-3 text-sm leading-6 text-slate-700">
+                          <p className="mt-3 text-sm leading-6 text-slate-700 sm:leading-7">
                             {getEntryPreview(canvas.text)}
                           </p>
                         </button>
