@@ -16,23 +16,26 @@ export default function Home() {
   ];
 
   const [index, setIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const startDelay = window.setTimeout(() => {
-      const interval = window.setInterval(() => {
-        setVisible(false);
+    const initialFadeIn = window.setTimeout(() => {
+      setVisible(true);
+    }, 700);
 
-        window.setTimeout(() => {
-          setIndex((prev) => (prev + 1) % affirmations.length);
-          setVisible(true);
-        }, 300);
-      }, 6000);
+    const interval = window.setInterval(() => {
+      setVisible(false);
 
-      return () => window.clearInterval(interval);
-    }, 800);
+      window.setTimeout(() => {
+        setIndex((prev) => (prev + 1) % affirmations.length);
+        setVisible(true);
+      }, 350);
+    }, 3000);
 
-    return () => window.clearTimeout(startDelay);
+    return () => {
+      window.clearTimeout(initialFadeIn);
+      window.clearInterval(interval);
+    };
   }, [affirmations.length]);
 
   return (
@@ -174,11 +177,11 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="mt-7 flex min-h-[30px] items-center justify-center">
+        <div className="mt-8 flex min-h-[34px] items-center justify-center px-3">
           <p
-            className="text-[13px] italic tracking-[0.2px] text-[rgba(145,112,118,0.72)] transition-opacity duration-700 ease-in-out sm:text-[14px]"
+            className="text-[15px] italic leading-relaxed tracking-[0.15px] text-[rgba(145,112,118,0.72)] transition-opacity duration-700 ease-in-out sm:text-[16px]"
             style={{
-              opacity: visible ? 0.78 : 0,
+              opacity: visible ? 0.72 : 0.32,
             }}
           >
             {affirmations[index]}
