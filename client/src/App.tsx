@@ -23,7 +23,7 @@ import QAPage from "@/pages/QAPage";
 import ContactPage from "@/pages/ContactPage";
 import LivingGalleryPage from "@/pages/LivingGalleryPage";
 import CalmStudioPage from "@/pages/CalmStudioPage";
-import CareSupportPage from "@/pages/CareSupportPage"; // NEW
+import CareSupportPage from "@/pages/CareSupportPage";
 
 // Owner unlock
 import OwnerUnlockPage from "@/pages/OwnerUnlockPage";
@@ -40,10 +40,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import GhostMenu from "@/components/GhostMenu";
 
-// Echo Vault
-import EchoVaultPage from "@/pages/EchoVaultPage";
-
-// Release Ritual
+// Release
 import ReleaseTextPage from "@/pages/ReleaseTextPage";
 import ReleaseVoicePage from "@/pages/ReleaseVoicePage";
 
@@ -54,20 +51,29 @@ import HarmonyConfirmPage from "@/pages/HarmonyConfirmPage";
 
 // Analytics
 import { Analytics } from "@vercel/analytics/react";
+import EchoVaultPage from "@/pages/EchoVaultPage";
 
 function Router() {
-  const flags = readFlags();
-
   return (
     <Switch>
       <Route path="/" component={Home} />
 
       <Route path="/owner-unlock" component={OwnerUnlockPage} />
 
+      {/* ✅ Release */}
       <Route path="/release/text" component={ReleaseTextPage} />
       <Route path="/release/voice" component={ReleaseVoicePage} />
 
-      <Route path="/vault" component={EchoVaultPage} />
+      {/* ✅ My Droplets (replaces Echo Vault) */}
+      <Route path="/my-droplets" component={EchoVaultPage} />
+
+      {/* Optional: redirect old vault route */}
+      <Route path="/vault">
+        {() => {
+          window.location.href = "/my-droplets";
+          return null;
+        }}
+      </Route>
 
       <Route path="/living-gallery" component={LivingGalleryPage} />
 
@@ -76,7 +82,6 @@ function Router() {
       <Route path="/harmony/confirm" component={HarmonyConfirmPage} />
 
       <Route path="/playground" component={CanvasPlayground} />
-
       <Route path="/dashboard" component={Dashboard} />
 
       {/* Calm Studio */}
@@ -93,7 +98,7 @@ function Router() {
       <Route path="/privacy" component={Privacy} />
       <Route path="/qa" component={QAPage} />
       <Route path="/contact" component={ContactPage} />
-      <Route path="/care-support" component={CareSupportPage} /> {/* NEW */}
+      <Route path="/care-support" component={CareSupportPage} />
 
       <Route path="/admin" component={AdminPage} />
       <Route path="/admin-legacy" component={AdminLogin} />
@@ -109,17 +114,18 @@ function Router() {
 function AppContent() {
   const [location] = useLocation();
 
+  // ✅ Full immersive pages (no tight container feel)
   const isFullWidthPage =
     location === "/dashboard" ||
     location === "/calm-studio" ||
     location === "/comfort" ||
     location === "/soft-reads" ||
     location === "/playground" ||
-    location === "/vault" ||
     location === "/living-gallery" ||
     location === "/harmony" ||
     location.startsWith("/harmony/") ||
-    location.startsWith("/soft-reads/");
+    location.startsWith("/soft-reads/") ||
+    location.startsWith("/release"); // ✅ IMPORTANT
 
   const isHome = location === "/";
 
@@ -127,10 +133,15 @@ function AppContent() {
     <div className="min-h-screen bg-gradient-to-br from-blush-50 via-cream-50 to-blush-100">
       <GhostMenu />
 
-      {!isHome && <Header />}
+      {/* ✅ Hide header on Home + Release pages */}
+      {!isHome && !location.startsWith("/release") && <Header />}
 
       <main
-        className={isFullWidthPage ? "px-6 py-8" : "max-w-lg mx-auto px-6 py-8"}
+        className={
+          isFullWidthPage
+            ? "px-6 py-8"
+            : "max-w-lg mx-auto px-6 py-8"
+        }
       >
         <Router />
       </main>

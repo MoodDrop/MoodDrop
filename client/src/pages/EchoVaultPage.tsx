@@ -42,14 +42,31 @@ function generatePositions(ids: string[]): Record<string, Pos> {
   const rand = seedRng(ids.join("|") || "droplets");
   const out: Record<string, Pos> = {};
 
-  ids.forEach((id) => {
-    out[id] = {
-      x: 10 + rand() * 80,
-      y: 18 + rand() * 58,
-      dur: 6 + rand() * 3,
-      delay: rand() * 2,
-    };
-  });
+  const placed: Array<{ x: number; y: number }> = [];
+
+ids.forEach((id) => {
+  let x = 10 + rand() * 80;
+  let y = 10 + rand() * 75;
+  let tries = 0;
+
+  while (
+    placed.some((p) => Math.abs(p.x - x) < 18 && Math.abs(p.y - y) < 18) &&
+    tries < 40
+  ) {
+    x = 10 + rand() * 80;
+    y = 10 + rand() * 75;
+    tries++;
+  }
+
+  placed.push({ x, y });
+
+  out[id] = {
+    x,
+    y,
+    dur: 6 + rand() * 3,
+    delay: rand() * 2,
+  };
+});
 
   return out;
 }
@@ -177,7 +194,7 @@ export default function EchoVaultPage() {
     });
   }, [visibleEchoes, activeMood, searchTerm]);
 
-  const pondDroplets = useMemo(() => filtered.slice(0, 8), [filtered]);
+  const pondDroplets = useMemo(() => filtered.slice(0, 10), [filtered]);
 
   const positions = useMemo(
     () => generatePositions(pondDroplets.map((e) => e.id)),

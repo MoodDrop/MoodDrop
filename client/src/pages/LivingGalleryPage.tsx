@@ -1,3 +1,4 @@
+// client/src/pages/LivingGalleryPage.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import {
   SharedCanvas,
@@ -168,7 +169,7 @@ export default function LivingGalleryPage() {
             </p>
 
             <p className="mt-2 text-sm italic text-slate-500">
-              A soft view of what the gallery is holding today.
+              A gentle view of what the gallery is holding.
             </p>
           </div>
 
@@ -209,13 +210,13 @@ export default function LivingGalleryPage() {
             </p>
 
             <p className="mt-2 text-sm italic text-slate-500">
-              Drift through what the day is holding.
+              Drift through what today is holding.
             </p>
           </div>
 
           {loading ? (
             <div className="py-12 text-center text-slate-500">
-              Gathering today's shared moments...
+              Gathering what’s been gently shared today...
             </div>
           ) : error ? (
             <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-700">
@@ -223,7 +224,10 @@ export default function LivingGalleryPage() {
             </div>
           ) : canvases.length === 0 ? (
             <div className="rounded-3xl border border-slate-200 bg-white/80 p-8 text-center text-slate-500">
-              No shared moments are floating through yet.
+              <p>It’s quiet here right now.</p>
+              <p className="mt-2">
+                When something is shared, it will drift through.
+              </p>
             </div>
           ) : (
             <>
@@ -231,11 +235,11 @@ export default function LivingGalleryPage() {
 
               <div className="mt-4 pb-1 text-center">
                 <p className="text-sm italic text-slate-500">
-                  A glimpse of today's shared moments.
+                  A glimpse of what’s been shared today.
                 </p>
 
                 <p className="mt-1 text-sm italic text-slate-400">
-                  More are drifting beneath the surface.
+                  More is drifting beneath the surface.
                 </p>
               </div>
             </>

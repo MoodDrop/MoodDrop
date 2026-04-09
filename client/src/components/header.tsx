@@ -41,17 +41,17 @@ export default function Header() {
 
           <span className="text-warm-gray-400">•</span>
 
-          {/* Echo Vault */}
-          <Link href="/vault">
+          {/* My Droplets */}
+          <Link href="/my-droplets">
             <button
               className={`px-2 sm:px-3 py-1 rounded-lg transition-colors duration-300 whitespace-nowrap ${
-                location === "/vault"
+                location === "/my-droplets"
                   ? "text-blush-400 font-medium"
                   : "text-warm-gray-600 hover:text-blush-300"
               }`}
               data-testid="nav-vault"
             >
-              Echoes
+              My Droplets
             </button>
           </Link>
 

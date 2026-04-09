@@ -1,3 +1,4 @@
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function HeldOverlay({ show }: { show: boolean }) {
@@ -40,7 +41,7 @@ export default function HeldOverlay({ show }: { show: boolean }) {
                 color: "rgba(35,28,28,0.55)",
               }}
             >
-              Your words are resting safely in your Echo Vault.
+              Your words are resting safely in My Droplets.
             </div>
           </motion.div>
         </motion.div>

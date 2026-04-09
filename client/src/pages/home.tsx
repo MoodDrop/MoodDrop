@@ -1,3 +1,4 @@
+// client/src/pages/home.tsx
 import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Orb } from "../components/Orb";
@@ -101,7 +102,7 @@ export default function HomePage() {
                 backdropFilter: "blur(10px)",
               }}
             >
-              Voice it 
+              Voice it out
             </button>
 
             <p className="pt-0.5 text-[13px] text-[rgba(35,28,28,0.48)] italic">
@@ -131,7 +132,7 @@ export default function HomePage() {
           <div className="mt-3 grid grid-cols-2 gap-2 text-left">
             <button
               type="button"
-              onClick={() => setLocation("/vault")}
+              onClick={() => setLocation("/my-droplets")}
               className="rounded-xl px-3 py-2 text-left transition hover:bg-white/50"
               style={{
                 background: "rgba(255,255,255,0.35)",
@@ -142,9 +143,11 @@ export default function HomePage() {
                 className="text-[14px]"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                Echoes
+                My Droplets
               </div>
-              <div className="text-[11px] italic opacity-60">Echo Vault</div>
+              <div className="text-[11px] italic opacity-60">
+                Private reflections
+              </div>
             </button>
 
             <button

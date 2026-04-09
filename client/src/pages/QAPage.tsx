@@ -54,12 +54,12 @@ const SECTIONS: QASection[] = [
       {
         question: "What happens to my voice notes?",
         answer:
-          "Voice notes can help you release what you’re feeling in a way that feels more natural in the moment. Depending on how you use MoodDrop, your voice may help create a text drop or become part of a private voice Echo in the Echo Vault. They’re not shared publicly as community audio, and the intention is always to keep the experience as private and gentle as possible.",
+          "Voice notes can help you release what you’re feeling in a way that feels more natural in the moment. Depending on how you use MoodDrop, your voice may become part of a private voice droplet in My Droplets. They’re not shared publicly as community audio, and the intention is always to keep the experience as private and gentle as possible.",
       },
       {
         question: "Can I edit or delete a drop?",
         answer:
-          "For My Drops, you’re in full control — entries saved on your device can be edited or deleted anytime. If you choose to share a moment in the Living Gallery, it appears anonymously as a canvas and may not always be editable.",
+          "For My Droplets, you’re in full control — droplets saved on your device can be removed anytime. If you choose to share a moment in the Living Gallery, it appears anonymously as a canvas and may not always be editable.",
       },
       {
         question: "What if I share something and regret it later?",
@@ -157,52 +157,47 @@ const SECTIONS: QASection[] = [
   },
 
   {
-    title: "Echo Vault",
+    title: "My Droplets",
     items: [
       {
-        question: "What is the Echo Vault?",
+        question: "What are My Droplets?",
         answer:
-          "The Echo Vault is a private reflective space inside MoodDrop where you can revisit moments you’ve already released. Instead of a list or feed, your past drops appear as soft Echoes — quiet reminders you can return to whenever you need grounding or perspective.",
+          "My Droplets is your private reflection space inside MoodDrop. It’s where your past releases are gently held so you can return to them whenever you need. Nothing here is public — it’s just for you.",
       },
       {
-        question: "What is an Echo?",
+        question: "What is a droplet?",
         answer:
-          "An Echo is a moment you’ve released — either through text or voice. Each Echo becomes a quiet point of memory, not something to analyze or perform, but something you can gently return to when you need it.",
+          "A droplet is a moment you’ve released — through text or voice. Each one is a small piece of how you felt, saved quietly so you can revisit it if you ever need to.",
       },
       {
-        question: "How do I use the Echo Vault?",
+        question: "How do I use My Droplets?",
         answer:
-          "Enter the Echo Vault and allow your Echoes to gently drift. Tap one to read a past text release or listen to a voice release. There’s no pressure to revisit everything — you choose what to open and when.",
+          "Enter My Droplets and explore at your own pace. You can search, filter by mood, or simply scroll. Tap a droplet to revisit what you released — there’s no pressure to open anything unless you want to.",
       },
       {
-        question: "Can I replay my voice Echo later?",
+        question: "Can I listen to my voice droplet later?",
         answer:
-          "Yes. If you recorded a voice Echo, you can return and listen to it again anytime inside the Echo Vault. Your voice stays connected to that moment so you can revisit it whenever you need grounding or reassurance.",
+          "Yes. If you recorded a voice droplet, you can return and listen to it anytime. Your voice stays connected to that moment so you can revisit it whenever you need.",
       },
       {
         question: "Is my voice being recorded or stored?",
         answer:
-          "Voice Echoes are stored locally on your device as part of the Echo Vault. They are not shared publicly or used as community audio. The Echo Vault is designed to remain private and personal.",
+          "Voice droplets are stored locally on your device. They are never shared publicly or used outside of your personal space. Everything in My Droplets stays private and belongs only to you.",
       },
       {
-        question: "Can anyone else see or hear my Echoes?",
+        question: "Can anyone else see or hear my droplets?",
         answer:
-          "No. Echoes are visible only to you. There are no comments, reactions, followers, or outside voices in the Echo Vault — it’s a space designed to stay quiet and non-performative.",
+          "No. Your droplets are completely private. There are no comments, reactions, or outside voices here — just a quiet space for you.",
       },
       {
-        question: "How is the Echo Vault different from My Drops?",
+        question: "Can I delete a droplet?",
         answer:
-          "My Drops is a private space for written entries saved on your device. The Echo Vault is a more reflective space where past releases appear as visual Echoes and may include both text and voice.",
+          "Yes. You’re always in control. You can remove a droplet at any time — nothing is kept unless you want it to be.",
       },
       {
-        question: "Can I delete or tuck away an Echo?",
+        question: "Is My Droplets meant to bring things back up?",
         answer:
-          "Yes. You’re in control. You can delete Echoes or tuck them away if you’re not ready to see them. Nothing is permanent unless you want it to be.",
-      },
-      {
-        question: "Is the Echo Vault meant to reopen old pain?",
-        answer:
-          "No. The Echo Vault isn’t meant to reopen difficult moments. It’s meant to remind you that you’ve moved through things before. You decide when — or if — you return to an Echo.",
+          "No. This space isn’t here to reopen anything. It’s here if you want to revisit, reflect, or simply remember how far you’ve come — only when you feel ready.",
       },
     ],
   },
@@ -216,19 +211,19 @@ const SECTIONS: QASection[] = [
           "Harmony is a quiet offering inside MoodDrop where your story is carefully shaped into melody. It’s meant to feel intimate, thoughtful, and deeply personal.",
       },
       {
-        question: "Is Harmony anonymous like Echoes?",
+        question: "Is Harmony private like My Droplets?",
         answer:
-          "Harmony is private, but not anonymous. Your email is used only to deliver your sample and any selected version. It isn’t connected to your Echo Vault, releases, or anything you’ve shared elsewhere in MoodDrop. Your submission is handled with care and is never shared publicly.",
+          "Harmony is private, but not anonymous. Your email is used only to deliver your preview and any selected version. It isn’t connected to your My Droplets, releases, or anything you’ve shared elsewhere in MoodDrop. Your submission is handled with care and is never shared publicly.",
       },
       {
         question: "How does Harmony work?",
         answer:
-          "You share what feels ready — a memory, a name, or a quiet truth — and choose the emotional tone. Within 24 hours, you’ll receive a 30 second Soft Echo via email. If it resonates, you may continue into the full piece. Each submission is reviewed personally.",
+          "You share what feels ready — a memory, a name, or a quiet truth — and choose the emotional tone. Within 24 hours, you’ll receive a 30 second preview via email. If it resonates, you may continue into the full piece. Each submission is reviewed personally.",
       },
       {
         question: "What are the Harmony options?",
         answer:
-          "After receiving your Soft Echo, you may choose between Full Harmony or Signature Harmony. Details and Founder Phase pricing are shared privately via email.",
+          "After receiving your preview, you may choose between Full Harmony or Signature Harmony. Details and Founder Phase pricing are shared privately via email.",
       },
       {
         question: "Why is Harmony limited each week?",
@@ -243,7 +238,7 @@ const SECTIONS: QASection[] = [
       {
         question: "Will my words be stored or reused?",
         answer:
-          "No. Your submission is used only to create your requested Soft Echo and any selected version. It is not shared, sold, or repurposed.",
+          "No. Your submission is used only to create your requested preview and any selected version. It is not shared, sold, or repurposed.",
       },
       {
         question: "Can I request changes to my song?",
@@ -254,40 +249,40 @@ const SECTIONS: QASection[] = [
   },
 
   {
-  title: "Privacy & Care",
-  items: [
-    {
-      question: "Are my drops anonymous?",
-      answer:
-        "Shared moments in the Living Gallery are anonymous. They appear as floating canvases without names or personal details. Your My Drops entries and Echo Vault moments stay private on your device.",
-    },
-    {
-      question: "Is anyone watching what I write?",
-      answer:
-        "No one is watching your writing in real time. MoodDrop is designed as a quiet space where you can release thoughts without feeling observed or judged. Private moments stay on your device, and shared moments appear anonymously in the Living Gallery without names or identities attached.",
-    },
-    {
-      question: "Do I have to share my drop with others?",
-      answer:
-        "No. Sharing is always optional. Many people use MoodDrop purely as a private space to release thoughts and revisit them later in the Echo Vault or My Drops. If you choose to share a moment, it will appear anonymously in the Living Gallery.",
-    },
-    {
-      question: "Can anyone see my private journal (My Drops)?",
-      answer:
-        "No. My Drops is stored locally in your browser on your device. That means only you can see them unless someone else has access to your device and browser.",
-    },
-    {
-      question: "Will my words ever be used to train AI or shared publicly?",
-      answer:
-        "Your words belong to you. MoodDrop is designed as a space for emotional release, not data collection. Your private entries remain on your device, and anything shared anonymously in the Living Gallery appears only as a moment to be witnessed — not as content to be analyzed, reused, or sold.",
-    },
-    {
-      question: "What if I’m going through something really serious or overwhelming?",
-      answer:
-        "If you're going through something that feels really heavy or overwhelming, you're not alone in feeling that way. MoodDrop is a space for emotional release and reflection, but it isn’t a replacement for professional care or crisis support.\n\nIf you’re experiencing something unsafe or urgent, it’s important to reach out to someone who can support you directly. This might be a trusted friend, family member, counselor, or a mental health professional.\n\nMoodDrop can be a quiet place to pause and breathe, but you don’t have to carry heavy moments alone. You can also visit the Care & Support page for additional resources and guidance.",
-    },
-  ],
-},
+    title: "Privacy & Care",
+    items: [
+      {
+        question: "Are my drops anonymous?",
+        answer:
+          "Shared moments in the Living Gallery are anonymous. They appear as floating canvases without names or personal details. Your droplets stay private on your device.",
+      },
+      {
+        question: "Is anyone watching what I write?",
+        answer:
+          "No one is watching your writing in real time. MoodDrop is designed as a quiet space where you can release thoughts without feeling observed or judged. Private moments stay on your device, and shared moments appear anonymously in the Living Gallery.",
+      },
+      {
+        question: "Do I have to share my drop with others?",
+        answer:
+          "No. Sharing is always optional. Many people use MoodDrop purely as a private space to release thoughts and revisit them later in My Droplets.",
+      },
+      {
+        question: "Can anyone see my private journal?",
+        answer:
+          "No. Your droplets are stored locally in your browser on your device. That means only you can see them unless someone else has access to your device.",
+      },
+      {
+        question: "Will my words ever be used or shared publicly?",
+        answer:
+          "Your words belong to you. MoodDrop is designed as a space for emotional release, not data collection. Your private entries remain on your device, and anything shared anonymously appears only as a moment to be witnessed — not reused or sold.",
+      },
+      {
+        question: "What if I’m going through something really serious or overwhelming?",
+        answer:
+          "If you're going through something that feels really heavy or overwhelming, you're not alone in feeling that way. MoodDrop is a space for emotional release and reflection, but it isn’t a replacement for professional care or crisis support.\n\nIf you’re experiencing something unsafe or urgent, it’s important to reach out to someone who can support you directly. This might be a trusted friend, family member, counselor, or a mental health professional.\n\nMoodDrop can be a quiet place to pause and breathe, but you don’t have to carry heavy moments alone. You can also visit the Care & Support page for additional resources and guidance.",
+      },
+    ],
+  },
 ];
 
 export default function QAPage() {
@@ -315,7 +310,9 @@ export default function QAPage() {
           kept safe, and how to get the most out of your drops — at your own
           pace.
         </p>
-        <p className="text-xs text-[#A08B73]">Tap a question whenever you&apos;re curious.</p>
+        <p className="text-xs text-[#A08B73]">
+          Tap a question whenever you&apos;re curious.
+        </p>
         <p className="text-[11px] uppercase tracking-[0.25em] text-[#C0A489]">
           Breathe in • Breathe out
         </p>
@@ -334,7 +331,7 @@ export default function QAPage() {
           <span>•</span>
           <span>Calm Studio</span>
           <span>•</span>
-          <span>Echo Vault</span>
+          <span>My Droplets</span>
           <span>•</span>
           <span>Harmony</span>
           <span>•</span>
@@ -350,6 +347,7 @@ export default function QAPage() {
                 <span className="text-[#3BA7FF]">💧</span>
                 {section.title}
               </h2>
+
               <div className="divide-y divide-blush-100">
                 {section.items.map((item, itemIndex) => {
                   const key = `${sectionIndex}-${itemIndex}`;
@@ -370,8 +368,9 @@ export default function QAPage() {
                           {isOpen ? "–" : "+"}
                         </span>
                       </div>
+
                       {isOpen && (
-                        <p className="mt-2 text-sm text-[#8B7355] leading-relaxed">
+                        <p className="mt-2 text-sm text-[#8B7355] leading-relaxed whitespace-pre-line">
                           {item.answer}
                         </p>
                       )}

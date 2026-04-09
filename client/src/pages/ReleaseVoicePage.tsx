@@ -3,9 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { saveVoiceEchoLocal } from "@/lib/EchoVaultLocal";
 import HeldOverlay from "@/components/HeldOverlay";
-
-// ✅ Update this filename to match your asset exactly
-import dropSound from "@/assets/sounds/moodDrop-droplet.m4a";
+import dropSound from "../assets/sounds/moodDrop-droplet.m4a";
 
 const VOICE_MAX_MS = 120_000; // 2 minutes
 const HELD_MS = 2600;
@@ -46,7 +44,14 @@ function formatMs(ms: number) {
   return `${m}:${String(ss).padStart(2, "0")}`;
 }
 
-const MOODS = ["Joy", "Calm", "Grounded", "Tense", "Overwhelmed", "Crash Out"] as const;
+const MOODS = [
+  "Joy",
+  "Calm",
+  "Grounded",
+  "Anxious",
+  "Overwhelmed",
+  "Crash Out",
+] as const;
 
 export default function ReleaseVoicePage() {
   const [, setLocation] = useLocation();
@@ -66,7 +71,6 @@ export default function ReleaseVoicePage() {
 
   const [showCopy, setShowCopy] = useState(false);
   const [showActions, setShowActions] = useState(false);
-
   const [showHeld, setShowHeld] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -78,12 +82,9 @@ export default function ReleaseVoicePage() {
   const hardLimitTimerRef = useRef<number | null>(null);
 
   const didReleaseRef = useRef(false);
-
-  // ✅ Drop sound (preloaded)
   const dropAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Preload the sound once so it’s ready instantly on tap
     const a = new Audio(dropSound);
     a.preload = "auto";
     a.volume = 0.9;
@@ -99,13 +100,14 @@ export default function ReleaseVoicePage() {
     try {
       a.currentTime = 0;
       await a.play();
-    } catch {
-      // If the browser blocks it (rare when triggered by tap), fail silently.
-    }
+    } catch {}
   };
 
   const headline = useMemo(() => "Say it out loud.", []);
-  const subline = useMemo(() => "You can keep it messy. The pond will hold it.", []);
+  const subline = useMemo(
+    () => "You can keep it messy. This space will hold it.",
+    []
+  );
 
   useEffect(() => {
     const t1 = window.setTimeout(() => setShowCopy(true), 200);
@@ -124,13 +126,11 @@ export default function ReleaseVoicePage() {
   useEffect(() => {
     return () => {
       if (!didReleaseRef.current && previewUrl) URL.revokeObjectURL(previewUrl);
-
       stopAllTracks();
       if (tickTimerRef.current) window.clearInterval(tickTimerRef.current);
       if (hardLimitTimerRef.current) window.clearTimeout(hardLimitTimerRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [previewUrl]);
 
   useEffect(() => {
     if (!isRecording) return;
@@ -191,7 +191,6 @@ export default function ReleaseVoicePage() {
         const url = URL.createObjectURL(blob);
         setPreviewUrl(url);
         setAudioBlob(blob);
-
         setIsRecording(false);
 
         const dur = Math.max(0, elapsedMs);
@@ -237,12 +236,9 @@ export default function ReleaseVoicePage() {
   const onRelease = async () => {
     if (!canRelease || !audioBlob) return;
 
-    // ✅ Play sound IMMEDIATELY on the tap (most important for mobile)
     void playDropSound();
-
     didReleaseRef.current = true;
 
-    // ✅ Save to Echo Vault
     await saveVoiceEchoLocal({
       mood,
       content: note,
@@ -251,11 +247,10 @@ export default function ReleaseVoicePage() {
       audioDurationMs,
     });
 
-    // ✅ Held moment then route to Vault
     setShowHeld(true);
     window.setTimeout(() => {
       setShowHeld(false);
-      setLocation("/vault");
+      setLocation("/my-droplets");
     }, HELD_MS);
   };
 
@@ -428,12 +423,23 @@ export default function ReleaseVoicePage() {
                   color: "rgba(35,28,28,0.62)",
                 }}
               >
-                {isRecording ? "Hold the moment." : previewUrl ? "A take is ready." : "Whenever you’re ready."}
+                {isRecording
+                  ? "Hold the moment."
+                  : previewUrl
+                  ? "A take is ready."
+                  : "Whenever you’re ready."}
               </div>
             </div>
 
-            <div className="text-[12px] tabular-nums" style={{ color: "rgba(35,28,28,0.55)" }}>
-              {isRecording ? formatMs(elapsedMs) : audioDurationMs ? formatMs(audioDurationMs) : "0:00"}
+            <div
+              className="text-[12px] tabular-nums"
+              style={{ color: "rgba(35,28,28,0.55)" }}
+            >
+              {isRecording
+                ? formatMs(elapsedMs)
+                : audioDurationMs
+                ? formatMs(audioDurationMs)
+                : "0:00"}
             </div>
           </div>
 
@@ -545,7 +551,7 @@ export default function ReleaseVoicePage() {
                       boxShadow: "0 18px 44px rgba(210,160,170,0.14)",
                     }}
                   >
-                    Release
+                    Save to My Droplets
                   </button>
                 </div>
               </div>

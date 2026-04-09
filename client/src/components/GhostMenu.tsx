@@ -1,3 +1,4 @@
+// client/src/components/GhostMenu.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -21,23 +22,35 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
 
   const items: MenuItem[] = useMemo(
     () => [
-      { label: "Echoes", href: "/vault", sub: "Echo Vault" },
+      {
+        label: "My Droplets",
+        href: "/my-droplets",
+        sub: "Private reflections",
+      },
 
-      // ✅ Living Gallery added
       {
         label: "Gallery",
         href: "/living-gallery",
-        sub: "Living Gallery",
+        sub: "Shared moments, witnessed softly",
       },
 
       {
         label: "Harmony",
         href: "/harmony",
-        sub: "A song shaped into a melody",
+        sub: "Turn your words into melody",
       },
 
-      { label: "Rest", href: "/calm-studio", sub: "Calm Studio" },
-      { label: "Read", href: "/soft-reads", sub: "Soft Reads" },
+      {
+        label: "Rest",
+        href: "/calm-studio",
+        sub: "A space to slow down",
+      },
+
+      {
+        label: "Read",
+        href: "/soft-reads",
+        sub: "Gentle reflections",
+      },
     ],
     []
   );
