@@ -1,235 +1,275 @@
-// client/src/pages/home.tsx
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useLocation } from "wouter";
-import { Orb } from "../components/Orb";
-
-// Wordmark
 import moodDropText from "../assets/mooddrop-text.png";
 
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-    if (!mq) return;
-
-    const onChange = () => setReduced(mq.matches);
-    onChange();
-
-    if (mq.addEventListener) mq.addEventListener("change", onChange);
-    else mq.addListener(onChange);
-
-    return () => {
-      if (mq.removeEventListener) mq.removeEventListener("change", onChange);
-      else mq.removeListener(onChange);
-    };
-  }, []);
-
-  return reduced;
-}
-
-export default function HomePage() {
+export default function Home() {
   const [, setLocation] = useLocation();
-  const reducedMotion = usePrefersReducedMotion();
-
-  const goText = () => setLocation("/release/text");
-  const goVoice = () => setLocation("/release/voice");
 
   return (
-    <main
-      className="relative min-h-screen overflow-hidden font-sans"
+    <div
+      className="relative min-h-screen overflow-hidden"
       style={{
         background:
-          "radial-gradient(circle at 20% 15%, rgba(255, 240, 235, 0.95), rgba(252, 232, 225, 0.72), rgba(249, 244, 240, 0.98))",
+          "linear-gradient(180deg, rgba(250,240,243,1) 0%, rgba(247,236,239,1) 45%, rgba(244,232,234,1) 100%)",
       }}
     >
-      <div className="pointer-events-none absolute inset-0 mooddrop-grain" />
+      <style>{`
+        @keyframes orbBreath {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.96;
+          }
+          50% {
+            transform: scale(1.04);
+            opacity: 1;
+          }
+        }
+      `}</style>
 
+      {/* Soft background glow only */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          background:
-            "radial-gradient(circle at 50% 35%, rgba(255,255,255,0.0), rgba(0,0,0,0.035))",
+          background: `
+            radial-gradient(circle at 50% 18%, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0) 28%),
+            radial-gradient(circle at 50% 34%, rgba(245,191,215,0.16) 0%, rgba(245,191,215,0.06) 22%, rgba(255,255,255,0) 52%)
+          `,
         }}
       />
 
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20">
+      {/* Tiny sparkle haze */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-30"
+        style={{
+          background: `
+            radial-gradient(circle at 18% 42%, rgba(255,255,255,0.75) 0px, rgba(255,255,255,0) 7px),
+            radial-gradient(circle at 78% 68%, rgba(255,255,255,0.7) 0px, rgba(255,255,255,0) 9px),
+            radial-gradient(circle at 70% 70%, rgba(255,255,255,0.45) 0px, rgba(255,255,255,0) 18px),
+            radial-gradient(circle at 24% 74%, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0) 14px)
+          `,
+        }}
+      />
+
+      <section className="relative mx-auto flex min-h-screen w-full max-w-md flex-col items-center px-6 pb-16 pt-10 text-center">
+        {/* Wordmark */}
         <img
           src={moodDropText}
           alt="MoodDrop"
-          className="h-7 w-auto opacity-60"
+          className="h-12 w-auto opacity-90"
           style={{
-            filter: "drop-shadow(0 10px 22px rgba(210,160,170,0.18))",
+            filter: "drop-shadow(0 8px 20px rgba(216,170,184,0.18))",
           }}
         />
-      </div>
 
-      <section className="relative mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 py-16 text-center">
-        <div className={`${reducedMotion ? "" : "mooddrop-breathe"} mt-6`}>
-          <Orb className="h-40 w-40" />
+        {/* Orb */}
+        <div className="relative mt-8 flex items-center justify-center">
+          <div
+            className="absolute h-[300px] w-[300px] rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(255,255,255,0.22) 0%, rgba(246,205,220,0.10) 42%, rgba(255,255,255,0) 72%)",
+              filter: "blur(18px)",
+            }}
+          />
+
+          <div
+            className="relative h-[240px] w-[240px] rounded-full"
+            style={{
+              animation: "orbBreath 6.5s ease-in-out infinite",
+              background:
+                "radial-gradient(circle at 38% 28%, rgba(255,255,255,0.88) 0%, rgba(252,233,243,0.98) 24%, rgba(244,196,221,0.94) 72%, rgba(235,171,207,0.96) 100%)",
+              boxShadow:
+                "0 24px 60px rgba(212, 160, 184, 0.20), inset 0 10px 30px rgba(255,255,255,0.30)",
+            }}
+          />
         </div>
 
-        <h1 className="mt-10 text-[22px] leading-tight tracking-wide text-[rgba(35,28,28,0.9)]">
-          A place to let go
+        {/* Headline */}
+        <h1
+          className="mt-12 text-[34px] leading-tight text-[rgba(66,50,56,0.92)]"
+          style={{ fontFamily: "'Playfair Display', serif" }}
+        >
+          You can release it here
         </h1>
 
-        <p className="mt-2 text-[13px] italic text-[rgba(35,28,28,0.48)] select-none">
-          Take a breath before you begin.
+        {/* Intro */}
+        <p className="mt-5 max-w-[620px] text-[18px] leading-[1.6] text-[rgba(99,79,87,0.72)]">
+          MoodDrop is a quiet space to release what you’re feeling — through
+          words or voice, without pressure or judgment.
         </p>
 
-        <div className="mt-10 w-full max-w-xs">
-          <div className="flex flex-col items-center gap-5">
-            <button
-              type="button"
-              onClick={goText}
-              className="w-full rounded-2xl px-6 py-4 text-[16px] tracking-wide text-[rgba(35,28,28,0.86)] shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
-              style={{
-                background: "rgba(255,255,255,0.62)",
-                border: "1px solid rgba(210, 160, 170, 0.18)",
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              Type it out
-            </button>
-
-            <button
-              type="button"
-              onClick={goVoice}
-              className="w-full rounded-2xl px-6 py-4 text-[16px] tracking-wide text-[rgba(35,28,28,0.86)] shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
-              style={{
-                background: "rgba(255,255,255,0.62)",
-                border: "1px solid rgba(210, 160, 170, 0.18)",
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              Voice it out
-            </button>
-
-            <p className="pt-0.5 text-[13px] text-[rgba(35,28,28,0.48)] italic">
-              Whenever you’re ready.
-            </p>
-          </div>
-        </div>
-
-        <div
-          className="mt-8 w-full max-w-xs rounded-2xl px-4 py-4"
-          style={{
-            background: "rgba(255,255,255,0.28)",
-            border: "1px solid rgba(210,160,170,0.12)",
-            backdropFilter: "blur(8px)",
-          }}
-        >
-          <div
-            className="text-[10px] uppercase"
+        {/* CTA buttons */}
+        <div className="mt-10 flex w-full max-w-[540px] flex-col gap-5">
+          <button
+            type="button"
+            onClick={() => setLocation("/release/text")}
+            className="flex items-center justify-center gap-4 rounded-full px-8 py-5 text-[18px] text-[rgba(79,62,68,0.94)] transition active:scale-[0.99]"
             style={{
-              letterSpacing: "0.26em",
-              color: "rgba(35,28,28,0.46)",
+              background:
+                "linear-gradient(90deg, rgba(255,255,255,0.78) 0%, rgba(255,244,248,0.72) 58%, rgba(246,214,228,0.44) 100%)",
+              border: "1px solid rgba(255,255,255,0.72)",
+              boxShadow:
+                "0 18px 35px rgba(201,168,181,0.18), inset 0 1px 0 rgba(255,255,255,0.72)",
+              backdropFilter: "blur(12px)",
             }}
           >
-            Inside MoodDrop
-          </div>
+            <span className="text-[28px] leading-none">✍🏽</span>
+            <span>Type it out</span>
+          </button>
 
-          <div className="mt-3 grid grid-cols-2 gap-2 text-left">
-            <button
-              type="button"
-              onClick={() => setLocation("/my-droplets")}
-              className="rounded-xl px-3 py-2 text-left transition hover:bg-white/50"
-              style={{
-                background: "rgba(255,255,255,0.35)",
-                border: "1px solid rgba(210,160,170,0.10)",
-              }}
-            >
-              <div
-                className="text-[14px]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                My Droplets
-              </div>
-              <div className="text-[11px] italic opacity-60">
-                Private reflections
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setLocation("/living-gallery")}
-              className="rounded-xl px-3 py-2 text-left transition hover:bg-white/50"
-              style={{
-                background: "rgba(255,255,255,0.35)",
-                border: "1px solid rgba(210,160,170,0.10)",
-              }}
-            >
-              <div
-                className="text-[14px]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                Gallery
-              </div>
-              <div className="text-[11px] italic opacity-60">Living Gallery</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setLocation("/comfort")}
-              className="rounded-xl px-3 py-2 text-left transition hover:bg-white/50"
-              style={{
-                background: "rgba(255,255,255,0.35)",
-                border: "1px solid rgba(210,160,170,0.10)",
-              }}
-            >
-              <div
-                className="text-[14px]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                Rest
-              </div>
-              <div className="text-[11px] italic opacity-60">Calm Studio</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setLocation("/soft-reads")}
-              className="rounded-xl px-3 py-2 text-left transition hover:bg-white/50"
-              style={{
-                background: "rgba(255,255,255,0.35)",
-                border: "1px solid rgba(210,160,170,0.10)",
-              }}
-            >
-              <div
-                className="text-[14px]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                Read
-              </div>
-              <div className="text-[11px] italic opacity-60">Soft Reads</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setLocation("/harmony")}
-              className="col-span-2 rounded-xl px-3 py-2 text-left transition hover:bg-white/50"
-              style={{
-                background: "rgba(255,255,255,0.35)",
-                border: "1px solid rgba(210,160,170,0.10)",
-              }}
-            >
-              <div
-                className="text-[14px]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                Harmony
-              </div>
-              <div className="text-[11px] italic opacity-60">
-                A song shaped into a melody
-              </div>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setLocation("/release/voice")}
+            className="flex items-center justify-center gap-4 rounded-full px-8 py-5 text-[18px] text-[rgba(79,62,68,0.94)] transition active:scale-[0.99]"
+            style={{
+              background:
+                "linear-gradient(90deg, rgba(255,255,255,0.78) 0%, rgba(255,244,248,0.72) 58%, rgba(246,214,228,0.44) 100%)",
+              border: "1px solid rgba(255,255,255,0.72)",
+              boxShadow:
+                "0 18px 35px rgba(201,168,181,0.18), inset 0 1px 0 rgba(255,255,255,0.72)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <span className="text-[26px] leading-none">🎙️</span>
+            <span>Voice it out</span>
+          </button>
         </div>
 
-        <p className="mt-8 text-[13px] text-[rgba(35,28,28,0.48)] select-none">
+        {/* Section label */}
+        <div className="mt-16 flex w-full max-w-[640px] items-center gap-5">
+          <div className="h-px flex-1 bg-[rgba(170,140,150,0.18)]" />
+          <p
+            className="text-[18px] text-[rgba(79,62,68,0.9)]"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Inside your space
+          </p>
+          <div className="h-px flex-1 bg-[rgba(170,140,150,0.18)]" />
+        </div>
+
+        {/* Cards */}
+        <div className="mt-8 grid w-full grid-cols-2 gap-4">
+          <button
+            type="button"
+            onClick={() => setLocation("/my-droplets")}
+            className="rounded-[28px] px-6 py-6 text-left transition hover:translate-y-[-1px]"
+            style={{
+              background: "rgba(255,255,255,0.48)",
+              border: "1px solid rgba(255,255,255,0.58)",
+              boxShadow:
+                "0 12px 28px rgba(201,168,181,0.12), inset 0 1px 0 rgba(255,255,255,0.62)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <div
+              className="text-[18px] text-[rgba(77,61,68,0.95)]"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              My Droplets
+            </div>
+            <div className="mt-2 text-[13px] italic text-[rgba(110,89,96,0.7)]">
+              Your private space
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setLocation("/living-gallery")}
+            className="rounded-[28px] px-6 py-6 text-left transition hover:translate-y-[-1px]"
+            style={{
+              background: "rgba(255,255,255,0.48)",
+              border: "1px solid rgba(255,255,255,0.58)",
+              boxShadow:
+                "0 12px 28px rgba(201,168,181,0.12), inset 0 1px 0 rgba(255,255,255,0.62)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <div
+              className="text-[18px] text-[rgba(77,61,68,0.95)]"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Gallery
+            </div>
+            <div className="mt-2 text-[13px] italic text-[rgba(110,89,96,0.7)]">
+              Shared moments
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setLocation("/comfort")}
+            className="rounded-[28px] px-6 py-6 text-left transition hover:translate-y-[-1px]"
+            style={{
+              background: "rgba(255,255,255,0.48)",
+              border: "1px solid rgba(255,255,255,0.58)",
+              boxShadow:
+                "0 12px 28px rgba(201,168,181,0.12), inset 0 1px 0 rgba(255,255,255,0.62)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <div
+              className="text-[18px] text-[rgba(77,61,68,0.95)]"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Rest
+            </div>
+            <div className="mt-2 text-[13px] italic text-[rgba(110,89,96,0.7)]">
+              Pause & unwind
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setLocation("/soft-reads")}
+            className="rounded-[28px] px-6 py-6 text-left transition hover:translate-y-[-1px]"
+            style={{
+              background: "rgba(255,255,255,0.48)",
+              border: "1px solid rgba(255,255,255,0.58)",
+              boxShadow:
+                "0 12px 28px rgba(201,168,181,0.12), inset 0 1px 0 rgba(255,255,255,0.62)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <div
+              className="text-[18px] text-[rgba(77,61,68,0.95)]"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Quiet Reads
+            </div>
+            <div className="mt-2 text-[13px] italic text-[rgba(110,89,96,0.7)]">
+              Take a moment
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setLocation("/harmony")}
+            className="col-span-2 rounded-[28px] px-6 py-6 text-left transition hover:translate-y-[-1px]"
+            style={{
+              background: "rgba(255,255,255,0.48)",
+              border: "1px solid rgba(255,255,255,0.58)",
+              boxShadow:
+                "0 12px 28px rgba(201,168,181,0.12), inset 0 1px 0 rgba(255,255,255,0.62)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <div
+              className="text-[18px] text-[rgba(77,61,68,0.95)]"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Harmony
+            </div>
+            <div className="mt-2 text-[13px] italic text-[rgba(110,89,96,0.7)]">
+              A song shaped into a melody
+            </div>
+          </button>
+        </div>
+
+        {/* Privacy line */}
+        <p className="mt-10 max-w-[420px] text-[14px] leading-7 text-[rgba(120,92,101,0.78)]">
           Your words belong only to you. Always private, always yours.
         </p>
       </section>
-    </main>
+    </div>
   );
 }

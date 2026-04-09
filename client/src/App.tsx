@@ -1,4 +1,3 @@
-// client/src/App.tsx
 import React from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
@@ -60,14 +59,11 @@ function Router() {
 
       <Route path="/owner-unlock" component={OwnerUnlockPage} />
 
-      {/* ✅ Release */}
       <Route path="/release/text" component={ReleaseTextPage} />
       <Route path="/release/voice" component={ReleaseVoicePage} />
 
-      {/* ✅ My Droplets (replaces Echo Vault) */}
       <Route path="/my-droplets" component={EchoVaultPage} />
 
-      {/* Optional: redirect old vault route */}
       <Route path="/vault">
         {() => {
           window.location.href = "/my-droplets";
@@ -84,7 +80,6 @@ function Router() {
       <Route path="/playground" component={CanvasPlayground} />
       <Route path="/dashboard" component={Dashboard} />
 
-      {/* Calm Studio */}
       <Route path="/comfort" component={CalmStudioPage} />
       <Route path="/calm-studio" component={CalmStudioPage} />
 
@@ -114,8 +109,10 @@ function Router() {
 function AppContent() {
   const [location] = useLocation();
 
-  // ✅ Full immersive pages (no tight container feel)
+  const isHome = location === "/";
+
   const isFullWidthPage =
+    isHome ||
     location === "/dashboard" ||
     location === "/calm-studio" ||
     location === "/comfort" ||
@@ -125,28 +122,19 @@ function AppContent() {
     location === "/harmony" ||
     location.startsWith("/harmony/") ||
     location.startsWith("/soft-reads/") ||
-    location.startsWith("/release"); // ✅ IMPORTANT
-
-  const isHome = location === "/";
+    location.startsWith("/release");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blush-50 via-cream-50 to-blush-100">
       <GhostMenu />
 
-      {/* ✅ Hide header on Home + Release pages */}
       {!isHome && !location.startsWith("/release") && <Header />}
 
-      <main
-        className={
-          isFullWidthPage
-            ? "px-6 py-8"
-            : "max-w-lg mx-auto px-6 py-8"
-        }
-      >
+      <main className={isFullWidthPage ? "" : "max-w-lg mx-auto px-6 py-8"}>
         <Router />
       </main>
 
-      <Footer />
+      {!isHome && <Footer />}
       <Analytics />
     </div>
   );
