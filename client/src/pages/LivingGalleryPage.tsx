@@ -1,5 +1,6 @@
 // client/src/pages/LivingGalleryPage.tsx
 import React, { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   SharedCanvas,
   getSharedDrops,
@@ -180,6 +181,10 @@ export default function LivingGalleryPage() {
     setSelectedMood((prev) => (prev === mood ? null : mood));
   }
 
+  function handleCloseMoodOverlay() {
+    setSelectedMood(null);
+  }
+
   return (
     <main
       className={`relative min-h-screen bg-gradient-to-b ${getMoodTint(
@@ -216,16 +221,6 @@ export default function LivingGalleryPage() {
             <p className="mt-2 text-sm italic text-slate-500">
               A soft glimpse of what’s present today. Tap a feeling to explore.
             </p>
-
-            {selectedMood ? (
-              <button
-                type="button"
-                onClick={() => setSelectedMood(null)}
-                className="mt-3 text-xs italic text-slate-400 transition hover:text-slate-600"
-              >
-                View the full space
-              </button>
-            ) : null}
           </div>
 
           <div className="space-y-3">
@@ -336,53 +331,89 @@ export default function LivingGalleryPage() {
             </>
           )}
         </section>
-
-        {selectedMood && !loading && !error ? (
-          <section className="mt-10 rounded-[32px] border border-white/60 bg-white/40 px-4 py-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur sm:px-5 sm:py-7">
-            <div className="mb-5 text-center">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                {formatSelectedMoodTitle(selectedMood)}
-              </p>
-
-              <p className="mt-2 text-sm italic text-slate-500">
-                Moments others needed to release.
-              </p>
-            </div>
-
-            {selectedMoodEntries.length === 0 ? (
-              <div className="rounded-3xl border border-slate-200 bg-white/75 p-8 text-center text-slate-500">
-                <p>Nothing has been shared here just yet.</p>
-                <p className="mt-2">Try another feeling, or return to the full space.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {selectedMoodEntries.map((canvas) => (
-                  <button
-                    key={canvas.id}
-                    type="button"
-                    onClick={() => handleOpenCanvas(canvas)}
-                    className="w-full rounded-[24px] border border-white/70 bg-white/70 px-4 py-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] backdrop-blur transition duration-300 hover:bg-white/85 focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-0"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-[11px] uppercase tracking-[0.14em] text-slate-400">
-                        {canvas.mood || "Shared"}
-                      </span>
-
-                      <span className="text-[11px] text-slate-400">
-                        Witnessed by {canvas.witness_count ?? 0}
-                      </span>
-                    </div>
-
-                    <p className="mt-3 text-sm leading-6 text-slate-700">
-                      {getEntryPreview(canvas.text)}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            )}
-          </section>
-        ) : null}
       </div>
+
+      <AnimatePresence>
+        {selectedMood && !loading && !error ? (
+          <>
+            <motion.div
+              key="mood-overlay-backdrop"
+              className="fixed inset-0 z-30 bg-[rgba(255,250,247,0.42)] backdrop-blur-[6px]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.28, ease: "easeOut" }}
+            />
+
+            <motion.section
+              key={`mood-overlay-${selectedMood}`}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.32, ease: "easeOut" }}
+              className="fixed inset-x-4 top-5 bottom-5 z-40 overflow-hidden rounded-[32px] border border-white/70 bg-white/55 shadow-[0_22px_70px_rgba(15,23,42,0.10)] backdrop-blur-xl sm:inset-x-10 sm:top-8 sm:bottom-8 lg:left-1/2 lg:right-auto lg:w-[min(760px,calc(100vw-6rem))] lg:-translate-x-1/2"
+            >
+              <div className="flex h-full flex-col">
+                <div className="border-b border-white/55 px-5 py-5 sm:px-7">
+                  <div className="text-center">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                      {formatSelectedMoodTitle(selectedMood)}
+                    </p>
+
+                    <p className="mt-2 text-sm italic text-slate-500">
+                      Moments others needed to release.
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={handleCloseMoodOverlay}
+                      className="mt-4 text-xs italic text-slate-400 transition hover:text-slate-600"
+                    >
+                      Return to the full space
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+                  {selectedMoodEntries.length === 0 ? (
+                    <div className="rounded-3xl border border-slate-200 bg-white/75 p-8 text-center text-slate-500">
+                      <p>Nothing has been shared here just yet.</p>
+                      <p className="mt-2">
+                        Try another feeling, or return to the full space.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {selectedMoodEntries.map((canvas) => (
+                        <button
+                          key={canvas.id}
+                          type="button"
+                          onClick={() => handleOpenCanvas(canvas)}
+                          className="w-full rounded-[24px] border border-white/75 bg-white/72 px-4 py-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] backdrop-blur transition duration-300 hover:bg-white/88 focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-0"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-[11px] uppercase tracking-[0.14em] text-slate-400">
+                              {canvas.mood || "Shared"}
+                            </span>
+
+                            <span className="text-[11px] text-slate-400">
+                              Witnessed by {canvas.witness_count ?? 0}
+                            </span>
+                          </div>
+
+                          <p className="mt-3 text-sm leading-6 text-slate-700">
+                            {getEntryPreview(canvas.text)}
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.section>
+          </>
+        ) : null}
+      </AnimatePresence>
 
       <CanvasViewer
         canvas={activeCanvas}
