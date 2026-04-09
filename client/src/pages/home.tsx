@@ -62,38 +62,41 @@ export default function Home() {
         />
 
         {/* Orb */}
-        <div className="relative mt-8 flex items-center justify-center">
-          <div
-            className="absolute h-[300px] w-[300px] rounded-full"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(255,255,255,0.22) 0%, rgba(246,205,220,0.10) 42%, rgba(255,255,255,0) 72%)",
-              filter: "blur(18px)",
-            }}
-          />
+        <div className="relative mt-6 sm:mt-8 flex items-center justify-center">
+  <div
+    className="absolute rounded-full"
+    style={{
+      width: "min(300px, 70vw)",
+      height: "min(300px, 70vw)",
+      background:
+        "radial-gradient(circle, rgba(255,255,255,0.22) 0%, rgba(246,205,220,0.10) 42%, rgba(255,255,255,0) 72%)",
+      filter: "blur(18px)",
+    }}
+  />
 
-          <div
-            className="relative h-[240px] w-[240px] rounded-full"
-            style={{
-              animation: "orbBreath 6.5s ease-in-out infinite",
-              background:
-                "radial-gradient(circle at 38% 28%, rgba(255,255,255,0.88) 0%, rgba(252,233,243,0.98) 24%, rgba(244,196,221,0.94) 72%, rgba(235,171,207,0.96) 100%)",
-              boxShadow:
-                "0 24px 60px rgba(212, 160, 184, 0.20), inset 0 10px 30px rgba(255,255,255,0.30)",
-            }}
-          />
-        </div>
+  <div
+    className="relative rounded-full"
+    style={{
+      width: "min(240px, 55vw)",
+      height: "min(240px, 55vw)",
+      animation: "orbBreath 6.5s ease-in-out infinite",
+      background:
+        "radial-gradient(circle at 38% 28%, rgba(255,255,255,0.88) 0%, rgba(252,233,243,0.98) 24%, rgba(244,196,221,0.94) 72%, rgba(235,171,207,0.96) 100%)",
+      boxShadow:
+        "0 24px 60px rgba(212, 160, 184, 0.20), inset 0 10px 30px rgba(255,255,255,0.30)",
+    }}
+  />
+</div>
 
         {/* Headline */}
-        <h1
-          className="mt-12 text-[34px] leading-tight text-[rgba(66,50,56,0.92)]"
+        <h1 className="mt-8 sm:mt-12 text-[28px] sm:text-[34px] leading-tight text-[rgba(66,50,56,0.92)]"
           style={{ fontFamily: "'Playfair Display', serif" }}
         >
           You can release it here
         </h1>
 
         {/* Intro */}
-        <p className="mt-5 max-w-[620px] text-[18px] leading-[1.6] text-[rgba(99,79,87,0.72)]">
+        <p className="mt-4 sm:mt-5 max-w-[620px] text-[16px] sm:text-[18px] leading-[1.6] text-[rgba(99,79,87,0.72)]">
           MoodDrop is a quiet space to release what you’re feeling — through
           words or voice, without pressure or judgment.
         </p>
