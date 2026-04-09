@@ -39,33 +39,13 @@ function buildPositions(
   const rand = seedRng(canvases.map((c) => c.id).join("|") || "empty");
   const positions: Record<string, OrbPos> = {};
 
-  const mobileLayout = [
-    { left: 30, top: 30 },
-    { left: 70, top: 34 },
-    { left: 32, top: 64 },
-    { left: 68, top: 68 },
-  ];
-
-  const desktopLayout = [
-    { left: 20, top: 24 },
-    { left: 50, top: 20 },
-    { left: 80, top: 24 },
-    { left: 22, top: 56 },
-    { left: 52, top: 60 },
-    { left: 80, top: 56 },
-  ];
-
-  const layout = isMobile ? mobileLayout : desktopLayout;
-
-  canvases.forEach((canvas, index) => {
-    const slot = layout[index % layout.length];
-
+  canvases.forEach((canvas) => {
     positions[canvas.id] = {
-      left: slot.left + (rand() * 3 - 1.5),
-      top: slot.top + (rand() * 3 - 1.5),
-      size: index % 2 === 0 ? "md" : "sm",
-      duration: 7 + rand() * 3,
-      delay: rand() * 2,
+      left: isMobile ? 16 + rand() * 68 : 14 + rand() * 72,
+      top: isMobile ? 18 + rand() * 62 : 16 + rand() * 66,
+      size: rand() > 0.62 ? "md" : "sm",
+      duration: 10 + rand() * 4,
+      delay: rand() * 3,
     };
   });
 
@@ -75,13 +55,13 @@ function buildPositions(
 function getSizeClasses(size: OrbPos["size"], isMobile: boolean) {
   if (isMobile) {
     return size === "md"
-      ? "w-[126px] h-[112px]"
-      : "w-[108px] h-[96px]";
+      ? "w-[104px] h-[92px]"
+      : "w-[86px] h-[78px]";
   }
 
   return size === "md"
-    ? "w-[148px] h-[128px]"
-    : "w-[124px] h-[108px]";
+    ? "w-[124px] h-[108px]"
+    : "w-[102px] h-[92px]";
 }
 
 export default function EmotionField({
@@ -108,13 +88,13 @@ export default function EmotionField({
 
     const interval = setInterval(() => {
       setStartIndex((prev) => (prev + 1) % canvases.length);
-    }, 8000);
+    }, 12000);
 
     return () => clearInterval(interval);
   }, [canvases.length]);
 
   const visibleCanvases = useMemo(() => {
-    const limit = isMobile ? 4 : 6;
+    const limit = isMobile ? 6 : 8;
     const rotated = [
       ...canvases.slice(startIndex),
       ...canvases.slice(0, startIndex),
@@ -132,10 +112,10 @@ export default function EmotionField({
   return (
     <div
       className={`relative w-full overflow-hidden rounded-[32px] ${
-        isMobile ? "h-[300px]" : "h-[500px]"
+        isMobile ? "h-[320px]" : "h-[520px]"
       }`}
     >
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence mode="sync">
         {visibleCanvases.map((canvas) => {
           const pos = positions[canvas.id];
 
@@ -151,10 +131,10 @@ export default function EmotionField({
                 top: `${pos.top}%`,
                 animation: `mooddropFloat ${pos.duration}s ease-in-out ${pos.delay}s infinite`,
               }}
-              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              initial={{ opacity: 0, scale: 0.98, y: 6 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 10 }}
-              transition={{ duration: 0.45, ease: "easeOut" }}
+              exit={{ opacity: 0, scale: 0.98, y: 6 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
             >
               <Droplet
                 text={canvas.text}
@@ -173,7 +153,7 @@ export default function EmotionField({
       <style>{`
         @keyframes mooddropFloat {
           0% { transform: translate(-50%, -50%) translateY(0px); }
-          50% { transform: translate(-50%, -50%) translateY(-8px); }
+          50% { transform: translate(-50%, -50%) translateY(-5px); }
           100% { transform: translate(-50%, -50%) translateY(0px); }
         }
       `}</style>
