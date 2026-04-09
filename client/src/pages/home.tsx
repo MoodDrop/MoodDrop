@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import moodDropText from "../assets/mooddrop-text.png";
 import typeIcon from "../assets/icons/type.png";
@@ -6,6 +6,34 @@ import micIcon from "../assets/icons/mic.png";
 
 export default function Home() {
   const [, setLocation] = useLocation();
+
+  const affirmations = [
+    "I am enough as I am",
+    "I am allowed to grow at my own pace",
+    "I trust myself through this",
+    "I am becoming who I need to be",
+    "I can move through this gently",
+  ];
+
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const startDelay = window.setTimeout(() => {
+      const interval = window.setInterval(() => {
+        setVisible(false);
+
+        window.setTimeout(() => {
+          setIndex((prev) => (prev + 1) % affirmations.length);
+          setVisible(true);
+        }, 300);
+      }, 6000);
+
+      return () => window.clearInterval(interval);
+    }, 800);
+
+    return () => window.clearTimeout(startDelay);
+  }, [affirmations.length]);
 
   return (
     <div
@@ -144,6 +172,17 @@ export default function Home() {
               <span>Voice it out</span>
             </div>
           </button>
+        </div>
+
+        <div className="mt-7 flex min-h-[30px] items-center justify-center">
+          <p
+            className="text-[13px] italic tracking-[0.2px] text-[rgba(145,112,118,0.72)] transition-opacity duration-700 ease-in-out sm:text-[14px]"
+            style={{
+              opacity: visible ? 0.78 : 0,
+            }}
+          >
+            {affirmations[index]}
+          </p>
         </div>
 
         <div className="mt-16 flex w-full max-w-[640px] items-center gap-5">
