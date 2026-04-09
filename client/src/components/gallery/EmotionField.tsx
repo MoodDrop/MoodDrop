@@ -39,11 +39,37 @@ function buildPositions(
   const rand = seedRng(canvases.map((c) => c.id).join("|") || "empty");
   const positions: Record<string, OrbPos> = {};
 
-  canvases.forEach((canvas) => {
+  const mobileLayout = [
+    { left: 24, top: 28, size: "sm" as const },
+    { left: 52, top: 26, size: "sm" as const },
+    { left: 78, top: 32, size: "sm" as const },
+    { left: 30, top: 54, size: "md" as const },
+    { left: 68, top: 54, size: "sm" as const },
+    { left: 50, top: 76, size: "sm" as const },
+  ];
+
+  const desktopLayout = [
+    { left: 18, top: 24, size: "sm" as const },
+    { left: 40, top: 20, size: "md" as const },
+    { left: 64, top: 24, size: "sm" as const },
+    { left: 84, top: 28, size: "sm" as const },
+    { left: 22, top: 54, size: "sm" as const },
+    { left: 46, top: 58, size: "md" as const },
+    { left: 70, top: 54, size: "sm" as const },
+    { left: 84, top: 64, size: "sm" as const },
+  ];
+
+  const layout = isMobile ? mobileLayout : desktopLayout;
+
+  canvases.forEach((canvas, index) => {
+    const slot = layout[index % layout.length];
+    const jitterX = isMobile ? rand() * 3 - 1.5 : rand() * 4 - 2;
+    const jitterY = isMobile ? rand() * 3 - 1.5 : rand() * 4 - 2;
+
     positions[canvas.id] = {
-      left: isMobile ? 20 + rand() * 60 : 14 + rand() * 72,
-      top: isMobile ? 20 + rand() * 58 : 16 + rand() * 66,
-      size: rand() > 0.62 ? "md" : "sm",
+      left: slot.left + jitterX,
+      top: slot.top + jitterY,
+      size: slot.size,
       duration: 10 + rand() * 4,
       delay: rand() * 3,
     };
@@ -55,8 +81,8 @@ function buildPositions(
 function getSizeClasses(size: OrbPos["size"], isMobile: boolean) {
   if (isMobile) {
     return size === "md"
-      ? "w-[92px] h-[82px]"
-      : "w-[76px] h-[68px]";
+      ? "w-[88px] h-[78px]"
+      : "w-[72px] h-[64px]";
   }
 
   return size === "md"
