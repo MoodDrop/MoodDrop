@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { SharedCanvas, getPreviewText } from "@/lib/livingGallery";
+import { SharedCanvas } from "@/lib/livingGallery";
+import Droplet from "@/components/gallery/Droplet";
 
 type EmotionFieldProps = {
   canvases: SharedCanvas[];
@@ -29,71 +30,6 @@ function seedRng(seed: string) {
     t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-}
-
-function getMoodClasses(mood?: string | null) {
-  switch (mood) {
-    case "CrashOut":
-      return {
-        glow: "bg-rose-200/35",
-        pill: "bg-rose-50/90 text-rose-700 border border-rose-100",
-      };
-    case "Overwhelmed":
-      return {
-        glow: "bg-violet-200/35",
-        pill: "bg-violet-50/90 text-violet-700 border border-violet-100",
-      };
-    case "Healing":
-      return {
-        glow: "bg-emerald-200/35",
-        pill: "bg-emerald-50/90 text-emerald-700 border border-emerald-100",
-      };
-    case "Hopeful":
-      return {
-        glow: "bg-amber-200/35",
-        pill: "bg-amber-50/90 text-amber-700 border border-amber-100",
-      };
-    case "Reflective":
-      return {
-        glow: "bg-sky-200/35",
-        pill: "bg-sky-50/90 text-sky-700 border border-sky-100",
-      };
-    case "Lonely":
-      return {
-        glow: "bg-slate-200/35",
-        pill: "bg-slate-50/90 text-slate-600 border border-slate-100",
-      };
-    case "Grateful":
-      return {
-        glow: "bg-pink-200/35",
-        pill: "bg-pink-50/90 text-pink-700 border border-pink-100",
-      };
-    case "Calm":
-      return {
-        glow: "bg-teal-200/35",
-        pill: "bg-teal-50/90 text-teal-700 border border-teal-100",
-      };
-    case "Tense":
-      return {
-        glow: "bg-orange-200/35",
-        pill: "bg-orange-50/90 text-orange-700 border border-orange-100",
-      };
-    case "Grounded":
-      return {
-        glow: "bg-lime-200/35",
-        pill: "bg-lime-50/90 text-lime-700 border border-lime-100",
-      };
-    case "Joy":
-      return {
-        glow: "bg-yellow-200/35",
-        pill: "bg-yellow-50/90 text-yellow-700 border border-yellow-100",
-      };
-    default:
-      return {
-        glow: "bg-white/35",
-        pill: "bg-white/90 text-slate-600 border border-slate-100",
-      };
-  }
 }
 
 function buildPositions(
@@ -138,22 +74,14 @@ function buildPositions(
 
 function getSizeClasses(size: OrbPos["size"], isMobile: boolean) {
   if (isMobile) {
-    switch (size) {
-      case "md":
-        return "w-[126px] min-h-[84px]";
-      case "sm":
-      default:
-        return "w-[118px] min-h-[78px]";
-    }
+    return size === "md"
+      ? "w-[126px] h-[112px]"
+      : "w-[108px] h-[96px]";
   }
 
-  switch (size) {
-    case "md":
-      return "w-[142px] min-h-[90px]";
-    case "sm":
-    default:
-      return "w-[132px] min-h-[84px]";
-  }
+  return size === "md"
+    ? "w-[148px] h-[128px]"
+    : "w-[124px] h-[108px]";
 }
 
 export default function EmotionField({
@@ -210,8 +138,6 @@ export default function EmotionField({
       <AnimatePresence mode="popLayout">
         {visibleCanvases.map((canvas) => {
           const pos = positions[canvas.id];
-          const mood = getMoodClasses(canvas.mood);
-          const preview = getPreviewText(canvas.text, isMobile ? 34 : 40);
 
           const isHighlighted =
             !activeMood || canvas.mood === activeMood || activeMood === "All";
@@ -230,42 +156,15 @@ export default function EmotionField({
               exit={{ opacity: 0, scale: 0.96, y: 10 }}
               transition={{ duration: 0.45, ease: "easeOut" }}
             >
-              <button
-                type="button"
+              <Droplet
+                text={canvas.text}
+                mood={canvas.mood}
                 onClick={() => onOpen(canvas)}
-                className={`group relative cursor-pointer rounded-[24px] border border-white/70 bg-white/72 p-3 text-left shadow-[0_10px_20px_rgba(90,70,70,0.07)] backdrop-blur transition duration-300 hover:shadow-[0_14px_28px_rgba(90,70,70,0.11)] ${getSizeClasses(
-                  pos.size,
-                  isMobile
-                )} ${isHighlighted ? "opacity-100" : "opacity-45"}`}
-              >
-                <div
-                  className={`pointer-events-none absolute inset-0 rounded-[24px] blur-2xl opacity-35 ${mood.glow}`}
-                />
-
-                <div className="relative z-10">
-                  <div className="mb-2">
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-[9px] uppercase tracking-[0.14em] ${mood.pill}`}
-                    >
-                      {canvas.mood || "Shared"}
-                    </span>
-                  </div>
-
-                  <p className="line-clamp-1 whitespace-pre-wrap text-[11px] leading-5 text-slate-700">
-                    {preview}
-                  </p>
-
-                  <div className="mt-3 flex items-center justify-between gap-2">
-                    <div className="text-[9px] text-slate-400">
-                      Witnessed by {canvas.witness_count ?? 0}
-                    </div>
-
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-slate-400 group-hover:text-slate-500">
-                      Open
-                    </div>
-                  </div>
-                </div>
-              </button>
+                className={`
+                  ${getSizeClasses(pos.size, isMobile)}
+                  ${isHighlighted ? "opacity-100" : "opacity-45"}
+                `}
+              />
             </motion.div>
           );
         })}
