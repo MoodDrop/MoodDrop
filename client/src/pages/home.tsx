@@ -292,28 +292,7 @@ export default function Home() {
             </div>
           </button>
 
-          <button
-            type="button"
-            onClick={() => setLocation("/harmony")}
-            className="col-span-2 rounded-[28px] px-6 py-6 text-left transition hover:translate-y-[-1px]"
-            style={{
-              background: "rgba(255,255,255,0.48)",
-              border: "1px solid rgba(255,255,255,0.58)",
-              boxShadow:
-                "0 12px 28px rgba(201,168,181,0.12), inset 0 1px 0 rgba(255,255,255,0.62)",
-              backdropFilter: "blur(12px)",
-            }}
-          >
-            <div
-              className="text-[18px] text-[rgba(77,61,68,0.95)]"
-              style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-              Harmony
-            </div>
-            <div className="mt-2 text-[13px] italic text-[rgba(110,89,96,0.7)]">
-              A song shaped into a melody
-            </div>
-          </button>
+    
         </div>
 
         <p className="mt-10 max-w-[420px] text-[14px] leading-7 text-[rgba(120,92,101,0.78)]">
