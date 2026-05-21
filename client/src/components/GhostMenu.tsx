@@ -27,25 +27,16 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
         href: "/my-droplets",
         sub: "Private reflections",
       },
-
       {
         label: "Gallery",
         href: "/living-gallery",
         sub: "Shared moments, witnessed softly",
       },
-
-      {
-        label: "Harmony",
-        href: "/harmony",
-        sub: "Turn your words into melody",
-      },
-
       {
         label: "Rest",
         href: "/calm-studio",
         sub: "A space to slow down",
       },
-
       {
         label: "Soft Reads",
         href: "/soft-reads",
