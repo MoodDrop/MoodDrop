@@ -262,7 +262,7 @@ export default function Home() {
               className="text-[18px] text-[rgba(77,61,68,0.95)]"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              Rest
+              Calm Studio
             </div>
             <div className="mt-2 text-[13px] italic text-[rgba(110,89,96,0.7)]">
               Pause &amp; unwind
