@@ -43,11 +43,6 @@ import GhostMenu from "@/components/GhostMenu";
 import ReleaseTextPage from "@/pages/ReleaseTextPage";
 import ReleaseVoicePage from "@/pages/ReleaseVoicePage";
 
-// Harmony
-import HarmonyLandingPage from "@/pages/HarmonyLandingPage";
-import HarmonyRequestPage from "@/pages/HarmonyRequestPage";
-import HarmonyConfirmPage from "@/pages/HarmonyConfirmPage";
-
 // Analytics
 import { Analytics } from "@vercel/analytics/react";
 import EchoVaultPage from "@/pages/EchoVaultPage";
@@ -72,10 +67,6 @@ function Router() {
       </Route>
 
       <Route path="/living-gallery" component={LivingGalleryPage} />
-
-      <Route path="/harmony" component={HarmonyLandingPage} />
-      <Route path="/harmony/request" component={HarmonyRequestPage} />
-      <Route path="/harmony/confirm" component={HarmonyConfirmPage} />
 
       <Route path="/playground" component={CanvasPlayground} />
       <Route path="/dashboard" component={Dashboard} />
@@ -119,8 +110,6 @@ function AppContent() {
     location === "/soft-reads" ||
     location === "/playground" ||
     location === "/living-gallery" ||
-    location === "/harmony" ||
-    location.startsWith("/harmony/") ||
     location.startsWith("/soft-reads/") ||
     location.startsWith("/release");
 
