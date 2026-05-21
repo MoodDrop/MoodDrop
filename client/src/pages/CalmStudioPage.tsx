@@ -37,20 +37,20 @@ export default function CalmStudioPage() {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,#FFF9F5_0%,#FFF3EE_35%,#F8E0D9_100%)] px-4 py-10 text-[#7f5148]">
       <section className="mx-auto max-w-5xl">
-        <div className="mb-10 rounded-[2rem] border border-white/40 bg-white/35 p-7 shadow-sm backdrop-blur-md">
-          <p className="text-sm uppercase tracking-[0.28em] text-[#b98b80]">
-            MoodDrop
-          </p>
+        <div className="mb-10 flex min-h-[180px] flex-col items-center justify-center rounded-[2rem] border border-white/40 bg-white/35 px-6 py-8 text-center shadow-sm backdrop-blur-md">
+  <p className="text-[11px] uppercase tracking-[0.32em] text-[#b98b80]">
+    MoodDrop
+  </p>
 
-          <h1 className="mt-3 font-serif text-4xl text-[#7f5148]">
-            Calm Studio
-          </h1>
+  <h1 className="mt-4 font-serif text-5xl text-[#7f5148]">
+    Calm Studio
+  </h1>
 
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-[#9b6c63]">
-            A quieter space to settle, breathe, listen, or gently play when your
-            mind needs somewhere soft to land.
-          </p>
-        </div>
+  <p className="mt-4 max-w-2xl text-sm leading-7 text-[#9b6c63]">
+    A quieter space to settle, breathe, listen, or gently play when your
+    mind needs somewhere soft to land.
+  </p>
+</div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           {calmCards.map((card) => {
