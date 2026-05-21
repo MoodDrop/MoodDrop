@@ -6,8 +6,26 @@ import {
   getSharedDrops,
   incrementWitnessCount,
 } from "@/lib/livingGallery";
+
 import EmotionField from "@/components/gallery/EmotionField";
 import CanvasViewer from "@/components/gallery/CanvasViewer";
+
+import {
+  Sun,
+  Sprout,
+  Wind,
+  Waves,
+  TreePine,
+  Cloud,
+  User,
+  Minus,
+  Flower2,
+  Orbit,
+  CircleAlert,
+  HeartCrack,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 
 const MOOD_ORDER = [
   "Joy",
@@ -24,33 +42,96 @@ const MOOD_ORDER = [
   "CrashOut",
 ];
 
+const COLLAPSED_MOODS = [
+  "Joy",
+  "Hopeful",
+  "Calm",
+  "Reflective",
+  "Overwhelmed",
+  "CrashOut",
+];
+
+function getMoodIcon(mood: string) {
+  switch (mood) {
+    case "Joy":
+      return Sun;
+
+    case "Hopeful":
+      return Sprout;
+
+    case "Relieved":
+      return Wind;
+
+    case "Calm":
+      return Waves;
+
+    case "Grounded":
+      return TreePine;
+
+    case "Reflective":
+      return Cloud;
+
+    case "Lonely":
+      return User;
+
+    case "Numb":
+      return Minus;
+
+    case "Upset":
+      return Flower2;
+
+    case "Tense":
+      return Orbit;
+
+    case "Overwhelmed":
+      return CircleAlert;
+
+    case "CrashOut":
+      return HeartCrack;
+
+    default:
+      return Cloud;
+  }
+}
+
 function getMoodTint(mood?: string | null) {
   switch (mood) {
     case "Joy":
       return "from-yellow-50 via-white to-yellow-100/60";
+
     case "Hopeful":
       return "from-lime-50 via-white to-lime-100/60";
+
     case "Relieved":
       return "from-teal-50 via-white to-teal-100/60";
+
     case "Calm":
       return "from-cyan-50 via-white to-cyan-100/60";
+
     case "Grounded":
-    case "Healing":
       return "from-emerald-50 via-white to-emerald-100/60";
+
     case "Reflective":
       return "from-sky-50 via-white to-sky-100/60";
+
     case "Lonely":
-      return "from-indigo-50 via-white to-indigo-100/50";
+      return "from-indigo-50 via-white to-indigo-100/60";
+
     case "Numb":
       return "from-slate-50 via-white to-slate-100/60";
+
     case "Upset":
       return "from-rose-50 via-white to-rose-100/60";
+
     case "Tense":
       return "from-orange-50 via-white to-orange-100/60";
+
     case "Overwhelmed":
       return "from-violet-50 via-white to-violet-100/60";
+
     case "CrashOut":
-      return "from-rose-50 via-white to-rose-100/60";
+      return "from-red-50 via-white to-red-100/60";
+
     default:
       return "from-[#fffaf7] via-white to-[#fff3f7]";
   }
@@ -60,29 +141,40 @@ function getMoodDotColor(mood?: string | null) {
   switch (mood) {
     case "Joy":
       return "bg-yellow-300";
+
     case "Hopeful":
       return "bg-lime-300";
+
     case "Relieved":
-      return "bg-teal-300";
+      return "bg-teal-200";
+
     case "Calm":
       return "bg-cyan-300";
+
     case "Grounded":
-    case "Healing":
-      return "bg-emerald-300";
+      return "bg-emerald-200";
+
     case "Reflective":
       return "bg-sky-300";
+
     case "Lonely":
-      return "bg-indigo-300";
+      return "bg-indigo-200";
+
     case "Numb":
-      return "bg-slate-300";
+      return "bg-slate-200";
+
     case "Upset":
-      return "bg-rose-300";
+      return "bg-rose-200";
+
     case "Tense":
       return "bg-orange-300";
+
     case "Overwhelmed":
       return "bg-violet-300";
+
     case "CrashOut":
       return "bg-red-300";
+
     default:
       return "bg-slate-300";
   }
@@ -96,15 +188,14 @@ function groupMoodCounts(canvases: SharedCanvas[]) {
     counts[mood] = (counts[mood] || 0) + 1;
   });
 
-  return MOOD_ORDER.map((mood) => [mood, counts[mood] || 0]) as [
-    string,
-    number
-  ][];
+  return MOOD_ORDER.map((mood) => [
+    mood,
+    counts[mood] || 0,
+  ]) as [string, number][];
 }
 
 function getDotCount(count: number, maxCount: number) {
   if (count === 0) return 2;
-  if (maxCount <= 0) return 3;
 
   const ratio = count / maxCount;
 
@@ -113,6 +204,7 @@ function getDotCount(count: number, maxCount: number) {
   if (ratio >= 0.55) return 5;
   if (ratio >= 0.4) return 4;
   if (ratio >= 0.2) return 3;
+
   return 2;
 }
 
@@ -140,7 +232,9 @@ function formatSelectedMoodTitle(mood: string) {
 
 function getEntryPreview(text: string, maxLength = 160) {
   const clean = text.replace(/\s+/g, " ").trim();
+
   if (clean.length <= maxLength) return clean;
+
   return `${clean.slice(0, maxLength).trim()}…`;
 }
 
@@ -148,20 +242,27 @@ export default function LivingGalleryPage() {
   const [canvases, setCanvases] = useState<SharedCanvas[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeCanvas, setActiveCanvas] = useState<SharedCanvas | null>(null);
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+
+  const [activeCanvas, setActiveCanvas] =
+    useState<SharedCanvas | null>(null);
+
+  const [selectedMood, setSelectedMood] =
+    useState<string | null>(null);
+
+  const [expandedSpectrum, setExpandedSpectrum] =
+    useState(false);
 
   useEffect(() => {
     async function loadGallery() {
       try {
         setLoading(true);
-        setError(null);
 
         const data = await getSharedDrops();
+
         setCanvases(data);
       } catch (err) {
-        console.error("[MoodDrop] Error loading Living Gallery:", err);
-        setError("Unable to load the Living Gallery right now.");
+        console.error(err);
+        setError("Unable to load the Living Gallery.");
       } finally {
         setLoading(false);
       }
@@ -171,14 +272,26 @@ export default function LivingGalleryPage() {
   }, []);
 
   const moodRows = useMemo(() => {
-    return groupMoodCounts(canvases);
-  }, [canvases]);
+    const rows = groupMoodCounts(canvases);
 
-  const maxCount = Math.max(...moodRows.map(([, count]) => count), 1);
+    if (expandedSpectrum) return rows;
+
+    return rows.filter(([mood]) =>
+      COLLAPSED_MOODS.includes(mood)
+    );
+  }, [canvases, expandedSpectrum]);
+
+  const maxCount = Math.max(
+    ...groupMoodCounts(canvases).map(([, count]) => count),
+    1
+  );
 
   const selectedMoodEntries = useMemo(() => {
     if (!selectedMood) return [];
-    return canvases.filter((canvas) => canvas.mood === selectedMood);
+
+    return canvases.filter(
+      (canvas) => canvas.mood === selectedMood
+    );
   }, [canvases, selectedMood]);
 
   async function handleOpenCanvas(canvas: SharedCanvas) {
@@ -190,27 +303,16 @@ export default function LivingGalleryPage() {
       setCanvases((prev) =>
         prev.map((item) =>
           item.id === canvas.id
-            ? { ...item, witness_count: updated.witness_count }
+            ? {
+                ...item,
+                witness_count: updated.witness_count,
+              }
             : item
         )
       );
-
-      setActiveCanvas((prev) =>
-        prev && prev.id === canvas.id
-          ? { ...prev, witness_count: updated.witness_count }
-          : prev
-      );
     } catch (err) {
-      console.error("[MoodDrop] Error incrementing witness count:", err);
+      console.error(err);
     }
-  }
-
-  function handleMoodSelect(mood: string) {
-    setSelectedMood((prev) => (prev === mood ? null : mood));
-  }
-
-  function handleCloseMoodOverlay() {
-    setSelectedMood(null);
   }
 
   return (
@@ -219,13 +321,8 @@ export default function LivingGalleryPage() {
         activeCanvas?.mood ?? selectedMood
       )} px-4 py-8 sm:px-6`}
     >
-      <div className="pointer-events-none absolute inset-0 opacity-20">
-        <div className="absolute left-[10%] top-[12%] h-40 w-40 rounded-full bg-pink-100 blur-3xl" />
-        <div className="absolute right-[12%] top-[28%] h-48 w-48 rounded-full bg-amber-50 blur-3xl" />
-        <div className="absolute bottom-[16%] left-[28%] h-44 w-44 rounded-full bg-rose-50 blur-3xl" />
-      </div>
-
       <div className="relative mx-auto max-w-5xl">
+        {/* HEADER */}
         <section className="mb-10 text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
             Living Gallery
@@ -240,79 +337,109 @@ export default function LivingGalleryPage() {
           </p>
         </section>
 
-        <section className="mx-auto mb-10 max-w-2xl rounded-[28px] border border-white/70 bg-white/70 p-6 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur">
+        {/* SPECTRUM */}
+        <section className="mx-auto mb-10 max-w-2xl rounded-[28px] border border-white/70 bg-white/70 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur">
           <div className="mb-5 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
               What the space is holding
             </p>
 
             <p className="mt-2 text-sm italic text-slate-500">
-              A soft glimpse of what’s present today. Tap a feeling to explore.
+              A soft glimpse of what’s present today.
+              Tap a feeling to explore.
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {moodRows.map(([mood, count]) => {
+              const Icon = getMoodIcon(mood);
+
               const percent = canvases.length
                 ? Math.round((count / canvases.length) * 100)
                 : 0;
 
               const dotCount = getDotCount(count, maxCount);
+
               const isActive = selectedMood === mood;
-              const isDimmed = selectedMood && !isActive;
 
               return (
                 <button
                   key={mood}
-                  type="button"
-                  onClick={() => handleMoodSelect(mood)}
-                  className={[
-                    "grid w-full grid-cols-[110px_1fr_40px] items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition duration-300",
-                    "focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-0",
+                  onClick={() =>
+                    setSelectedMood((prev) =>
+                      prev === mood ? null : mood
+                    )
+                  }
+                  className={`w-full rounded-2xl border border-white/60 bg-white/40 px-3 py-3 transition hover:bg-white/60 ${
                     isActive
-                      ? "bg-white/55 shadow-[0_8px_18px_rgba(15,23,42,0.03)]"
-                      : "bg-white/18 hover:bg-white/32",
-                    isDimmed ? "opacity-55" : "opacity-100",
-                  ].join(" ")}
-                  aria-pressed={isActive}
+                      ? "shadow-[0_10px_24px_rgba(15,23,42,0.05)]"
+                      : ""
+                  }`}
                 >
-                  <div
-                    className={[
-                      "text-sm transition",
-                      isActive ? "text-slate-800" : "text-slate-700",
-                    ].join(" ")}
-                  >
-                    {mood}
-                  </div>
-
-                  <div className="flex items-center gap-2.5">
-                    {Array.from({ length: dotCount }).map((_, index) => (
-                      <span
-                        key={`${mood}-${index}`}
-                        className={[
-                          "h-2.5 w-2.5 rounded-full transition",
-                          getMoodDotColor(mood),
-                          getDotOpacity(index, count),
-                          isActive ? "scale-105" : "",
-                        ].join(" ")}
+                  <div className="flex items-center gap-3">
+                    {/* ICON */}
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70">
+                      <Icon
+                        size={18}
+                        className="text-slate-500"
+                        strokeWidth={1.8}
                       />
-                    ))}
-                  </div>
+                    </div>
 
-                  <div
-                    className={[
-                      "text-xs transition",
-                      isActive ? "text-slate-500" : "text-slate-400",
-                    ].join(" ")}
-                  >
-                    {percent}%
+                    {/* LABEL */}
+                    <div className="min-w-[92px] text-left text-[15px] text-slate-800">
+                      {mood}
+                    </div>
+
+                    {/* DOTS */}
+                    <div className="flex flex-1 items-center gap-2">
+                      {Array.from({ length: dotCount }).map(
+                        (_, index) => (
+                          <span
+                            key={`${mood}-${index}`}
+                            className={[
+                              "h-2.5 w-2.5 rounded-full",
+                              getMoodDotColor(mood),
+                              getDotOpacity(index, count),
+                            ].join(" ")}
+                          />
+                        )
+                      )}
+                    </div>
+
+                    {/* % */}
+                    <div className="w-[38px] text-right text-xs text-slate-400">
+                      {percent}%
+                    </div>
                   </div>
                 </button>
               );
             })}
           </div>
+
+          {/* EXPAND / COLLAPSE */}
+          <button
+            type="button"
+            onClick={() =>
+              setExpandedSpectrum((prev) => !prev)
+            }
+            className="mx-auto mt-5 flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-rose-400 transition hover:text-rose-500"
+          >
+            {expandedSpectrum ? (
+              <>
+                <ChevronUp size={14} />
+                Show Less
+              </>
+            ) : (
+              <>
+                <ChevronDown size={14} />
+                View All Feelings
+              </>
+            )}
+          </button>
         </section>
 
+        {/* EMOTIONAL FIELD */}
         <section className="rounded-[32px] border border-white/60 bg-white/35 px-4 py-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur sm:px-5 sm:py-7">
           <div className="mb-5 text-center">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
@@ -332,100 +459,67 @@ export default function LivingGalleryPage() {
             <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-700">
               {error}
             </div>
-          ) : canvases.length === 0 ? (
-            <div className="rounded-3xl border border-slate-200 bg-white/80 p-8 text-center text-slate-500">
-              <p>It’s quiet here right now.</p>
-              <p className="mt-2">
-                When something is shared, it will drift through.
-              </p>
-            </div>
           ) : (
-            <>
-              <EmotionField
-                canvases={canvases}
-                onOpen={handleOpenCanvas}
-                activeMood={selectedMood ?? "All"}
-              />
-
-              <div className="mt-4 pb-1 text-center">
-                <p className="text-sm italic text-slate-500">
-                  A glimpse of what’s been shared today.
-                </p>
-
-                <p className="mt-1 text-sm italic text-slate-400">
-                  More is quietly drifting beneath the surface.
-                </p>
-              </div>
-            </>
+            <EmotionField
+              canvases={canvases}
+              onOpen={handleOpenCanvas}
+              activeMood={selectedMood ?? "All"}
+            />
           )}
         </section>
       </div>
 
+      {/* OVERLAY */}
       <AnimatePresence>
-        {selectedMood && !loading && !error ? (
+        {selectedMood && (
           <>
             <motion.div
-              key="mood-overlay-backdrop"
               className="fixed inset-0 z-30 bg-[rgba(255,248,246,0.34)] backdrop-blur-[8px]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.28, ease: "easeOut" }}
             />
 
             <motion.section
-              key={`mood-overlay-${selectedMood}`}
-              initial={{ opacity: 0, y: 16, scale: 0.992 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.996 }}
-              transition={{ duration: 0.34, ease: "easeOut" }}
-              className="fixed inset-x-4 top-5 bottom-5 z-40 overflow-hidden rounded-[34px] border border-white/75 bg-[rgba(255,255,255,0.50)] shadow-[0_24px_80px_rgba(15,23,42,0.10)] backdrop-blur-2xl sm:inset-x-8 sm:top-7 sm:bottom-7 lg:left-1/2 lg:right-auto lg:w-[min(760px,calc(100vw-6rem))] lg:-translate-x-1/2"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              className="fixed inset-x-4 top-5 bottom-5 z-40 overflow-hidden rounded-[34px] border border-white/75 bg-[rgba(255,255,255,0.55)] shadow-[0_24px_80px_rgba(15,23,42,0.10)] backdrop-blur-2xl"
             >
-              <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute left-[10%] top-[8%] h-24 w-24 rounded-full bg-white/26 blur-3xl" />
-                <div className="absolute right-[14%] top-[18%] h-20 w-20 rounded-full bg-pink-100/30 blur-3xl" />
-                <div className="absolute bottom-[18%] left-[18%] h-24 w-24 rounded-full bg-amber-50/25 blur-3xl" />
-              </div>
+              <div className="flex h-full flex-col">
+                <div className="border-b border-white/50 px-5 pb-5 pt-6 text-center">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                    {formatSelectedMoodTitle(selectedMood)}
+                  </p>
 
-              <div className="relative flex h-full flex-col">
-                <div className="border-b border-white/50 px-5 pb-5 pt-6 sm:px-7 sm:pb-6 sm:pt-7">
-                  <div className="text-center">
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                      {formatSelectedMoodTitle(selectedMood)}
-                    </p>
+                  <p className="mt-2 text-sm italic text-slate-500">
+                    Moments others needed to release.
+                  </p>
 
-                    <p className="mt-2 text-sm italic text-slate-500">
-                      Moments others needed to release.
-                    </p>
-
-                    <button
-                      type="button"
-                      onClick={handleCloseMoodOverlay}
-                      className="mt-4 text-xs italic text-slate-400 transition hover:text-slate-600"
-                    >
-                      Return to the full space
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setSelectedMood(null)}
+                    className="mt-4 text-xs italic text-slate-400 transition hover:text-slate-600"
+                  >
+                    Return to the full space
+                  </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-4 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
+                <div className="flex-1 overflow-y-auto px-4 pb-5 pt-5">
                   {selectedMoodEntries.length === 0 ? (
-                    <div className="rounded-[28px] border border-white/70 bg-white/65 p-8 text-center text-slate-500 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
-                      <p>Nothing has been shared here just yet.</p>
-                      <p className="mt-2">
-                        Try another feeling, or return to the full space.
-                      </p>
+                    <div className="rounded-[28px] border border-white/70 bg-white/65 p-8 text-center text-slate-500">
+                      Nothing has been shared here just yet.
                     </div>
                   ) : (
-                    <div className="space-y-3.5">
+                    <div className="space-y-3">
                       {selectedMoodEntries.map((canvas) => (
                         <button
                           key={canvas.id}
-                          type="button"
-                          onClick={() => handleOpenCanvas(canvas)}
-                          className="w-full rounded-[26px] border border-white/75 bg-[rgba(255,255,255,0.62)] px-4 py-4 text-left shadow-[0_8px_20px_rgba(15,23,42,0.03)] backdrop-blur-md transition duration-300 hover:bg-[rgba(255,255,255,0.78)] focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-0 sm:px-5 sm:py-4"
+                          onClick={() =>
+                            handleOpenCanvas(canvas)
+                          }
+                          className="w-full rounded-[26px] border border-white/75 bg-[rgba(255,255,255,0.62)] px-4 py-4 text-left transition hover:bg-[rgba(255,255,255,0.78)]"
                         >
-                          <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center justify-between">
                             <span className="text-[11px] uppercase tracking-[0.14em] text-slate-400">
                               {canvas.mood || "Shared"}
                             </span>
@@ -435,7 +529,7 @@ export default function LivingGalleryPage() {
                             </span>
                           </div>
 
-                          <p className="mt-3 text-sm leading-6 text-slate-700 sm:leading-7">
+                          <p className="mt-3 text-sm leading-6 text-slate-700">
                             {getEntryPreview(canvas.text)}
                           </p>
                         </button>
@@ -446,10 +540,13 @@ export default function LivingGalleryPage() {
               </div>
             </motion.section>
           </>
-        ) : null}
+        )}
       </AnimatePresence>
 
-      <CanvasViewer canvas={activeCanvas} onClose={() => setActiveCanvas(null)} />
+      <CanvasViewer
+        canvas={activeCanvas}
+        onClose={() => setActiveCanvas(null)}
+      />
     </main>
   );
 }
