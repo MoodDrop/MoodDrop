@@ -51,46 +51,98 @@ const COLLAPSED_MOODS = [
   "CrashOut",
 ];
 
-function getMoodIcon(mood: string) {
+function getMoodVisuals(mood: string) {
   switch (mood) {
     case "Joy":
-      return Sun;
+      return {
+        icon: Sun,
+        iconColor: "text-yellow-500",
+        bg: "bg-yellow-50",
+      };
 
     case "Hopeful":
-      return Sprout;
+      return {
+        icon: Sprout,
+        iconColor: "text-lime-500",
+        bg: "bg-lime-50",
+      };
 
     case "Relieved":
-      return Wind;
+      return {
+        icon: Wind,
+        iconColor: "text-teal-400",
+        bg: "bg-teal-50",
+      };
 
     case "Calm":
-      return Waves;
+      return {
+        icon: Waves,
+        iconColor: "text-cyan-500",
+        bg: "bg-cyan-50",
+      };
 
     case "Grounded":
-      return TreePine;
+      return {
+        icon: TreePine,
+        iconColor: "text-emerald-500",
+        bg: "bg-emerald-50",
+      };
 
     case "Reflective":
-      return Cloud;
+      return {
+        icon: Cloud,
+        iconColor: "text-sky-500",
+        bg: "bg-sky-50",
+      };
 
     case "Lonely":
-      return User;
+      return {
+        icon: User,
+        iconColor: "text-indigo-400",
+        bg: "bg-indigo-50",
+      };
 
     case "Numb":
-      return Minus;
+      return {
+        icon: Minus,
+        iconColor: "text-slate-400",
+        bg: "bg-slate-50",
+      };
 
     case "Upset":
-      return Flower2;
+      return {
+        icon: Flower2,
+        iconColor: "text-rose-400",
+        bg: "bg-rose-50",
+      };
 
     case "Tense":
-      return Orbit;
+      return {
+        icon: Orbit,
+        iconColor: "text-orange-400",
+        bg: "bg-orange-50",
+      };
 
     case "Overwhelmed":
-      return CircleAlert;
+      return {
+        icon: CircleAlert,
+        iconColor: "text-violet-400",
+        bg: "bg-violet-50",
+      };
 
     case "CrashOut":
-      return HeartCrack;
+      return {
+        icon: HeartCrack,
+        iconColor: "text-red-400",
+        bg: "bg-red-50",
+      };
 
     default:
-      return Cloud;
+      return {
+        icon: Cloud,
+        iconColor: "text-slate-400",
+        bg: "bg-slate-50",
+      };
   }
 }
 
@@ -322,7 +374,6 @@ export default function LivingGalleryPage() {
       )} px-4 py-8 sm:px-6`}
     >
       <div className="relative mx-auto max-w-5xl">
-        {/* HEADER */}
         <section className="mb-10 text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
             Living Gallery
@@ -337,7 +388,6 @@ export default function LivingGalleryPage() {
           </p>
         </section>
 
-        {/* SPECTRUM */}
         <section className="mx-auto mb-10 max-w-2xl rounded-[28px] border border-white/70 bg-white/70 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur">
           <div className="mb-5 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
@@ -352,7 +402,11 @@ export default function LivingGalleryPage() {
 
           <div className="space-y-2.5">
             {moodRows.map(([mood, count]) => {
-              const Icon = getMoodIcon(mood);
+              const {
+                icon: Icon,
+                iconColor,
+                bg,
+              } = getMoodVisuals(mood);
 
               const percent = canvases.length
                 ? Math.round((count / canvases.length) * 100)
@@ -377,21 +431,20 @@ export default function LivingGalleryPage() {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    {/* ICON */}
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70">
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-full ${bg}`}
+                    >
                       <Icon
                         size={18}
-                        className="text-slate-500"
+                        className={iconColor}
                         strokeWidth={1.8}
                       />
                     </div>
 
-                    {/* LABEL */}
                     <div className="min-w-[92px] text-left text-[15px] text-slate-800">
                       {mood}
                     </div>
 
-                    {/* DOTS */}
                     <div className="flex flex-1 items-center gap-2">
                       {Array.from({ length: dotCount }).map(
                         (_, index) => (
@@ -407,7 +460,6 @@ export default function LivingGalleryPage() {
                       )}
                     </div>
 
-                    {/* % */}
                     <div className="w-[38px] text-right text-xs text-slate-400">
                       {percent}%
                     </div>
@@ -417,7 +469,6 @@ export default function LivingGalleryPage() {
             })}
           </div>
 
-          {/* EXPAND / COLLAPSE */}
           <button
             type="button"
             onClick={() =>
@@ -439,7 +490,6 @@ export default function LivingGalleryPage() {
           </button>
         </section>
 
-        {/* EMOTIONAL FIELD */}
         <section className="rounded-[32px] border border-white/60 bg-white/35 px-4 py-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur sm:px-5 sm:py-7">
           <div className="mb-5 text-center">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
@@ -469,7 +519,6 @@ export default function LivingGalleryPage() {
         </section>
       </div>
 
-      {/* OVERLAY */}
       <AnimatePresence>
         {selectedMood && (
           <>
