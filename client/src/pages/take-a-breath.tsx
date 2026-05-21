@@ -1,12 +1,26 @@
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, RotateCcw, Volume2, VolumeX } from "lucide-react";
-import { breathingPresets, type BreathingPreset, type BreathPhase } from "@/lib/breathingPresets";
+import {
+  Play,
+  Pause,
+  RotateCcw,
+  Volume2,
+  VolumeX,
+  ArrowLeft,
+} from "lucide-react";
+import { Link } from "wouter";
+
+import {
+  breathingPresets,
+  type BreathingPreset,
+} from "@/lib/breathingPresets";
 
 export default function TakeABreath() {
-  const [selectedPreset, setSelectedPreset] = useState<BreathingPreset>(breathingPresets[0]);
+  const [selectedPreset, setSelectedPreset] =
+    useState<BreathingPreset>(breathingPresets[0]);
+
   const [isRunning, setIsRunning] = useState(false);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
-  const [phaseProgress, setPhaseProgress] = useState(0); // 0 to 1
+  const [phaseProgress, setPhaseProgress] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
@@ -14,7 +28,6 @@ export default function TakeABreath() {
   const phaseStartTimeRef = useRef<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Check for reduced motion preference
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     setPrefersReducedMotion(mediaQuery.matches);
@@ -27,9 +40,9 @@ export default function TakeABreath() {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
-  // Initialize audio
   useEffect(() => {
     audioRef.current = new Audio("/sounds/breath-chime.mp3");
+
     if (audioRef.current) {
       audioRef.current.volume = 0.15;
     }
@@ -51,6 +64,7 @@ export default function TakeABreath() {
 
   const pauseBreathing = () => {
     setIsRunning(false);
+
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
@@ -66,13 +80,13 @@ export default function TakeABreath() {
   const playChime = () => {
     if (soundEnabled && audioRef.current) {
       audioRef.current.currentTime = 0;
+
       audioRef.current.play().catch(() => {
-        // Ignore errors if audio can't play
+        // ignore autoplay issues
       });
     }
   };
 
-  // Animation loop
   useEffect(() => {
     if (!isRunning) return;
 
@@ -84,8 +98,9 @@ export default function TakeABreath() {
       setPhaseProgress(progress);
 
       if (progress >= 1) {
-        // Move to next phase
-        const nextIndex = (currentPhaseIndex + 1) % selectedPreset.phases.length;
+        const nextIndex =
+          (currentPhaseIndex + 1) % selectedPreset.phases.length;
+
         setCurrentPhaseIndex(nextIndex);
         setPhaseProgress(0);
         phaseStartTimeRef.current = timestamp;
@@ -102,196 +117,226 @@ export default function TakeABreath() {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isRunning, currentPhaseIndex, currentPhase, selectedPreset, soundEnabled]);
+  }, [
+    isRunning,
+    currentPhaseIndex,
+    currentPhase,
+    selectedPreset,
+    soundEnabled,
+  ]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.code === "Space" && e.target === document.body) {
         e.preventDefault();
+
         if (isRunning) {
           pauseBreathing();
         } else {
           startBreathing();
         }
-      } else if (e.code === "Enter" && e.target === document.body) {
+      }
+
+      if (e.code === "Enter" && e.target === document.body) {
         e.preventDefault();
         resetBreathing();
       }
     };
 
     window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
   }, [isRunning]);
 
-  const getRingScale = () => {
+  const getOrbScale = () => {
     if (currentPhase.type === "inhale") {
-      return 0.6 + (phaseProgress * 0.4); // Expand from 0.6 to 1.0
-    } else if (currentPhase.type === "exhale") {
-      return 1.0 - (phaseProgress * 0.4); // Contract from 1.0 to 0.6
-    } else {
-      // Hold phases - maintain current size
-      return currentPhase.type === "hold" ? 1.0 : 0.6;
+      return 0.88 + phaseProgress * 0.16;
     }
+
+    if (currentPhase.type === "exhale") {
+      return 1.04 - phaseProgress * 0.16;
+    }
+
+    return currentPhase.type === "hold" ? 1.04 : 0.88;
   };
 
-  const getPhaseColor = () => {
-    if (currentPhase.type === "inhale") return "rgba(166, 200, 255, 0.4)"; // Calm blue
-    if (currentPhase.type === "exhale") return "rgba(251, 230, 148, 0.4)"; // Warm yellow
-    return "rgba(201, 199, 210, 0.3)"; // Neutral gray for holds
-  };
+  const secondsRemaining = Math.max(
+    1,
+    Math.ceil(currentPhase.duration * (1 - phaseProgress))
+  );
 
   return (
-    <div className="min-h-[calc(100vh-12rem)] flex items-center justify-center px-4">
-      <div className="w-full max-w-lg">
-        {/* Card */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 md:p-10">
-          {/* Title */}
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-semibold text-warm-gray-800 mb-2">
-              Take a Breath
-            </h1>
-            <p className="text-sm text-warm-gray-600">
-              Follow the ring or the cues below.
-            </p>
-          </div>
-
-          {/* Preset Selector */}
-          <div className="mb-8">
-            <label className="block text-sm font-medium text-warm-gray-700 mb-2">
-              Breathing Pattern
-            </label>
-            <select
-              value={selectedPreset.id}
-              onChange={(e) => {
-                const preset = breathingPresets.find(p => p.id === e.target.value);
-                if (preset) {
-                  resetBreathing();
-                  setSelectedPreset(preset);
-                }
-              }}
-              className="w-full px-4 py-3 rounded-xl border border-warm-gray-200 bg-white text-warm-gray-800 focus:ring-2 focus:ring-blush-300 focus:outline-none transition"
-              data-testid="select-breathing-preset"
+    <div className="min-h-[calc(100vh-8rem)] overflow-hidden bg-[radial-gradient(circle_at_top,#FFF8F1_0%,#FAD8D0_42%,#DFA59E_100%)] px-4 py-8 text-[#7f5148]">
+      <div className="mx-auto flex min-h-[calc(100vh-10rem)] w-full max-w-lg flex-col">
+        <div className="mb-8">
+          <Link href="/comfort">
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-full border border-white/45 bg-white/30 px-4 py-2 text-sm text-[#7f5148] shadow-sm backdrop-blur-md transition hover:bg-white/45"
             >
-              {breathingPresets.map((preset) => (
-                <option key={preset.id} value={preset.id}>
-                  {preset.name}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-warm-gray-500 mt-2">
-              {selectedPreset.description}
-            </p>
-          </div>
+              <ArrowLeft size={16} />
+              Back to Calm Studio
+            </button>
+          </Link>
+        </div>
 
-          {/* Breathing Ring or Progress Bar */}
+        <div className="text-center">
+          <h1 className="font-serif text-4xl text-[#7f5148]">
+            Take a Breath
+          </h1>
+
+          <p className="mt-3 text-sm text-[#9b6c63]">
+            Slow down. You’re safe here.
+          </p>
+        </div>
+
+        <div className="mt-8">
+          <select
+            value={selectedPreset.id}
+            onChange={(e) => {
+              const preset = breathingPresets.find(
+                (p) => p.id === e.target.value
+              );
+
+              if (preset) {
+                resetBreathing();
+                setSelectedPreset(preset);
+              }
+            }}
+            className="w-full rounded-2xl border border-white/40 bg-white/25 px-4 py-3 text-sm text-[#7f5148] shadow-sm backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-white/50"
+            data-testid="select-breathing-preset"
+          >
+            {breathingPresets.map((preset) => (
+              <option key={preset.id} value={preset.id}>
+                {preset.name}
+              </option>
+            ))}
+          </select>
+
+          <p className="mt-2 text-center text-xs text-[#9b6c63]">
+            {selectedPreset.description}
+          </p>
+        </div>
+
+        <div className="relative mt-14 flex flex-1 flex-col items-center justify-center">
           {!prefersReducedMotion ? (
-            <div className="flex justify-center mb-8">
-              <div className="relative w-64 h-64 flex items-center justify-center">
-                {/* Ring */}
-                <div
-                  className="absolute rounded-full border-8 transition-all duration-1000 ease-in-out"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    borderColor: getPhaseColor(),
-                    transform: `scale(${getRingScale()})`,
-                    boxShadow: `0 0 30px ${getPhaseColor()}`,
-                  }}
-                />
-                
-                {/* Center Content */}
+            <div className="relative flex h-80 w-80 items-center justify-center">
+              <div className="absolute h-72 w-72 rounded-full bg-white/25 blur-3xl" />
+
+              <div
+                className="relative flex h-72 w-72 items-center justify-center rounded-full border border-white/55 bg-[radial-gradient(circle_at_30%_25%,#FFF9F0_0%,#F8B6A7_35%,#EFA194_72%,#F8D8CD_100%)] shadow-[0_0_80px_rgba(255,244,232,0.8)] transition-transform duration-1000 ease-in-out"
+                style={{
+                  transform: `scale(${getOrbScale()})`,
+                }}
+              >
+                <div className="absolute left-16 top-16 h-5 w-5 rounded-full bg-white/80 blur-[1px]" />
+                <div className="absolute inset-3 rounded-full border border-white/20" />
+
                 <div className="relative z-10 text-center">
-                  <div
-                    className="text-3xl font-semibold text-warm-gray-800 mb-2"
+                  <p
+                    className="tracking-[0.3em] text-[#7f5148]/80"
                     aria-live="polite"
                     aria-atomic="true"
                   >
                     {currentPhase.label}
-                  </div>
-                  <div className="text-lg text-warm-gray-600">
-                    for {currentPhase.duration}
-                  </div>
+                  </p>
+
+                  <p className="mt-6 font-serif text-5xl text-[#7f5148]/75">
+                    {secondsRemaining}s
+                  </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="mb-8">
-              {/* Static text cues for reduced motion */}
-              <div className="text-center mb-4">
+            <div className="w-full rounded-[2rem] border border-white/40 bg-white/25 p-6 text-center shadow-sm backdrop-blur-md">
+              <p
+                className="text-2xl font-semibold text-[#7f5148]"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {currentPhase.label} for {currentPhase.duration}
+              </p>
+
+              <div className="mt-5 h-3 w-full overflow-hidden rounded-full bg-white/35">
                 <div
-                  className="text-2xl font-semibold text-warm-gray-800 mb-2"
-                  aria-live="polite"
-                  aria-atomic="true"
-                >
-                  {currentPhase.label} for {currentPhase.duration}
-                </div>
-              </div>
-              
-              {/* Progress bar */}
-              <div className="w-full bg-warm-gray-200 rounded-full h-3 overflow-hidden">
-                <div
-                  className="h-full bg-blush-300 transition-all duration-300"
-                  style={{ width: `${phaseProgress * 100}%` }}
+                  className="h-full rounded-full bg-[#f6b7a6] transition-all duration-300"
+                  style={{
+                    width: `${phaseProgress * 100}%`,
+                  }}
                 />
               </div>
             </div>
           )}
 
-          {/* Controls */}
-          <div className="flex flex-wrap gap-3 justify-center mb-6">
-            <button
-              onClick={isRunning ? pauseBreathing : startBreathing}
-              className="flex items-center gap-2 px-6 py-3 bg-blush-300 hover:bg-blush-400 text-white rounded-xl font-medium transition-all shadow-md hover:shadow-lg"
-              data-testid="button-breath-start-pause"
-            >
-              {isRunning ? (
-                <>
-                  <Pause size={20} />
-                  Pause
-                </>
-              ) : (
-                <>
-                  <Play size={20} />
-                  Start
-                </>
-              )}
-            </button>
+          <div className="mt-12 w-full rounded-[2rem] border border-white/35 bg-white/20 px-6 py-4 shadow-sm backdrop-blur-md">
+            <div className="grid grid-cols-3 text-center text-sm text-[#7f5148]">
+              {selectedPreset.phases.slice(0, 3).map((phase, index) => {
+                const active = index === currentPhaseIndex;
 
+                return (
+                  <div
+                    key={`${phase.type}-${index}`}
+                    className="flex flex-col items-center gap-2"
+                  >
+                    <span
+                      className={`h-3 w-3 rounded-full transition ${
+                        active
+                          ? "bg-white shadow-[0_0_16px_rgba(255,255,255,0.9)]"
+                          : "bg-[#9b6c63]/35"
+                      }`}
+                    />
+
+                    <span>{phase.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-10 pb-4">
+          <div className="grid grid-cols-3 items-center">
             <button
               onClick={resetBreathing}
-              className="flex items-center gap-2 px-6 py-3 bg-warm-gray-600 hover:bg-warm-gray-700 text-white rounded-xl font-medium transition-all shadow-md hover:shadow-lg"
+              className="flex flex-col items-center gap-2 text-sm text-[#7f5148]"
               data-testid="button-breath-reset"
             >
-              <RotateCcw size={20} />
+              <span className="flex h-14 w-14 items-center justify-center rounded-full border border-white/40 bg-white/25 backdrop-blur-md">
+                <RotateCcw size={21} />
+              </span>
               Reset
             </button>
 
             <button
+              onClick={isRunning ? pauseBreathing : startBreathing}
+              aria-label={
+                isRunning
+                  ? "Pause breathing exercise"
+                  : "Start breathing exercise"
+              }
+              className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-white/50 bg-white/35 text-[#7f5148] shadow-md backdrop-blur-md transition hover:bg-white/45"
+              data-testid="button-breath-start-pause"
+            >
+              {isRunning ? <Pause size={32} /> : <Play size={32} />}
+            </button>
+
+            <button
               onClick={() => setSoundEnabled(!soundEnabled)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all shadow-md hover:shadow-lg ${
-                soundEnabled
-                  ? "bg-green-500 hover:bg-green-600 text-white"
-                  : "bg-cream-200 hover:bg-cream-300 text-warm-gray-700"
-              }`}
+              className="flex flex-col items-center gap-2 text-sm text-[#7f5148]"
               data-testid="button-breath-sound"
             >
-              {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+              <span className="flex h-14 w-14 items-center justify-center rounded-full border border-white/40 bg-white/25 backdrop-blur-md">
+                {soundEnabled ? <Volume2 size={21} /> : <VolumeX size={21} />}
+              </span>
               Sound
             </button>
           </div>
 
-          {/* Keyboard Hints */}
-          <div className="text-center text-xs text-warm-gray-500">
-            <kbd className="px-2 py-1 bg-warm-gray-100 rounded border border-warm-gray-300 mr-1">
-              Space
-            </kbd>
-            Start/Pause •
-            <kbd className="px-2 py-1 bg-warm-gray-100 rounded border border-warm-gray-300 mx-1">
-              Enter
-            </kbd>
-            Reset
-          </div>
+          <p className="mt-8 text-center text-sm text-[#9b6c63]">
+            You can come back to this anytime.
+          </p>
         </div>
       </div>
     </div>

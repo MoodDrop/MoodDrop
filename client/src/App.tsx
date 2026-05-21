@@ -22,6 +22,8 @@ import QAPage from "@/pages/QAPage";
 import ContactPage from "@/pages/ContactPage";
 import LivingGalleryPage from "@/pages/LivingGalleryPage";
 import CalmStudioPage from "@/pages/CalmStudioPage";
+import TakeABreath from "@/pages/take-a-breath";
+import CalmGentlePlayPage from "@/pages/calm-gentle-play";
 import CareSupportPage from "@/pages/CareSupportPage";
 
 // Owner unlock
@@ -74,6 +76,12 @@ function Router() {
       <Route path="/comfort" component={CalmStudioPage} />
       <Route path="/calm-studio" component={CalmStudioPage} />
 
+      <Route path="/comfort/breath" component={TakeABreath} />
+      <Route path="/calm-studio/breath" component={TakeABreath} />
+
+      <Route path="/comfort/play" component={CalmGentlePlayPage} />
+      <Route path="/calm-studio/play" component={CalmGentlePlayPage} />
+
       <Route path="/my-drops" component={MyDropsPage} />
       <Route path="/drop-it" component={DropItPage} />
 
@@ -102,11 +110,16 @@ function AppContent() {
 
   const isHome = location === "/";
 
+  const isCalmStudioPage =
+    location === "/calm-studio" ||
+    location === "/comfort" ||
+    location.startsWith("/comfort/") ||
+    location.startsWith("/calm-studio/");
+
   const isFullWidthPage =
     isHome ||
     location === "/dashboard" ||
-    location === "/calm-studio" ||
-    location === "/comfort" ||
+    isCalmStudioPage ||
     location === "/soft-reads" ||
     location === "/playground" ||
     location === "/living-gallery" ||
