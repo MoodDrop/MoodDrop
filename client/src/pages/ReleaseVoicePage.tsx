@@ -44,13 +44,20 @@ function formatMs(ms: number) {
   return `${m}:${String(ss).padStart(2, "0")}`;
 }
 
-const MOODS = [
+;const MOODS = [
   "Joy",
+  "Hopeful",
+  "Relieved",
   "Calm",
   "Grounded",
+  "Reflective",
+  "Lonely",
+  "Numb",
+  "Upset",
+  "Tense",
   "Anxious",
   "Overwhelmed",
-  "Crash Out",
+  "CrashOut",
 ] as const;
 
 export default function ReleaseVoicePage() {

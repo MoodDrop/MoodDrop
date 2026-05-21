@@ -9,20 +9,48 @@ import {
 import EmotionField from "@/components/gallery/EmotionField";
 import CanvasViewer from "@/components/gallery/CanvasViewer";
 
-const FALLBACK_MOODS = ["Healing", "CrashOut", "Hopeful", "Overwhelmed"];
+const MOOD_ORDER = [
+  "Joy",
+  "Hopeful",
+  "Relieved",
+  "Calm",
+  "Grounded",
+  "Reflective",
+  "Lonely",
+  "Numb",
+  "Upset",
+  "Tense",
+  "Overwhelmed",
+  "CrashOut",
+];
 
 function getMoodTint(mood?: string | null) {
   switch (mood) {
-    case "CrashOut":
-      return "from-rose-50 via-white to-rose-100/60";
-    case "Overwhelmed":
-      return "from-violet-50 via-white to-violet-100/60";
+    case "Joy":
+      return "from-yellow-50 via-white to-yellow-100/60";
+    case "Hopeful":
+      return "from-lime-50 via-white to-lime-100/60";
+    case "Relieved":
+      return "from-teal-50 via-white to-teal-100/60";
+    case "Calm":
+      return "from-cyan-50 via-white to-cyan-100/60";
+    case "Grounded":
     case "Healing":
       return "from-emerald-50 via-white to-emerald-100/60";
-    case "Hopeful":
-      return "from-amber-50 via-white to-amber-100/60";
     case "Reflective":
       return "from-sky-50 via-white to-sky-100/60";
+    case "Lonely":
+      return "from-indigo-50 via-white to-indigo-100/50";
+    case "Numb":
+      return "from-slate-50 via-white to-slate-100/60";
+    case "Upset":
+      return "from-rose-50 via-white to-rose-100/60";
+    case "Tense":
+      return "from-orange-50 via-white to-orange-100/60";
+    case "Overwhelmed":
+      return "from-violet-50 via-white to-violet-100/60";
+    case "CrashOut":
+      return "from-rose-50 via-white to-rose-100/60";
     default:
       return "from-[#fffaf7] via-white to-[#fff3f7]";
   }
@@ -30,28 +58,31 @@ function getMoodTint(mood?: string | null) {
 
 function getMoodDotColor(mood?: string | null) {
   switch (mood) {
-    case "CrashOut":
-      return "bg-rose-300";
-    case "Overwhelmed":
-      return "bg-violet-300";
+    case "Joy":
+      return "bg-yellow-300";
+    case "Hopeful":
+      return "bg-lime-300";
+    case "Relieved":
+      return "bg-teal-300";
+    case "Calm":
+      return "bg-cyan-300";
+    case "Grounded":
     case "Healing":
       return "bg-emerald-300";
-    case "Hopeful":
-      return "bg-amber-300";
     case "Reflective":
       return "bg-sky-300";
     case "Lonely":
+      return "bg-indigo-300";
+    case "Numb":
       return "bg-slate-300";
-    case "Grateful":
-      return "bg-pink-300";
-    case "Calm":
-      return "bg-teal-300";
+    case "Upset":
+      return "bg-rose-300";
     case "Tense":
       return "bg-orange-300";
-    case "Grounded":
-      return "bg-lime-300";
-    case "Joy":
-      return "bg-yellow-300";
+    case "Overwhelmed":
+      return "bg-violet-300";
+    case "CrashOut":
+      return "bg-red-300";
     default:
       return "bg-slate-300";
   }
@@ -65,12 +96,14 @@ function groupMoodCounts(canvases: SharedCanvas[]) {
     counts[mood] = (counts[mood] || 0) + 1;
   });
 
-  return Object.entries(counts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
+  return MOOD_ORDER.map((mood) => [mood, counts[mood] || 0]) as [
+    string,
+    number
+  ][];
 }
 
 function getDotCount(count: number, maxCount: number) {
+  if (count === 0) return 2;
   if (maxCount <= 0) return 3;
 
   const ratio = count / maxCount;
@@ -83,7 +116,11 @@ function getDotCount(count: number, maxCount: number) {
   return 2;
 }
 
-function getDotOpacity(index: number) {
+function getDotOpacity(index: number, count: number) {
+  if (count === 0) {
+    return index === 0 ? "opacity-25" : "opacity-15";
+  }
+
   const opacities = [
     "opacity-100",
     "opacity-85",
@@ -134,15 +171,7 @@ export default function LivingGalleryPage() {
   }, []);
 
   const moodRows = useMemo(() => {
-    const grouped = groupMoodCounts(canvases);
-
-    if (grouped.length === 0) {
-      return FALLBACK_MOODS.map(
-        (mood, index) => [mood, 5 - index] as [string, number]
-      );
-    }
-
-    return grouped;
+    return groupMoodCounts(canvases);
   }, [canvases]);
 
   const maxCount = Math.max(...moodRows.map(([, count]) => count), 1);
@@ -263,7 +292,7 @@ export default function LivingGalleryPage() {
                         className={[
                           "h-2.5 w-2.5 rounded-full transition",
                           getMoodDotColor(mood),
-                          getDotOpacity(index),
+                          getDotOpacity(index, count),
                           isActive ? "scale-105" : "",
                         ].join(" ")}
                       />
@@ -420,10 +449,7 @@ export default function LivingGalleryPage() {
         ) : null}
       </AnimatePresence>
 
-      <CanvasViewer
-        canvas={activeCanvas}
-        onClose={() => setActiveCanvas(null)}
-      />
+      <CanvasViewer canvas={activeCanvas} onClose={() => setActiveCanvas(null)} />
     </main>
   );
 }

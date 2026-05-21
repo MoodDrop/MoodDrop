@@ -7,11 +7,18 @@ import { supabase } from "@/lib/supabaseClient";
 import dropletSfx from "../assets/sounds/moodDrop-droplet.m4a";
 
 const MOODS = [
-  { key: "Calm", hint: "Soft, steady, quieter inside." },
-  { key: "Anxious", hint: "Restless, tight-chested, mentally ‘on.’" },
-  { key: "Overwhelmed", hint: "Too much at once. Too loud." },
-  { key: "Grounded", hint: "Present. Here. In your body." },
   { key: "Joy", hint: "Lightness returning." },
+  { key: "Hopeful", hint: "A small part of you still believes it can get better." },
+  { key: "Relieved", hint: "Something softened. You can exhale now." },
+  { key: "Calm", hint: "Soft, steady, quieter inside." },
+  { key: "Grounded", hint: "Present. Here. In your body." },
+  { key: "Reflective", hint: "Turning inward. Making sense of what you feel." },
+  { key: "Lonely", hint: "Wanting connection, even quietly." },
+  { key: "Numb", hint: "Not much is coming through right now, and that counts too." },
+  { key: "Upset", hint: "Something hurt, bothered, or threw you off." },
+  { key: "Tense", hint: "Restless, tight-chested, mentally ‘on.’" },
+  { key: "Anxious", hint: "Worried, uneasy, or waiting for something to settle." },
+  { key: "Overwhelmed", hint: "Too much at once. Too loud." },
   { key: "CrashOut", hint: "Raw. Sharp. Unfiltered." },
 ];
 

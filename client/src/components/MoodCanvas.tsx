@@ -8,6 +8,12 @@ type Mood =
   | "Joy"
   | "Calm"
   | "Grounded"
+  | "Hopeful"
+  | "Relieved"
+  | "Reflective"
+  | "Lonely"
+  | "Numb"
+  | "Upset"
   | "Tense"
   | "Overwhelmed"
   | "Crash Out"
@@ -32,31 +38,73 @@ const moodStyles: Record<
     wash: "from-[#F9E4B7]/40 to-transparent",
     label: "JOY",
   },
+
+  Hopeful: {
+    border: "border-[#DCE8C8]",
+    wash: "from-[#DCE8C8]/40 to-transparent",
+    label: "HOPEFUL",
+  },
+
+  Relieved: {
+    border: "border-[#CFEAE4]",
+    wash: "from-[#CFEAE4]/40 to-transparent",
+    label: "RELIEVED",
+  },
+
   Calm: {
     border: "border-[#C1D5C0]",
     wash: "from-[#C1D5C0]/40 to-transparent",
     label: "CALM",
   },
+
   Grounded: {
     border: "border-[#D7CCC8]",
     wash: "from-[#D7CCC8]/40 to-transparent",
     label: "GROUNDED",
   },
+
+  Reflective: {
+    border: "border-[#DDD6F3]",
+    wash: "from-[#DDD6F3]/40 to-transparent",
+    label: "REFLECTIVE",
+  },
+
+  Lonely: {
+    border: "border-[#CFCFEA]",
+    wash: "from-[#CFCFEA]/40 to-transparent",
+    label: "LONELY",
+  },
+
+  Numb: {
+    border: "border-[#C9D3DC]",
+    wash: "from-[#C9D3DC]/40 to-transparent",
+    label: "NUMB",
+  },
+
+  Upset: {
+    border: "border-[#E8B7B1]",
+    wash: "from-[#E8B7B1]/40 to-transparent",
+    label: "UPSET",
+  },
+
   Tense: {
-    border: "border-[#D8BFD8]",
-    wash: "from-[#D8BFD8]/40 to-transparent",
+    border: "border-[#FBEFB0]",
+    wash: "from-[#FBEFB0]/40 to-transparent",
     label: "TENSE",
   },
+
   Overwhelmed: {
-    border: "border-[#CDC4D6]",
-    wash: "from-[#CDC4D6]/40 to-transparent",
+    border: "border-[#E7B6A9]",
+    wash: "from-[#E7B6A9]/40 to-transparent",
     label: "OVERWHELMED",
   },
+
   "Crash Out": {
     border: "border-[#9E4759]",
     wash: "from-[#9E4759]/26 to-transparent",
     label: "CRASH OUT",
   },
+
   CrashOut: {
     border: "border-[#9E4759]",
     wash: "from-[#9E4759]/26 to-transparent",
@@ -64,7 +112,11 @@ const moodStyles: Record<
   },
 };
 
-export default function MoodCanvas({ mood, text, vibeCount = 0 }: MoodCanvasProps) {
+export default function MoodCanvas({
+  mood,
+  text,
+  vibeCount = 0,
+}: MoodCanvasProps) {
   const style = moodStyles[mood] || {
     border: "border-black/10",
     wash: "from-black/5 to-transparent",
@@ -84,16 +136,24 @@ export default function MoodCanvas({ mood, text, vibeCount = 0 }: MoodCanvasProp
       : "shadow-sm";
 
   return (
-    <div className={`relative rounded-2xl border bg-white p-6 ${style.border} ${presenceGlow}`}>
+    <div
+      className={`relative rounded-2xl border bg-white p-6 ${style.border} ${presenceGlow}`}
+    >
       {/* Soft mood wash */}
-      <div className={`pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br ${style.wash}`} />
+      <div
+        className={`pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br ${style.wash}`}
+      />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col justify-between">
-        <p className="text-[15px] leading-relaxed text-warm-gray-700">{text}</p>
+        <p className="text-[15px] leading-relaxed text-warm-gray-700">
+          {text}
+        </p>
 
         <div className="mt-6 flex items-center justify-between">
-          <span className="text-xs tracking-wide text-warm-gray-600">{style.label}</span>
+          <span className="text-xs tracking-wide text-warm-gray-600">
+            {style.label}
+          </span>
 
           {/* Decorative MoodDrop mark */}
           <img
@@ -101,7 +161,7 @@ export default function MoodCanvas({ mood, text, vibeCount = 0 }: MoodCanvasProp
             alt=""
             aria-hidden="true"
             draggable={false}
-            className="h-12 w-12 opacity-80 select-none"
+            className="h-12 w-12 select-none opacity-80"
           />
         </div>
       </div>
