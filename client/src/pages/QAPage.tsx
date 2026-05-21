@@ -203,52 +203,6 @@ const SECTIONS: QASection[] = [
   },
 
   {
-    title: "Harmony 🌹 (Intimate Song Experience)",
-    items: [
-      {
-        question: "What is Harmony?",
-        answer:
-          "Harmony is a quiet offering inside MoodDrop where your story is carefully shaped into melody. It’s meant to feel intimate, thoughtful, and deeply personal.",
-      },
-      {
-        question: "Is Harmony private like My Droplets?",
-        answer:
-          "Harmony is private, but not anonymous. Your email is used only to deliver your preview and any selected version. It isn’t connected to your My Droplets, releases, or anything you’ve shared elsewhere in MoodDrop. Your submission is handled with care and is never shared publicly.",
-      },
-      {
-        question: "How does Harmony work?",
-        answer:
-          "You share what feels ready — a memory, a name, or a quiet truth — and choose the emotional tone. Within 24 hours, you’ll receive a 30 second preview via email. If it resonates, you may continue into the full piece. Each submission is reviewed personally.",
-      },
-      {
-        question: "What are the Harmony options?",
-        answer:
-          "After receiving your preview, you may choose between Full Harmony or Signature Harmony. Details and Founder Phase pricing are shared privately via email.",
-      },
-      {
-        question: "Why is Harmony limited each week?",
-        answer:
-          "Harmony is shaped slowly and intentionally — never rushed. To preserve depth and care, only a limited number of submissions are accepted each week. When sessions are full, new openings return the following week.",
-      },
-      {
-        question: "Can I submit more than once?",
-        answer:
-          "Yes. Harmony is available for repeat submissions, and each request is treated as its own intentional studio session.",
-      },
-      {
-        question: "Will my words be stored or reused?",
-        answer:
-          "No. Your submission is used only to create your requested preview and any selected version. It is not shared, sold, or repurposed.",
-      },
-      {
-        question: "Can I request changes to my song?",
-        answer:
-          "Full and Signature Harmony each include one thoughtful refinement if requested within 48 hours. Small factual corrections, such as names or pronunciation, are always welcome.",
-      },
-    ],
-  },
-
-  {
     title: "Privacy & Care",
     items: [
       {
@@ -332,8 +286,6 @@ export default function QAPage() {
           <span>Calm Studio</span>
           <span>•</span>
           <span>My Droplets</span>
-          <span>•</span>
-          <span>Harmony</span>
           <span>•</span>
           <span>Privacy &amp; Care</span>
         </div>
