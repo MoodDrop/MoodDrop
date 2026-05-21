@@ -33,7 +33,7 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
         sub: "Shared moments, witnessed softly",
       },
       {
-        label: "Rest",
+        label: "Calm Studio",
         href: "/calm-studio",
         sub: "A space to slow down",
       },
