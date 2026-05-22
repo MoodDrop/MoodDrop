@@ -131,9 +131,48 @@
   will-change: transform, filter;
 }
 
+/* ================================
+   QUIET MOMENTS BACKGROUND FLOAT
+================================ */
+@keyframes quietFloat {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(28px, -34px, 0) scale(1.35);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes quietHaze {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: translate3d(42px, -30px, 0) rotate(8deg) scale(1.18);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+/* ================================
+   REDUCED MOTION
+================================ */
 @media (prefers-reduced-motion: reduce) {
   .mooddrop-breathe {
     animation: none !important;
     filter: none !important;
+  }
+
+  .animate-\[quietFloat_24s_ease-in-out_infinite\],
+  .animate-\[quietHaze_32s_ease-in-out_infinite\] {
+    animation: none !important;
   }
 }

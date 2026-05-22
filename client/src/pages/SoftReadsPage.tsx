@@ -13,8 +13,6 @@ export default function SoftReadsPage() {
         <main className="relative mx-auto max-w-5xl">
           {/* Hero */}
           <section className="mb-10 pt-6 text-center">
-        
-
             <h1 className="text-4xl font-semibold tracking-tight md:text-6xl">
               Quiet Moments
             </h1>
@@ -56,17 +54,20 @@ export default function SoftReadsPage() {
           <section className="grid gap-5 md:grid-cols-2">
             {/* Reflection */}
             <Link href="/soft-reads/welcome">
-              <a className="group rounded-[1.75rem] border border-white/10 bg-white/[0.07] p-5 backdrop-blur-xl transition hover:-translate-y-1 hover:bg-white/[0.09]">
+              <a className="group block rounded-[1.75rem] border border-white/10 bg-white/[0.07] p-5 backdrop-blur-xl transition hover:-translate-y-1 hover:bg-white/[0.09]">
                 <p className="text-xs uppercase tracking-[0.25em] text-[#F4B7A8]">
                   Reflection of the Week
                 </p>
+
                 <h3 className="mt-4 text-xl font-semibold">
                   I Needed a Place That Didn’t Talk Back
                 </h3>
+
                 <p className="mt-3 text-sm leading-6 text-[#D8CFEA]/70">
                   A founder note for the days you don’t want advice — you just
                   need somewhere to release.
                 </p>
+
                 <div className="mt-5 text-sm text-[#F4B7A8]">
                   Read quietly →
                 </div>
@@ -81,15 +82,15 @@ export default function SoftReadsPage() {
 
               <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
                 <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-gradient-to-br from-[#171A33] via-[#251D3F] to-[#3A2032] text-sm text-[#D8CFEA]/60">
-                  Podcast / sound bite placeholder
+                  This space is being curated 
                 </div>
 
                 <h3 className="text-lg font-semibold">
-                  A quiet sound will live here
+                  
                 </h3>
+
                 <p className="mt-2 text-sm leading-6 text-[#D8CFEA]/70">
-                  Later, this can hold a YouTube, podcast, or reflective audio
-                  link you choose for the week.
+                 
                 </p>
 
                 <button
@@ -113,9 +114,9 @@ export default function SoftReadsPage() {
                     <h3 className="text-xl font-semibold">
                       Moonlight, rain, or candlelight
                     </h3>
+
                     <p className="mt-2 max-w-xl text-sm leading-6 text-[#D8CFEA]/70">
-                      This space will hold a calming visual or ambient loop — no
-                      pressure to do anything but sit with it.
+                      This space is being curated
                     </p>
                   </div>
                 </div>
@@ -127,6 +128,7 @@ export default function SoftReadsPage() {
               <p className="text-xs uppercase tracking-[0.25em] text-[#B9A7FF]">
                 A Thought to Sit With
               </p>
+
               <p className="mx-auto mt-5 max-w-2xl text-xl leading-8 text-[#F7EFEA]">
                 “You don’t have to solve tonight all at once.”
               </p>
