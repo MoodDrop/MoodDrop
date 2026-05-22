@@ -1,144 +1,143 @@
 import React from "react";
 import { Link } from "wouter";
-import SoftReadsAtmosphere from "@/components/SoftReadsAtmosphere";
-
-const SOFT_READ_CARDS = [
-  {
-    mood: "Tense",
-    title: "Why You Feel Tense Even When Nothing Is Wrong",
-    description:
-      "If your body won’t fully relax — even in quiet moments — this is for you.",
-    slug: "tense",
-    status: "live",
-    readTime: "2 min read",
-  },
-  {
-    mood: "Overwhelmed",
-    title: "Overwhelmed",
-    description: "Gentle words for when everything feels like too much.",
-    slug: "overwhelmed",
-    status: "coming-soon",
-  },
-  {
-    mood: "CrashOut",
-    title: "CrashOut",
-    description: "When everything hits at once and your system shuts down.",
-    slug: "crashout",
-    status: "coming-soon",
-  },
-  {
-    mood: "Grounded",
-    title: "Grounded",
-    description: "Finding your footing again.",
-    slug: "grounded",
-    status: "coming-soon",
-  },
-  {
-    mood: "Calm",
-    title: "Calm",
-    description: "Quiet moments for your nervous system.",
-    slug: "calm",
-    status: "coming-soon",
-  },
-  {
-    mood: "Joyful",
-    title: "Joyful",
-    description: "Lightness without guilt.",
-    slug: "joyful",
-    status: "coming-soon",
-  },
-];
 
 export default function SoftReadsPage() {
   return (
-    <div className="relative mx-auto max-w-5xl px-4 py-12">
-      {/* 🌸 Soft Reads atmospheric warmth layer (page-scoped) */}
-      <SoftReadsAtmosphere />
+    <div className="min-h-screen bg-[#070812] text-[#F7EFEA]">
+      <div className="relative overflow-hidden px-5 py-10">
+        {/* Atmosphere */}
+        <div className="pointer-events-none absolute -top-32 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-[#7A5CFF]/25 blur-3xl" />
+        <div className="pointer-events-none absolute top-40 -left-24 h-72 w-72 rounded-full bg-[#C77DFF]/15 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-80 w-80 rounded-full bg-[#F4B7A8]/10 blur-3xl" />
 
-      {/* Header */}
-      <div className="mb-10 text-center relative">
-        {/* subtle reading-room glow behind header */}
-        <div className="pointer-events-none absolute inset-0 -z-10 opacity-70 blur-3xl bg-[radial-gradient(circle_at_50%_40%,rgba(255,230,236,0.75),transparent_65%)]" />
+        <main className="relative mx-auto max-w-5xl">
+          {/* Hero */}
+          <section className="mb-10 pt-6 text-center">
+        
 
-        <h1 className="text-3xl font-semibold">Soft Reads</h1>
-        <p className="mt-2 text-sm opacity-70">
-          Gentle words for when your mind feels loud.
-        </p>
-      </div>
+            <h1 className="text-4xl font-semibold tracking-tight md:text-6xl">
+              Quiet Moments
+            </h1>
 
-      {/* 📌 Pinned Intro Card */}
-      <Link href="/soft-reads/welcome">
-        <a className="relative mb-10 block rounded-2xl border border-blush/40 bg-white/95 backdrop-blur-sm p-6 transition hover:shadow-sm">
-          {/* subtle radial glow behind pinned card */}
-          <div className="pointer-events-none absolute inset-0 -z-10 opacity-60 blur-2xl bg-[radial-gradient(circle_at_50%_50%,rgba(255,220,230,0.6),transparent_70%)]" />
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-[#D8CFEA]/75 md:text-base">
+              A weekly reflection, a sound, and a small moment to sit with.
+            </p>
 
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="rounded-full border px-3 py-1 text-xs">
-                Foundations
+            <p className="mt-3 text-xs text-[#D8CFEA]/50">
+              Updated weekly. No rush here.
+            </p>
+          </section>
+
+          {/* This Week */}
+          <section className="mb-6 rounded-[2rem] border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-black/30 backdrop-blur-xl md:p-8">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-[#B9A7FF]">
+                  This Week’s Quiet
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold">
+                  A softer place to land
+                </h2>
+              </div>
+
+              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs text-[#F7EFEA]/70">
+                Weekly
               </span>
-              <span className="text-xs opacity-60">3 min read</span>
             </div>
 
-            <span className="text-xs opacity-60">📌 Pinned</span>
-          </div>
+            <p className="max-w-2xl text-sm leading-6 text-[#D8CFEA]/75">
+              This space is being shaped into a quiet corner for reflection,
+              sound, and stillness — something you can visit when the rest of
+              the internet feels too loud.
+            </p>
+          </section>
 
-          <h2 className="text-xl font-medium">
-            I Needed a Place That Didn’t Talk Back
-          </h2>
-
-          <p className="mt-2 text-sm opacity-75">
-            A founder note for the days you don’t want advice — you just need
-            somewhere to release.
-          </p>
-
-          <div className="mt-4 text-sm opacity-70">Enter →</div>
-        </a>
-      </Link>
-
-      {/* Mood Cards Grid */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-        {SOFT_READ_CARDS.map((card) => {
-          const isLive = card.status === "live";
-
-          return (
-            <Link key={card.slug} href={`/soft-reads/${card.slug}`}>
-              <a className="relative group block rounded-2xl border border-blush/40 bg-white/95 backdrop-blur-sm p-4 transition hover:-translate-y-1 hover:shadow-sm">
-                {/* soft glow on hover */}
-                <div className="pointer-events-none absolute inset-0 -z-10 opacity-0 group-hover:opacity-60 blur-xl transition bg-[radial-gradient(circle_at_50%_50%,rgba(255,220,230,0.55),transparent_70%)]" />
-
-                {/* Top Row */}
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="rounded-full border px-3 py-1 text-xs">
-                    {card.mood}
-                  </span>
-
-                  {isLive ? (
-                    <span className="text-xs opacity-60">{card.readTime}</span>
-                  ) : (
-                    <span className="text-xs opacity-55">Still forming</span>
-                  )}
-                </div>
-
-                {/* Title */}
-                <h3 className="text-base font-medium">{card.title}</h3>
-
-                {/* Description */}
-                <p className="mt-1 text-sm opacity-75">{card.description}</p>
-
-                {/* Action */}
-                <div className="mt-4 text-sm opacity-70">
-                  {isLive ? "Enter →" : "Held for now →"}
+          {/* Main Grid */}
+          <section className="grid gap-5 md:grid-cols-2">
+            {/* Reflection */}
+            <Link href="/soft-reads/welcome">
+              <a className="group rounded-[1.75rem] border border-white/10 bg-white/[0.07] p-5 backdrop-blur-xl transition hover:-translate-y-1 hover:bg-white/[0.09]">
+                <p className="text-xs uppercase tracking-[0.25em] text-[#F4B7A8]">
+                  Reflection of the Week
+                </p>
+                <h3 className="mt-4 text-xl font-semibold">
+                  I Needed a Place That Didn’t Talk Back
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-[#D8CFEA]/70">
+                  A founder note for the days you don’t want advice — you just
+                  need somewhere to release.
+                </p>
+                <div className="mt-5 text-sm text-[#F4B7A8]">
+                  Read quietly →
                 </div>
               </a>
             </Link>
-          );
-        })}
-      </div>
 
-      {/* Closing line */}
-      <div className="mt-12 text-center text-sm opacity-60 italic">
-        Take what you need. Leave the rest.
+            {/* Listen */}
+            <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.07] p-5 backdrop-blur-xl">
+              <p className="text-xs uppercase tracking-[0.25em] text-[#B9A7FF]">
+                Something to Listen To
+              </p>
+
+              <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+                <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-gradient-to-br from-[#171A33] via-[#251D3F] to-[#3A2032] text-sm text-[#D8CFEA]/60">
+                  Podcast / sound bite placeholder
+                </div>
+
+                <h3 className="text-lg font-semibold">
+                  A quiet sound will live here
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-[#D8CFEA]/70">
+                  Later, this can hold a YouTube, podcast, or reflective audio
+                  link you choose for the week.
+                </p>
+
+                <button
+                  type="button"
+                  className="mt-5 rounded-full border border-white/10 bg-white/10 px-5 py-2 text-sm text-[#F7EFEA]/80"
+                >
+                  Coming soon
+                </button>
+              </div>
+            </div>
+
+            {/* Visual */}
+            <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.07] p-5 backdrop-blur-xl md:col-span-2">
+              <p className="text-xs uppercase tracking-[0.25em] text-[#B9A7FF]">
+                A Quiet Visual
+              </p>
+
+              <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+                <div className="flex min-h-56 items-end bg-[radial-gradient(circle_at_30%_20%,rgba(185,167,255,0.35),transparent_35%),radial-gradient(circle_at_80%_70%,rgba(244,183,168,0.18),transparent_35%),linear-gradient(135deg,#101225,#171A33,#080912)] p-5">
+                  <div>
+                    <h3 className="text-xl font-semibold">
+                      Moonlight, rain, or candlelight
+                    </h3>
+                    <p className="mt-2 max-w-xl text-sm leading-6 text-[#D8CFEA]/70">
+                      This space will hold a calming visual or ambient loop — no
+                      pressure to do anything but sit with it.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Thought */}
+            <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.07] p-6 text-center backdrop-blur-xl md:col-span-2">
+              <p className="text-xs uppercase tracking-[0.25em] text-[#B9A7FF]">
+                A Thought to Sit With
+              </p>
+              <p className="mx-auto mt-5 max-w-2xl text-xl leading-8 text-[#F7EFEA]">
+                “You don’t have to solve tonight all at once.”
+              </p>
+            </div>
+          </section>
+
+          {/* Footer whisper */}
+          <div className="mt-12 text-center text-sm italic text-[#D8CFEA]/50">
+            Stay as long as you need. The internet can wait.
+          </div>
+        </main>
       </div>
     </div>
   );

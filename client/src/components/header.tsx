@@ -99,7 +99,7 @@ export default function Header() {
               }`}
               data-testid="nav-soft-reads"
             >
-              Soft Reads
+              Quiet Moments
             </button>
           </Link>
         </nav>

@@ -38,9 +38,9 @@ export default function GhostMenu({ hiddenOnRoutes = [] }: GhostMenuProps) {
         sub: "A space to slow down",
       },
       {
-        label: "Soft Reads",
+        label: "Quiet Moments",
         href: "/soft-reads",
-        sub: "Words to sit with",
+        sub: "Sit here for a while",
       },
     ],
     []
